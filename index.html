@@ -317,7 +317,7 @@ function boot(d){
     $('compte').classList.remove('hide');if(KEYMEM)$('logout').classList.remove('hide');
     var tabs;
     if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']];$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
-    else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['rpe','RPE séance'],['dispos','Mes dispos'],['wellnessT','Wellness'],['resultats','Résultats']];VIEW=location.hash==='#wellness'?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':'moi';$('sub').textContent=d.user.nom;}
+    else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':'moi';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Coach'){tabs=[['dispos','Mes dispos'],['resultats','Résultats']];VIEW='dispos';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
     else {tabs=[['resultats','Résultats']];VIEW='resultats';$('sub').textContent='Accès résultats · '+d.user.nom;}
@@ -1371,6 +1371,7 @@ function escDictee(t){
 }
 /* ---------------- APPLICATION (PWA) ET NOTIFICATIONS ---------------- */
 var VAPID='';
+var WELLNESS_T=false; /* questionnaire wellness côté tireur : activé seulement après l'accord du médecin et des familles */
 var APP_URL='https://delamballerieguy-lang.github.io/pfr-fleuret/';
 function estIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent);}
 function estInstallee(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}
