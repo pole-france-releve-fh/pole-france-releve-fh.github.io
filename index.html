@@ -318,7 +318,7 @@ function boot(d){
     var tabs;
     if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']];$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
     else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':'moi';$('sub').textContent=d.user.nom;}
-    else if(d.user.role==='Coach'){tabs=[['dispos','Mes dispos'],['resultats','Résultats']];VIEW='dispos';$('sub').textContent=d.user.nom;}
+    else if(d.user.role==='Coach'){tabs=[['semaine','Planning'],['dispos','Mes dispos'],['resultats','Résultats']];VIEW=location.hash==='#dispos'?'dispos':'semaine';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
     else {tabs=[['resultats','Résultats']];VIEW='resultats';$('sub').textContent='Accès résultats · '+d.user.nom;}
     if(d.user.role==='Staff'){VIEW=location.hash==='#wellness'?'saisie':location.hash==='#semaine'?'semaine':location.hash==='#dispos'?'dispos':'jour';}
@@ -687,13 +687,13 @@ function vSemaine(){
   var h='<div class="row sp wrap" style="margin-bottom:12px"><div class="row"><button class="btn sm" id="pw">←</button><b>'+(s?esc(s.titre):'Semaine')+'</b><button class="btn sm" id="nw">→</button>'+(SEM.off?'<button class="btn sm" id="cw">Cette semaine</button>':'')+'</div><div class="row"><button class="btn sm" id="prS">🖨 Semaine</button><button class="btn sm" id="prL">🖨 Leçons</button></div></div>';
   if(!s){$('app').innerHTML=h+'<div class="card">Pas d\'onglet pour cette semaine dans le fichier maître.</div>';bindWeekNav();return;}
   if(s.compets.length)h+='<div class="banner" id="bn">'+s.compets.map(function(c,i){return compHtml(c,i);}).join('')+'</div>';
-  if(SEM.off===0){var v=D.vacations,b=D.budget,tot=v.lignes[v.lignes.length-1];
+  if(SEM.off===0&&D.vacations){var v=D.vacations,b=D.budget,tot=v.lignes[v.lignes.length-1];
   h+='<div class="grid g4">'+kpi('Leçons POL · PE',esc(s.leconsPol)+' · '+esc(s.leconsPe),'prévues cette semaine')+kpi('Assauts · PP · fonda',esc(s.assauts)+' · '+esc(s.pp)+' · '+esc(s.fonda),'séances collectives')+kpi('Vacations consommées',tot?esc(tot.conso)+' h':'–',tot?'sur '+esc(tot.env)+' · '+esc(tot.euros):'')+kpi('Budget commission',Math.round((b.pct||0)*100)+' %','atterrissage '+eur(b.atterrissage)+' / '+eur(b.enveloppe),b.marge<0)+'</div>';}
   h+='<div class="row sp wrap"><div class="sec">Programme</div><div class="row wrap sm">'+['Leçons','Fonda','Assauts','Prépa physique','Récup'].map(function(x){return '<span class="tag '+tagCls(x)+'">'+x+'</span>';}).join('')+'</div></div><div class="days">'+daysHtml(s,true)+'</div>';
   if(s.suivantes.length)h+='<div class="mut sm" style="margin-top:8px">Semaine suivante : '+s.suivantes.map(esc).join(' · ')+'</div>';
   h+='<div class="sec">Créneaux entraînements individuels</div><div class="card"><div class="lgrid">'+leconsHtml(s)+'</div></div>';
   if(pp.length){var gb={};pp.forEach(function(x){(gb[x.bloc]=gb[x.bloc]||[]).push(x);});h+='<details class="ppd"><summary><div class="sec">Prépa physique de la semaine (programme de Mathieu) · cliquer pour afficher</div></summary><div class="grid g4">'+Object.keys(gb).map(function(k){return '<div class="ppb"><b>'+esc(k)+'</b>'+(PPJ[k.replace(/\s*\(.*$/,'')]?' <span class="mut sm">· '+PPJ[k.replace(/\s*\(.*$/,'')]+'</span>':'')+gb[k].map(function(x){return '<pre>'+esc(x.txt)+'</pre>';}).join('')+'</div>';}).join('')+'</div></details>';}
-  if(SEM.off===0)h+='<div class="sec">À surveiller</div><div class="card">'+alertes()+'</div>';
+  if(SEM.off===0&&isStaff())h+='<div class="sec">À surveiller</div><div class="card">'+alertes()+'</div>';
   $('app').innerHTML=h;bindWeekNav();
   if($('bn'))$('bn').onclick=function(e){var el=e.target.closest('[data-ci]');if(el)showParticipants(s.compets[Number(el.dataset.ci)]);};
   $('prS').onclick=function(){doPrint(printSemaine(s));};
