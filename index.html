@@ -248,10 +248,54 @@ a.nm{color:var(--ink);text-decoration:underline}
   .plg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.plg .lrow{font-size:11px;grid-template-columns:36px 1fr}
   @page{size:A4 landscape;margin:9mm}
 }
+
+/* ===== Mobile : affichage et ergonomie ===== */
+html{overflow-x:hidden}
+body{overflow-x:hidden;overflow-x:clip;max-width:100%;overscroll-behavior-x:none;overflow-wrap:break-word;-webkit-tap-highlight-color:rgba(31,58,147,.12)}
+button,.btn,.chip,a,select,label{touch-action:manipulation}
+img,canvas,svg,video{max-width:100%}
+nav::-webkit-scrollbar{display:none}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr))}
+.list-t{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}.info{grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr))}.lgrid{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+@supports(top:env(safe-area-inset-top)){
+  nav{top:env(safe-area-inset-top)}
+  body:before{content:'';position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#0b1430;z-index:45;pointer-events:none}
+  main{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .modal{padding-bottom:env(safe-area-inset-bottom)}
+}
+@media (max-width:700px){
+  header{padding:12px 14px 12px;align-items:flex-start;flex-wrap:nowrap}
+  header>div:first-child{min-width:0;flex:1}
+  header .k{font-size:9px;letter-spacing:.1em}
+  .hb{flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:58%}
+  .hb #maj{flex:1 1 100%;text-align:right;font-size:10px;order:9}
+  .hb button{padding:6px 9px;font-size:14px;line-height:1;min-width:34px;min-height:34px}
+  .hb .lbl{display:none}
+  .ffe{height:30px;margin-left:2px}
+  nav{padding:6px 8px;scroll-snap-type:x proximity}
+  nav button{padding:9px 12px;scroll-snap-align:center}
+  .card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .modal .card{overflow-x:hidden}
+  input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}
+  .apc select,.pdd select,.pm td input,.relt input{font-size:16px}
+  .pm td input{width:46px}
+  .btn{min-height:36px}.btn.sm{min-height:32px;padding:5px 11px}
+  .chip{padding:7px 12px}
+  .hero{gap:12px}.hero .av{width:52px;height:52px;font-size:17px}.hero h2{font-size:19px}
+  .tabs2{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:10px -4px;padding:0 4px 2px}.tabs2::-webkit-scrollbar{display:none}.tabs2>*{flex:0 0 auto}
+  .vtabs{scrollbar-width:none}.vtabs::-webkit-scrollbar{display:none}
+  .slot{flex-wrap:wrap}
+  .apr{grid-template-columns:1fr}
+  .apx{grid-template-columns:1fr 1fr}.apx>*:last-child{grid-column:1/-1}
+  .drg{grid-template-columns:1fr 1fr}.drg .val{grid-column:1/-1;text-align:left;min-width:0}
+  .dpl{grid-template-columns:1fr}
+  .tip{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  table{font-size:12.5px}
+}
 </style>
 </head>
 <body>
-<header><div><div class="k">Pôle France Relève · Châtenay-Malabry</div><h1 id="titre">France Fleuret Hommes</h1><small id="sub"></small></div><div class="hb"><small id="maj"></small><button id="refresh" class="hide" title="Recharger les données">↻ Actualiser</button><button id="compte" class="hide" title="Choisir mon e-mail et mon mot de passe">🔑</button><button id="cloche" class="hide" title="Notifications">🔔</button><button id="logout" class="hide">Déconnexion</button><img class="ffe" src="https://www.ffescrime.fr/wp-content/uploads/2026/10/logo-escrime-ffe.png" alt="Fédération Française d'Escrime"></div></header>
+<header><div><div class="k">Pôle France Relève · Châtenay-Malabry</div><h1 id="titre">France Fleuret Hommes</h1><small id="sub"></small></div><div class="hb"><small id="maj"></small><button id="refresh" class="hide" title="Recharger les données">↻<span class="lbl"> Actualiser</span></button><button id="compte" class="hide" title="Choisir mon e-mail et mon mot de passe">🔑</button><button id="cloche" class="hide" title="Notifications">🔔</button><button id="logout" class="hide" title="Déconnexion">⏻<span class="lbl"> Déconnexion</span></button><img class="ffe" src="https://www.ffescrime.fr/wp-content/uploads/2026/10/logo-escrime-ffe.png" alt="Fédération Française d'Escrime"></div></header>
 <nav id="nav" class="hide"></nav>
 <main><div id="load"><span class="spin"></span>Chargement…</div><div id="app"></div></main>
 <div id="print"></div>
@@ -326,7 +370,7 @@ function boot(d){
     majCloche();pushSynchro();
     $('nav').innerHTML=tabs.map(function(t){return '<button data-v="'+t[0]+'">'+t[1]+'</button>';}).join('');
     $('nav').classList.remove('hide');
-    $('nav').onclick=function(e){if(e.target.dataset.v){VIEW=e.target.dataset.v;render();}};
+    $('nav').onclick=function(e){if(e.target.dataset.v){VIEW=e.target.dataset.v;render();try{e.target.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}catch(x){}}};
     render();
 }
 $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');run('rafraichir',KEY).then(function(d){D=d;cacheD(d);SEM.data=null;CAL.data=null;$('maj').textContent='Données du '+d.maj;render();});};
@@ -1740,7 +1784,7 @@ function vWellness(){
   for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5);jours.push(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2));}
   var map={};D.wellness.forEach(function(w){map[norm(w.tireur)+'|'+w.d]=w;});
   function col(v){return v==null?'background:#f0f2f5;color:#9aa1ad':v<=13?'background:var(--bad-bg);color:var(--bad)':v<=17?'background:var(--warn-bg);color:var(--warn)':'background:var(--ok-bg);color:var(--ok)';}
-  var h='<div class="card"><h3>Score wellness sur 7 jours (sur 25)</h3><div class="wg" style="grid-template-columns:170px repeat(7,1fr)"><span></span>'+jours.map(function(j){return '<span class="mut">'+frDate(j)+'</span>';}).join('');
+  var h='<div class="card"><h3>Score wellness sur 7 jours (sur 25)</h3><div class="wg" style="grid-template-columns:minmax(80px,170px) repeat(7,minmax(0,1fr))"><span></span>'+jours.map(function(j){return '<span class="mut">'+frDate(j)+'</span>';}).join('');
   pole.forEach(function(t){h+='<span style="text-align:left">'+esc(t.prenom)+' '+esc(t.nom)+'</span>'+jours.map(function(j){var w=map[t.cle+'|'+j];return '<span style="'+col(w?w.total:null)+'" title="'+(w?'sommeil '+w.s+', forme '+w.f+', courbatures '+w.c+', humeur '+w.hu+', stress '+w.st+(w.comm?' · '+esc(w.comm):''):'')+'">'+(w?w.total:'–')+'</span>';}).join('');});
   h+='</div><div class="mut sm" style="margin-top:8px">Vert : 18 et plus · orange : 14 à 17 · rouge : 13 et moins.</div></div>';
   var comm=D.wellness.filter(function(w){return w.comm;}).slice(-10).reverse();
