@@ -141,6 +141,7 @@ details.ppd>summary{cursor:pointer;list-style:none}details.ppd>summary::-webkit-
 .kb{display:block;width:100%;margin:6px 0;text-align:left}
 .lmr{padding:4px 0;border-bottom:1px solid var(--line);cursor:pointer}.lmr .b{font-weight:800}
 a.nm{color:var(--ink);text-decoration:underline}
+.muz{border-collapse:collapse;font-size:13px}.muz th{font-size:11px;max-width:90px;white-space:normal;vertical-align:bottom;padding:4px}.muz td{text-align:center;padding:5px;border-top:1px solid var(--line)}
 .rpeg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}.rpeg button{border:1px solid var(--line);border-radius:10px;background:hsl(var(--h),70%,95%);padding:8px 4px;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}.rpeg button b{font-size:20px}.rpeg button span{font-size:11px;text-align:center}.rpeg button.on{outline:3px solid var(--ink);background:hsl(var(--h),70%,82%)}
 .jnav{font-size:22px;line-height:1;padding:6px 14px}
 .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
@@ -316,7 +317,7 @@ function boot(d){
     if(d.erreur){if(KEYMEM){try{localStorage.removeItem('pfr_k');}catch(e){}KEY='';KEYMEM=false;showLogin('Ta session a expiré, reconnecte-toi.');return;}$('app').innerHTML='<div class="card">'+esc(d.erreur)+'</div>';return;}
     $('compte').classList.remove('hide');if(KEYMEM)$('logout').classList.remove('hide');
     var tabs;
-    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']];$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
+    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['muscu','Muscu'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']];$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
     else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':'moi';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Coach'){tabs=[['semaine','Planning'],['dispos','Mes dispos'],['resultats','Résultats']];VIEW=location.hash==='#dispos'?'dispos':'semaine';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
@@ -332,7 +333,7 @@ $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');r
 function render(){
   killCharts();
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW);});
-  ({rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
+  ({muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -1372,7 +1373,7 @@ function escDictee(t){
 /* ---------------- APPLICATION (PWA) ET NOTIFICATIONS ---------------- */
 var VAPID='';
 var WELLNESS_T=false; /* questionnaire wellness côté tireur : activé seulement après l'accord du médecin et des familles */
-var APP_URL='https://delamballerieguy-lang.github.io/pfr-fleuret/';
+var APP_URL='https://delamballerieguy-lang.github.io/pole-france-releve-fh/';
 function estIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent);}
 function estInstallee(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}
 function pushPossible(){return EN_APP&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;}
@@ -1413,6 +1414,40 @@ function vRPE(){
   }).catch(function(e){$('app').textContent=e.message;});
 }
 
+/* ---------------- MUSCULATION ---------------- */
+function ficheMuscu(f,ft){ft.innerHTML=loading('Chargement des charges…');run('getMuscu',KEY,f.nom).then(function(m){drawMuscu(m,f,ft);}).catch(function(e){ft.textContent=e.message;});}
+function drawMuscu(m,f,ft){
+  var best={},hist={},fam={},ordre=[];
+  m.entrees.forEach(function(e){(hist[e.mvt]=hist[e.mvt]||[]).push(e);if(!best[e.mvt]||e.e1rm>best[e.mvt].e1rm)best[e.mvt]=e;});
+  m.mouvements.forEach(function(x){if(!fam[x.famille]){fam[x.famille]=[];ordre.push(x.famille);}fam[x.famille].push(x.nom);});
+  Object.keys(hist).forEach(function(n){if(!m.mouvements.some(function(x){return x.nom===n;})){if(!fam['Autres']){fam['Autres']=[];ordre.push('Autres');}fam['Autres'].push(n);}});
+  var h='<div class="card"><h3 style="margin:0">Musculation · charges maximales</h3><div class="mut sm" style="margin:6px 0 10px">Note la charge la plus lourde soulevée proprement sur un mouvement et le nombre de répétitions faites à cette charge. Le 1RM (charge maximale sur 1 répétition) est estimé automatiquement. Visible par toi, Guy et Mathieu.</div>';
+  h+='<div class="grid g4" style="gap:6px;align-items:end"><div><span class="lab">Mouvement</span><select id="muM">'+ordre.map(function(k){return '<optgroup label="'+esc(k)+'">'+fam[k].map(function(n){return '<option>'+esc(n)+'</option>';}).join('')+'</optgroup>';}).join('')+'</select></div><div><span class="lab">Charge (kg)</span><input id="muC" inputmode="decimal" placeholder="ex. 60"></div><div><span class="lab">Répétitions à cette charge</span><input id="muR" inputmode="numeric" placeholder="ex. 3"></div><div><span class="lab">Date</span><input id="muD" type="date" value="'+today()+'"></div></div><input id="muX" placeholder="Commentaire (facultatif : jusqu\'à l\'échec, avec ceinture…)" style="margin-top:6px"><button class="go" id="muOk">Enregistrer</button><div class="msg" id="muMsg"></div></div>';
+  ordre.forEach(function(k){
+    h+='<div class="card" style="margin-top:12px"><h3 style="margin-top:0">'+esc(k)+'</h3><table class="mut-t"><tr><th style="text-align:left">Mouvement</th><th>Meilleure perf</th><th>1RM estimé</th><th style="text-align:left">Dernières saisies</th></tr>';
+    fam[k].forEach(function(n){var b=best[n],hs=(hist[n]||[]).slice(0,3);
+      h+='<tr><td style="text-align:left"><a href="#" class="nm" data-mu="'+esc(n)+'">'+esc(n)+'</a></td><td>'+(b?'<b>'+b.charge+' kg</b> × '+b.reps+'<div class="mut sm">'+esc(frDate(b.date))+'</div>':'<span class="mut">–</span>')+'</td><td>'+(b?'<b>'+b.e1rm+' kg</b>':'')+'</td><td style="text-align:left" class="sm">'+hs.map(function(e){return esc(frDate(e.date))+' : '+e.charge+' kg × '+e.reps+(e.comm?' <span class="mut">('+esc(e.comm)+')</span>':'')+' <a href="#" class="mut" title="Supprimer" data-mudel="'+e.ligne+'|'+esc(e.mvt)+'|'+e.date+'">✕</a>';}).join('<br>')+'</td></tr>';});
+    h+='</table></div>';
+  });
+  ft.innerHTML=h;
+  [].forEach.call(ft.querySelectorAll('[data-mu]'),function(a){a.onclick=function(e){e.preventDefault();$('muM').value=a.dataset.mu;$('muC').focus();ft.scrollIntoView({behavior:'smooth'});};});
+  [].forEach.call(ft.querySelectorAll('[data-mudel]'),function(a){a.onclick=function(e){e.preventDefault();var p=a.dataset.mudel.split('|');if(!confirm('Supprimer cette saisie ?'))return;run('supprimerCharge',KEY,Number(p[0]),p[1],p[2]).then(function(){ficheMuscu(f,ft);}).catch(function(x){alert(x.message);});};});
+  $('muOk').onclick=function(){var c=$('muC').value.trim(),r=$('muR').value.trim();if(!c||!r){$('muMsg').className='msg err';$('muMsg').textContent='Indique la charge et le nombre de répétitions.';return;}
+    $('muMsg').className='msg';$('muMsg').textContent='Enregistrement…';
+    run('saveCharge',KEY,{tireur:f.nom,mvt:$('muM').value,charge:c,reps:r,date:$('muD').value,comm:$('muX').value}).then(function(){ficheMuscu(f,ft);}).catch(function(x){$('muMsg').className='msg err';$('muMsg').textContent=x.message;});};
+}
+function vMuscu(){
+  $('app').innerHTML=loading('Chargement des charges…');
+  run('getMuscuEquipe',KEY).then(function(d){
+    var mv=d.mouvements,h='<div class="card"><h3 style="margin-top:0">Musculation · meilleur 1RM estimé (kg)</h3><div class="mut sm" style="margin-bottom:8px">Saisies faites par les tireurs (ou par le staff) dans l\'onglet Musculation de leur fiche. Survole une case pour voir la charge et les répétitions. Clique sur un nom pour ouvrir la fiche.</div>';
+    if(!mv.length){$('app').innerHTML=h+'<div class="empty">Aucune charge saisie pour l\'instant.</div></div>';return;}
+    h+='<div style="overflow-x:auto"><table class="muz"><tr><th style="text-align:left">Tireur</th>'+mv.map(function(m){return '<th>'+esc(m)+'</th>';}).join('')+'</tr>';
+    d.tireurs.forEach(function(t){var b=d.best[t.nom]||{};h+='<tr><td style="text-align:left;white-space:nowrap"><a href="#" class="nm" data-fi="'+esc(t.nom)+'">'+esc(t.nom)+'</a>'+(t.pole?'':' <span class="mut sm">(partenaire)</span>')+'</td>'+mv.map(function(m){var x=b[m];return '<td'+(x?' title="'+x.charge+' kg × '+x.reps+' le '+esc(frDate(x.date))+'"':'')+'>'+(x?'<b>'+x.e1rm+'</b>':'<span class="mut">–</span>')+'</td>';}).join('')+'</tr>';});
+    h+='</table></div></div>';$('app').innerHTML=h;
+    [].forEach.call(document.querySelectorAll('[data-fi]'),function(a){a.onclick=function(e){e.preventDefault();FT='muscu';openFiche(a.dataset.fi);};});
+  }).catch(function(e){$('app').textContent=e.message;});
+}
+
 /* ---------------- TIREURS + FICHE ---------------- */
 function resDe(t){var R=D.resultats||{};return R[t.cle]||R[norm(String(t.nom).split(/[\s-]+/)[0]+' '+t.prenom)]||R['NOM '+norm(t.nom)]||R['NI '+norm(t.nom)+' '+norm(t.prenom).charAt(0)]||null;}
 var RKC={M17:'#18794e',M20:'#1f3a93',Senior:'#0f1b3d'};
@@ -1442,7 +1477,7 @@ function renderFiche(f,retour,target){
   killCharts();
   var t=f.tireur||{},h=retour?'<button class="back" id="back">← Tous les tireurs</button>':'';
   h+='<div class="card dark"><div class="row sp wrap"><div class="hero"><span class="av">'+ini((t.prenom||'')+' '+(t.nom||f.nom))+'</span><div><h2>'+esc(t.prenom)+' '+esc(t.nom||f.nom)+'</h2><div class="mut">'+[t.annee,t.cat,t.club,t.ligue].filter(Boolean).map(esc).join(' · ')+'</div><div class="mut">'+[t.statut,t.regime,t.etudes].filter(Boolean).map(esc).join(' · ')+'</div></div></div><button class="btn sm" id="prF">🖨 Imprimer</button></div></div>';
-  h+='<div class="tabs2 chips">'+[['resume','Résumé'],['parcours','Parcours en compétition'],['entr','Entraînement'],['tests','Tests physiques'],['infos','Infos & données'],['compte','Compte pôle']].concat(f.memos?[['notes','Notes du staff'+(f.memos.length?' ('+f.memos.length+')':'')]]:[]).map(function(x){return '<button class="chip'+(FT===x[0]?' on':'')+'" data-ft="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div id="ftab"></div>';
+  h+='<div class="tabs2 chips">'+[['resume','Résumé'],['parcours','Parcours en compétition'],['entr','Entraînement'],['tests','Tests physiques'],['infos','Infos & données'],['muscu','Musculation'],['compte','Compte pôle']].concat(f.memos?[['notes','Notes du staff'+(f.memos.length?' ('+f.memos.length+')':'')]]:[]).map(function(x){return '<button class="chip'+(FT===x[0]?' on':'')+'" data-ft="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div id="ftab"></div>';
   $(target||'app').innerHTML=h;
   if($('back'))$('back').onclick=function(){render();};
   [].forEach.call(document.querySelectorAll('[data-ft]'),function(b){b.onclick=function(){FT=b.dataset.ft;renderFiche(f,retour,target);};});
@@ -1454,6 +1489,7 @@ function renderFiche(f,retour,target){
   else if(FT==='tests'){ft.innerHTML=ficheTests(f);drawTests(f);}
   else if(FT==='infos'){ft.innerHTML=ficheInfos(f);bindInfos(f,retour,target);}
   else if(FT==='compte')ft.innerHTML=ficheCompte(f);
+  else if(FT==='muscu')ficheMuscu(f,ft);
   else if(FT==='notes'&&f.memos){var nmT=(t.prenom||'')+' '+(t.nom||'');ft.innerHTML='<div class="card"><div class="row wrap" style="gap:6px"><textarea id="nfT" rows="2" style="flex:1;min-width:220px" placeholder="Nouvelle note (rendez-vous, examen, absence, observation…)"></textarea><button class="btn pr" id="nfOk">Ajouter</button></div><div class="msg" id="nfM"></div>'+(f.memos.length?f.memos.map(memoLigne).join(''):'<div class="empty">Aucune note pour l\'instant.</div>')+'</div>';
     ft._memos=f.memos;var recharge=function(){run('getFiche',KEY,f.nom).then(function(g){renderFiche(g,retour,target);});};bindMemos(ft,recharge);
     $('nfOk').onclick=function(){var x=$('nfT').value.trim();if(!x)return;$('nfM').textContent='Enregistrement…';run('memoVocal',KEY,nmT+' : '+x).then(function(rep){$('nfM').textContent=rep.msg;jourInvalider();recharge();}).catch(function(e){$('nfM').textContent=e.message;});};}
