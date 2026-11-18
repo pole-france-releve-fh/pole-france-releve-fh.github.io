@@ -1377,8 +1377,8 @@ function b64ToU8(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g
 function cleSW(){try{if(window.caches)caches.open('pfr').then(function(c){return c.put('cle',new Response(KEY||''));});}catch(e){}}
 function pushSynchro(){if(!pushPossible()||!KEY||Notification.permission!=='granted')return;cleSW();navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription();}).then(function(s){if(s)run('pushAbonner',KEY,s.toJSON(),navigator.userAgent).catch(function(){});});}
 function pushActiver(){
-  if(!pushPossible()){alert(EN_APP?'Ce navigateur ne gère pas les notifications.':'Les notifications passent par l\'application installée.');return;}
-  if(estIOS()&&!estInstallee()){alert('Sur iPhone : touche d\'abord le bouton Partager puis « Sur l\'écran d\'accueil », ouvre l\'application depuis son icône, puis reviens ici.');return;}
+  if(estIOS()&&!estInstallee()){alert('Sur iPhone, les notifications ne marchent que depuis l\'application installée : dans Safari, touche le bouton Partager (carré avec flèche) puis « Sur l\'écran d\'accueil », puis ouvre l\'application depuis l\'icône PFR et touche à nouveau la cloche.');return;}
+  if(!pushPossible()){alert(EN_APP?(estIOS()?'Il faut iOS 16.4 ou plus récent pour recevoir les notifications (Réglages › Général › Mise à jour logicielle).':'Ce navigateur ne gère pas les notifications. Ouvre l\'application dans Chrome ou Safari.'):'Les notifications passent par l\'application installée.');return;}
   Notification.requestPermission().then(function(p){
     if(p!=='granted')throw new Error('Notifications refusées. Tu peux les réactiver dans les réglages du téléphone.');
     return navigator.serviceWorker.ready;
@@ -1390,8 +1390,9 @@ function pushActiver(){
 function majCloche(){var b=$('cloche');if(!b)return;if(!KEY){b.classList.add('hide');return;}
   if(pushPossible()){b.classList.remove('hide');b.textContent=Notification.permission==='granted'?'🔔':'🔕';b.title=Notification.permission==='granted'?'Notifications activées (touche pour tester)':'Activer les notifications';}
   else if(!EN_APP&&APP_URL){b.classList.remove('hide');b.textContent='📱';b.title='Installer l\'application';}
+  else if(EN_APP){b.classList.remove('hide');b.textContent='🔕';b.title='Activer les notifications';}
   else b.classList.add('hide');}
-function clocheClic(){if(!EN_APP&&APP_URL){window.open(APP_URL+'?k='+encodeURIComponent(KEY),'_blank');return;}if(Notification.permission==='granted')run('pushTest',KEY).then(function(m){alert(m);});else pushActiver();}
+function clocheClic(){if(!EN_APP&&APP_URL){window.open(APP_URL+'?k='+encodeURIComponent(KEY),'_blank');return;}if(!pushPossible()){pushActiver();return;}if(Notification.permission==='granted')run('pushTest',KEY).then(function(m){alert(m);});else pushActiver();}
 
 /* ---------------- RPE (tireur) ---------------- */
 var RPE_L=['0 · Repos','1 · Très très facile','2 · Facile','3 · Modéré','4 · Un peu dur','5 · Dur','6 · Dur +','7 · Très dur','8 · Très dur +','9 · Presque maximal','10 · Maximal'];
