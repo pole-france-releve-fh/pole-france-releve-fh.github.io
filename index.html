@@ -361,7 +361,7 @@ function boot(d){
     if(d.erreur){if(KEYMEM){try{localStorage.removeItem('pfr_k');}catch(e){}KEY='';KEYMEM=false;showLogin('Ta session a expiré, reconnecte-toi.');return;}$('app').innerHTML='<div class="card">'+esc(d.erreur)+'</div>';return;}
     $('compte').classList.remove('hide');if(KEYMEM)$('logout').classList.remove('hide');
     var tabs;
-    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['muscu','Muscu'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']];$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
+    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['semaine','Semaine'],['calendrier','Calendrier'],['lecons','Leçons'],['dispos','Dispos'],['seances','Séances'],['tireurs','Tireurs'],['resultats','Résultats'],['wellness','Wellness'],['muscu','Muscu'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']].concat(d.user.admin?[['connexions','Connexions']]:[]);$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
     else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':'moi';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Coach'){tabs=[['semaine','Planning'],['dispos','Mes dispos'],['resultats','Résultats']];VIEW=location.hash==='#dispos'?'dispos':'semaine';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
@@ -377,7 +377,7 @@ $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');r
 function render(){
   killCharts();
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW);});
-  ({muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
+  ({connexions:vConnexions,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -1479,6 +1479,21 @@ function drawMuscu(m,f,ft){
   $('muOk').onclick=function(){var c=$('muC').value.trim(),r=$('muR').value.trim();if(!c||!r){$('muMsg').className='msg err';$('muMsg').textContent='Indique la charge et le nombre de répétitions.';return;}
     $('muMsg').className='msg';$('muMsg').textContent='Enregistrement…';
     run('saveCharge',KEY,{tireur:f.nom,mvt:$('muM').value,charge:c,reps:r,date:$('muD').value,comm:$('muX').value}).then(function(){ficheMuscu(f,ft);}).catch(function(x){$('muMsg').className='msg err';$('muMsg').textContent=x.message;});};
+}
+function vConnexions(){
+  $('app').innerHTML=loading('Lecture des connexions…');
+  run('getConnexions',KEY).then(function(L){
+    function quand(s){if(!s)return '<span class="mut">jamais</span>';var d=new Date(s.replace(' ','T')),j=Math.floor((new Date().setHours(0,0,0,0)-new Date(d).setHours(0,0,0,0))/864e5);return (j===0?'aujourd\'hui':j===1?'hier':'il y a '+j+' j')+' <span class="mut sm">'+s.slice(8,10)+'/'+s.slice(5,7)+' '+s.slice(11)+'</span>';}
+    var G=[['Tireur','Tireurs et partenaires'],['Staff','Staff'],['Coach','Cadres (leçons)'],['Sél','Sélectionneurs']];
+    var vus=L.filter(function(x){return x.der;}).length,nt=L.filter(function(x){return x.notif;}).length,tir=L.filter(function(x){return x.role==='Tireur';});
+    var h='<div class="grid g4">'+kpi('Connectés au moins une fois',vus+' / '+L.length,'depuis le 19 novembre')+kpi('Tireurs connectés',tir.filter(function(x){return x.der;}).length+' / '+tir.length)+kpi('Notifications activées',nt+' / '+L.length,'cloche 🔔 activée sur au moins un appareil')+'</div>';
+    G.forEach(function(g){var l=L.filter(function(x){return g[0]==='Sél'?/^s[ée]lection/i.test(x.role):x.role===g[0];});if(!l.length)return;
+      l.sort(function(a,b){return (b.der||'').localeCompare(a.der||'')||a.nom.localeCompare(b.nom);});
+      h+='<div class="sec">'+g[1]+' · '+l.filter(function(x){return x.der;}).length+' / '+l.length+'</div><div class="card" style="padding:6px 12px"><table><tr><th>Nom</th><th>Dernière connexion</th><th class="ctr">Fois</th><th class="ctr">🔔</th></tr>'+
+        l.map(function(x){return '<tr'+(x.der?'':' style="opacity:.6"')+'><td><b>'+esc(x.nom)+'</b>'+(x.mdp?' <span class="mut sm" title="mot de passe défini">🔑</span>':'')+'</td><td>'+quand(x.der)+'</td><td class="ctr">'+(x.nb||'')+'</td><td class="ctr">'+(x.notif?'✓':'')+'</td></tr>';}).join('')+'</table></div>';});
+    h+='<div class="foot">Une ouverture de l\'application compte pour une connexion (au plus une toutes les 15 minutes). 🔑 : la personne a choisi son e-mail et son mot de passe. Ce suivi n\'est visible que par toi.</div>';
+    $('app').innerHTML=h;
+  }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
 }
 function vMuscu(){
   $('app').innerHTML=loading('Chargement des charges…');
