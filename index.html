@@ -349,7 +349,7 @@ function load(){
   if(c&&c.k===KEY&&c.d&&c.d.user){boot(c.d);if(c.d.user.role==='Staff')$('maj').textContent='Données du '+c.d.maj+' · mise à jour…';}
   var v0=VIEW;
   run('getData',KEY).then(function(d){
-    if(BOOT&&!d.erreur){D=d;cacheD(d);SEM.data=null;$('maj').textContent=d.user.role==='Staff'?'Données du '+d.maj:'';
+    if(BOOT&&!d.erreur){D=d;cacheD(d);if(d.user.admin&&!document.querySelector('#nav [data-v=connexions]'))$('nav').insertAdjacentHTML('beforeend','<button data-v="connexions">Connexions</button>');SEM.data=null;$('maj').textContent=d.user.role==='Staff'?'Données du '+d.maj:'';
       var busy=$('modal')&&$('modal').innerHTML||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName));
       if(VIEW===v0&&!busy)render();return;}
     cacheD(d);boot(d);
