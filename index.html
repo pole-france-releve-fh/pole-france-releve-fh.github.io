@@ -312,7 +312,7 @@ nav::-webkit-scrollbar{display:none}
 .gst{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}.gst.ok{background:#e3f6ea;color:#17703a}.gst.old{background:#fff3d6;color:#8a5a00}.gst.prov{background:#e8eefc;color:#2a4a9a}
 .logi{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 14px}.logd{margin-top:12px;border:1px solid var(--line,#e3e6ee);border-radius:12px;padding:8px 10px}.logd summary{cursor:pointer;font-weight:700}
 .trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}.trl{border:1px dashed var(--line,#e3e6ee);border-radius:10px;padding:8px;display:grid;gap:6px}.modal textarea{width:100%;font:inherit;font-size:16px;border:1px solid var(--line,#e3e6ee);border-radius:8px;padding:6px}
-.rtab{border-collapse:collapse;width:100%}.rtab th,.rtab td{padding:4px 6px;border-bottom:1px solid var(--line,#e3e6ee);text-align:left;font-size:13px}.rtab select,.rtab input{font-size:14px;padding:4px}
+.rtab{border-collapse:collapse;width:100%}.rtab th,.rtab td{padding:4px 6px;border-bottom:1px solid var(--line,#e3e6ee);text-align:left;font-size:13px}.rtab select,.rtab input{font-size:14px;padding:4px}.rprio .rg td{background:var(--acc-bg,#eef2fb);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}.rprio select{min-width:110px}
 </style>
 </head>
 <body>
@@ -541,14 +541,15 @@ function plRegles(){
   h+='<div class="sec">Objectifs par groupe</div><div class="mut sm" style="margin-bottom:6px">Appliqués à tous les tireurs du groupe d\'un coup. Ensuite, tu ajustes au cas par cas avec le ✎ à côté de chaque tireur.</div><table class="rtab"><tr><th>Groupe</th><th>Tireurs</th><th>Leçons / semaine</th><th>Doublettes / semaine</th></tr>'
     +grp.map(function(g){var n=ti.filter(function(t){return (norm(t.groupe)||'TOUS')===g;}).length;return '<tr><td><b>'+esc(lib(g))+'</b></td><td>'+n+'</td><td><input type="number" min="0" id="rl_'+g+'" value="'+mode(g,'cible')+'" style="width:80px"></td><td><input type="number" min="0" id="rd_'+g+'" value="'+mode(g,'dbl')+'" style="width:80px"></td></tr>';}).join('')+'</table>'
     +'<label class="row sm" style="gap:6px;margin-top:6px;cursor:pointer"><input type="checkbox" id="rApp" style="width:auto"> Appliquer ces objectifs à tous les tireurs (remplace les objectifs individuels actuels)</label>';
-  h+='<div class="sec" style="margin-top:14px">Priorité des maîtres d\'armes selon la leçon</div><div class="mut sm" style="margin-bottom:6px">Pour chaque tireur, sa 1<sup>re</sup> leçon de la semaine va en priorité au 1<sup>er</sup> choix, sinon au 2<sup>e</sup>, etc. « ✨ Remplir automatiquement » en tient compte ; ça reste une proposition à valider.</div>'
-    +grp.map(function(g){var P=R[g]||{};return '<div style="margin-bottom:10px"><b>'+esc(lib(g))+'</b><table class="rtab"><tr><th>Leçon</th><th>1<sup>er</sup> choix</th><th>2<sup>e</sup> choix</th><th>3<sup>e</sup> choix</th></tr>'
-      +[1,2,3,4].map(function(k){var L=P[k]||[];return '<tr><td>n° '+k+'</td>'+[0,1,2].map(function(q){return '<td>'+sel('rp_'+g+'_'+k+'_'+q,L[q])+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';}).join('');
+  h+='<div class="sec" style="margin-top:14px">Priorité des maîtres d\'armes, tireur par tireur</div><div class="mut sm" style="margin-bottom:6px">Pour chaque tireur, le maître d\'armes voulu pour sa leçon n° 1, n° 2, n° 3 et n° 4 de la semaine. « ✨ Remplir automatiquement » le suit quand les disponibilités le permettent, sinon il prend un autre maître d\'armes ; ça reste une proposition à valider.</div>'
+    +'<div style="overflow-x:auto"><table class="rtab rprio"><tr><th>Tireur</th><th>Leçon 1</th><th>Leçon 2</th><th>Leçon 3</th><th>Leçon 4</th></tr>'
+    +grp.map(function(g){return '<tr class="rg"><td colspan="5">'+esc(lib(g))+'</td></tr>'+ti.filter(function(t){return (norm(t.groupe)||'TOUS')===g;}).map(function(t){var P=R[norm(t.nom)]||{};
+      return '<tr><td><b>'+esc(t.nom)+'</b></td>'+[1,2,3,4].map(function(k){return '<td>'+sel('rp_'+ti.indexOf(t)+'_'+k,(P[k]||[])[0])+'</td>';}).join('')+'</tr>';}).join('');}).join('')+'</table></div>';
   h+='<button class="go" id="rOk">Enregistrer</button><div class="msg" id="rM"></div></div></div>';
   $('modal').innerHTML=h;$('xR').onclick=function(){$('modal').innerHTML='';};
   $('rOk').onclick=function(){var r={prio:{}};
     if($('rApp').checked){r.objectifs={};grp.forEach(function(g){r.objectifs[g]={l:$('rl_'+g).value,d:$('rd_'+g).value};});}
-    grp.forEach(function(g){r.prio[g]={};[1,2,3,4].forEach(function(k){r.prio[g][k]=[0,1,2].map(function(q){return $('rp_'+g+'_'+k+'_'+q).value;}).filter(Boolean);});});
+    ti.forEach(function(t,n){var o={},any=false;[1,2,3,4].forEach(function(k){var v=$('rp_'+n+'_'+k).value;if(v){o[k]=[v];any=true;}});if(any)r.prio[t.nom]=o;});
     var m=$('rM');m.className='msg';m.textContent='Enregistrement…';
     run('saveReglesLecons',KEY,r).then(function(x){D.profils=x.profils;D.regles=x.regles;$('modal').innerHTML='';vLecons();}).catch(function(e){m.className='msg err';m.textContent=e.message;});};
 }
@@ -591,7 +592,7 @@ function plProposer(){
   for(var round=0;round<6;round++){var placed=false;
     order.forEach(function(t){
       var have=cnt(function(l){return l.tireur===t.nom&&!l.vs;});if(have>=t.cible||have>round)return;
-      var best=null,pf=prefs(t),RG=D.regles||{},rk=((RG[norm(t.groupe)||'TOUS']||RG.TOUS||{})[have+1])||[];
+      var best=null,pf=prefs(t),RG=D.regles||{},rk=((RG[norm(t.nom)]||{})[have+1])||[];
       for(var i=0;i<6;i++){var d=plDay(i);if(all.some(function(l){return l.date===d&&(l.tireur===t.nom||l.vs===t.nom);}))continue;
         plInt(t.nom,i).forEach(function(ti_){co.forEach(function(c){if(!plAllowed(c,t.nom))return;
           var nc=cnt(function(l){return l.coach===c.nom;}),nj=cnt(function(l){return l.coach===c.nom&&l.date===d;});if((c.max&&nc>=c.max)||(c.maxJour&&nj>=c.maxJour))return;
