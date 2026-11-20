@@ -257,6 +257,12 @@ a.nm{color:var(--ink);text-decoration:underline}
 .modal .card .card{min-height:0!important;max-height:none;border-radius:12px}.n5{flex-wrap:nowrap}.n5 .chip{flex:1;justify-content:center;text-align:center;font-weight:800;padding:8px 0}.n5 .chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .sui{padding:12px}.ens{padding:10px 12px}.ens table td,.ens table th{padding:3px 4px}.ens1 td{background:var(--ok-bg)}
 .ced{cursor:pointer}.ced:hover{background:#eef3ff}.cedi{float:right;opacity:.45;font-size:12px}.cadd{margin:6px 8px 8px;width:calc(100% - 16px);border-style:dashed}
+.propbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fff8e6;border:1px solid #f0d58a;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:13px}
+.pd.big{flex:1 1 auto;padding:12px}.pd.big .pgt{width:100%;font-size:13px}.pd.big .pgt th{min-width:120px;font-size:12.5px;padding:7px 8px}.pd.big .pgt td{height:42px}.pd.big .pl2{font-size:12.5px;min-height:36px;padding:5px 7px}.pd.big .ph{font-size:12px;width:52px}.pd.big .pdh{font-size:14px}.pd.big .pdc{font-size:12px;max-width:none}
+.plegend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 4px;font-size:12px;color:var(--ink2)}.plegend i{display:inline-block;width:18px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px;border:1px solid #e3e7ef}
+.lg-fr{background:#fff}.lg-na{background:repeating-linear-gradient(45deg,#f1f3f7,#f1f3f7 4px,#e8ebf1 4px,#e8ebf1 8px)}.lg-hl{background:#d9f3e3;border-color:#2f9e62!important}.lg-ok{background:#1f3a93}.lg-pr{background:#fff;border:2px dashed #1f3a93!important}.lg-db{background:repeating-linear-gradient(135deg,#1f3a93,#1f3a93 5px,#132a6f 5px,#132a6f 10px)}
+.spk{display:inline-flex;align-items:flex-end;gap:2px;height:20px}.spk i{display:block;width:5px;background:#1f3a93;border-radius:1px;opacity:.75}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}.bar{display:block;height:8px;border-radius:4px}
 .scb{min-width:54px;text-align:center;background:#0f1b3d;color:#fff;border-radius:6px;padding:1px 6px}
 /* ===== Mobile : affichage et ergonomie ===== */
 html{overflow-x:hidden}
@@ -384,7 +390,7 @@ function boot(d){
     render();
 }
 $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');run('rafraichir',KEY).then(function(d){D=d;cacheD(d);SEM.data=null;CAL.data=null;$('maj').textContent='Données du '+d.maj;render();});};
-var GRP={gcal:[['semaine','Semaine'],['calendrier','Année']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['muscu','Muscu']]},SUBV={};
+var GRP={gcal:[['semaine','Semaine'],['calendrier','Année'],['saison','Bilan saison']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['muscu','Muscu']]},SUBV={};
 function grpDe(v){for(var g in GRP){if(GRP[g].some(function(x){return x[0]===v;})&&document.querySelector('#nav [data-v="'+g+'"]'))return g;}return null;}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-sv]');if(b){VIEW=b.dataset.sv;render();}});
 function render(){
@@ -392,7 +398,7 @@ function render(){
   var g=grpDe(VIEW);if(g)SUBV[g]=VIEW;
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW||b.dataset.v===g);});
   $('stabs').innerHTML=g?'<div class="chips stabs">'+GRP[g].map(function(x){return '<button class="chip'+(x[0]===VIEW?' on':'')+'" data-sv="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>':'';
-  ({suivi:vSuivi,connexions:vConnexions,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
+  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -467,13 +473,16 @@ function vLecons(){
   var lun=lundiIso(PL.off);
   if(!PL.data||PL.data.lundi!==lun){$('app').innerHTML=loading('Lecture des disponibilités…');run('getPlanif',KEY,lun).then(function(r){PL.data=r;PL.sel=[];if(VIEW==='lecons')vLecons();}).catch(function(e){$('app').innerHTML='<div class="card">'+esc(e.message)+'</div>';});return;}
   var D=PL.data,ti=plProf('Tireur'),nP=D.lecons.filter(function(l){return /propos/i.test(l.statut);}).length;
-  var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="lp">←</button><b>Leçons · semaine du '+esc(frLun(lun))+'</b><button class="btn sm" id="ln">→</button></div><div class="row wrap"><div class="chips" id="lmode"><button class="chip'+(PL.mode!=='dbl'?' on':'')+'" data-m="lec">Placer une leçon</button><button class="chip'+(PL.mode==='dbl'?' on':'')+'" data-m="dbl">Placer une doublette (2 tireurs, 1 h min.)</button></div><button class="btn sm" id="lprop">✨ Remplir automatiquement</button>'+(nP?'<button class="btn sm rd" id="lval">✓ Valider '+nP+'</button><button class="btn sm" id="ldel">Effacer les propositions</button>':'')+(D.lecons.some(function(l){return /valid/i.test(l.statut);})?'<button class="btn sm pr" id="lenv">📣 Envoyer le planning</button>':'')+'<button class="btn sm" id="lpr">🖨 Leçons</button><button class="btn sm" id="ldsp">🕒 Disponibilités</button></div></div>';
+  var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="lp">←</button><b>Leçons · semaine du '+esc(frLun(lun))+'</b><button class="btn sm" id="ln">→</button></div><div class="row wrap"><div class="chips" id="lmode"><button class="chip'+(PL.mode!=='dbl'?' on':'')+'" data-m="lec">Placer une leçon</button><button class="chip'+(PL.mode==='dbl'?' on':'')+'" data-m="dbl">Placer une doublette (2 tireurs, 1 h min.)</button></div><button class="btn sm" id="lprop">✨ Remplir automatiquement</button>'+(D.lecons.some(function(l){return /valid/i.test(l.statut);})?'<button class="btn sm pr" id="lenv">📣 Envoyer le planning</button>':'')+'<button class="btn sm" id="lpr">🖨 Leçons</button><button class="btn sm" id="ldsp">🕒 Disponibilités</button></div></div>';
+  if(nP)h+='<div class="propbar"><div>✨ <b>'+nP+' leçon'+(nP>1?'s':'')+' proposée'+(nP>1?'s':'')+'</b> (cadres en pointillés). Elles restent invisibles pour les tireurs tant qu\'elles ne sont pas validées. Touche une leçon pour la valider seule, la modifier ou la supprimer.</div><div class="row"><button class="btn pr" id="lval">✓ Tout valider</button><button class="btn sm" id="ldel">Tout effacer</button></div></div>';
   if(D.maitre&&!D.lecons.length&&D.maitre.some(function(n){return n;}))h+='<div class="mut sm" style="margin-bottom:8px">Cette semaine a déjà '+D.maitre.reduce(function(a,b){return a+b;},0)+' leçons dans l\'onglet semaine du fichier maître. Dès que tu places des leçons ici, ce sont elles qui s\'affichent dans l\'onglet Semaine.</div>';
   h+='<div class="pg"><div class="pg-l"><div class="sec" style="margin-top:0">Tireurs · objectifs</div><div class="mut sm" style="margin-bottom:6px">Survole un tireur pour voir ses créneaux possibles · clique-le (ou glisse-le) puis clique une case verte.</div>'+ti.map(function(p){var c=plCount(p.nom),on=PL.sel.indexOf(p.nom)>=0,src=(D.dispo[p.nom]||{}).src;
     return '<div class="pt'+(on?' on':'')+'" draggable="true" data-t="'+esc(p.nom)+'"><span class="pn">'+esc(p.nom)+(src==='semaine'?' ●':'')+'</span><span class="po '+(p.cible&&c.l>=p.cible?'ok':'')+'" title="Leçons placées / objectif">L '+c.l+'/'+(p.cible||0)+'</span><span class="po '+(p.dbl&&c.d>=p.dbl?'ok':'')+'" title="Doublettes / objectif">D '+c.d+'/'+(p.dbl||0)+'</span><span class="pe2" data-obj="'+esc(p.nom)+'" title="Objectifs et disponibilités">✎</span></div>';}).join('')+'</div><div class="pg-r">';
-  for(var i=0;i<6;i++){var co=plCoachesDay(i);if(!co.length)continue;var d=plDay(i),sl=plSlots(i),J=(D.jours||[]).filter(function(j){return j.date===d;})[0];
+  if(PL.vue===undefined)PL.vue=innerWidth>=900?'jour':'semaine';if(PL.jour===undefined){PL.jour=Math.max(0,JD.findIndex(function(x,k){return plDay(k)>=today();}));}
+  h+='<div class="row wrap" style="gap:6px;margin-bottom:8px"><div class="chips" id="lvue"><button class="chip'+(PL.vue==='jour'?' on':'')+'" data-vu="jour">Un jour en grand</button><button class="chip'+(PL.vue==='semaine'?' on':'')+'" data-vu="semaine">Toute la semaine</button></div>'+(PL.vue==='jour'?'<div class="chips" id="ljour">'+JD.slice(0,6).map(function(x,k){var n=D.lecons.filter(function(l){return l.date===plDay(k);}).length;return '<button class="chip'+(PL.jour===k?' on':'')+'" data-jo="'+k+'">'+esc(x)+' '+cDate(plDay(k)).getDate()+(n?' <small>('+n+')</small>':'')+'</button>';}).join('')+'</div>':'')+'</div>';
+  for(var i=0;i<6;i++){if(PL.vue==='jour'&&i!==PL.jour)continue;var co=plCoachesDay(i);if(!co.length){if(PL.vue==='jour')h+='<div class="card empty">Aucun maître d\'armes disponible ce jour-là.</div>';continue;}var d=plDay(i),sl=plSlots(i),J=(D.jours||[]).filter(function(j){return j.date===d;})[0];
     var skip={};
-    h+='<div class="pd"><div class="pdh"><b>'+esc(JD[i])+' '+cDate(d).getDate()+'</b><span class="pdd">matin <select data-du="'+i+'m">'+[45,30].map(function(x){return '<option'+(plDur(i,0)===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select> · a-m <select data-du="'+i+'p">'+[30,45].map(function(x){return '<option'+(plDur(i,1)===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select></span>'+(J&&J.creneaux.length?'<div class="pdc">'+J.creneaux.map(function(c){return esc(c.h)+' '+esc(c.quoi);}).join(' · ')+'</div>':'')+'</div>';
+    h+='<div class="pd'+(PL.vue==='jour'?' big':'')+'"><div class="pdh"><b>'+esc(JD[i])+' '+cDate(d).getDate()+'</b><span class="pdd">matin <select data-du="'+i+'m">'+[45,30].map(function(x){return '<option'+(plDur(i,0)===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select> · a-m <select data-du="'+i+'p">'+[30,45].map(function(x){return '<option'+(plDur(i,1)===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select></span>'+(J&&J.creneaux.length?'<div class="pdc">'+J.creneaux.map(function(c){return esc(c.h)+' '+esc(c.quoi);}).join(' · ')+'</div>':'')+'</div>';
     h+='<table class="pgt"><thead><tr><th></th>'+co.map(function(c){return '<th style="background:'+coachCol(c.nom)+'">'+esc(c.nom)+'</th>';}).join('')+'</tr></thead><tbody>';
     sl.forEach(function(z,zi){if(zi&&sl[zi-1].pm!==z.pm)h+='<tr class="pgb"><td colspan="'+(co.length+1)+'"></td></tr>';
       h+='<tr><td class="ph">'+tfmt(z.s)+'</td>'+co.map(function(c){var k=c.nom+'|'+z.s;if(skip[k])return '';
@@ -483,7 +492,7 @@ function vLecons(){
         var av=plIn(plInt(c.nom,i),z.s,z.e);
         return '<td class="pc2'+(av?' pfr':' na')+'" data-i="'+i+'" data-c="'+esc(c.nom)+'" data-s="'+z.s+'"></td>';}).join('')+'</tr>';});
     h+='</tbody></table></div>';}
-  h+='</div></div><div class="mut sm" style="margin-top:6px">Cases blanches = maître d\'armes disponible · grises = indisponible · vertes = possible pour le ou les tireurs survolés ou sélectionnés · pointillés = proposition à valider · clic sur une leçon pour la modifier ou la supprimer.</div>';
+  h+='</div></div><div class="plegend"><span><i class="lg-fr"></i>maître d\'armes disponible</span><span><i class="lg-na"></i>indisponible</span><span><i class="lg-hl"></i>possible pour le tireur choisi</span><span><i class="lg-ok"></i>leçon validée</span><span><i class="lg-pr"></i>leçon proposée (à valider)</span><span><i class="lg-db"></i>doublette</span></div><div class="mut sm">Pour placer une leçon : choisis un tireur à gauche, puis touche une case verte. Touche une leçon pour la modifier, la valider ou la supprimer.</div>';
   h+='<div class="sec">Maîtres d\'armes</div><div class="lsum">'+plProf('Coach').map(function(p){var n=D.lecons.filter(function(l){return l.coach===p.nom;}).length;return '<span style="border-left:4px solid '+coachCol(p.nom)+';cursor:pointer" data-ed="'+esc(p.nom)+'">'+esc(p.nom)+' <b>'+n+'</b>/'+(p.max||'–')+' ✎</span>';}).join('')+'</div>';
   $('app').innerHTML=h;
   if($('ldsp'))$('ldsp').onclick=function(){VIEW='dispos';render();};
@@ -503,6 +512,8 @@ function vLecons(){
   [].forEach.call(document.querySelectorAll('[data-du]'),function(s){s.onchange=function(){PL.dur[s.dataset.du]=+s.value;vLecons();};});
   [].forEach.call(document.querySelectorAll('[data-ed]'),function(b){b.onclick=function(){plEditDispo(b.dataset.ed);};});
   $('lmode').onclick=function(e){var m=e.target.dataset.m;if(m){PL.mode=m;PL.sel=[];vLecons();}};
+  $('lvue').onclick=function(e){var b=e.target.closest('[data-vu]');if(b){PL.vue=b.dataset.vu;vLecons();}};
+  if($('ljour'))$('ljour').onclick=function(e){var b=e.target.closest('[data-jo]');if(b){PL.jour=+b.dataset.jo;vLecons();}};
   $('lp').onclick=function(){PL.off--;PL.data=null;vLecons();};$('ln').onclick=function(){PL.off++;PL.data=null;vLecons();};
   $('lprop').onclick=plProposer;
   if($('lenv'))$('lenv').onclick=function(){if(!confirm('Envoyer à chaque tireur et à chaque maître d\'armes ses leçons validées de la semaine ?'))return;var b=$('lenv');b.disabled=true;b.textContent='Envoi…';run('envoyerPlanningLecons',KEY,PL.data.lundi).then(function(m){alert(m);b.disabled=false;b.textContent='📣 Envoyer le planning';}).catch(function(e){alert(e.message);b.disabled=false;b.textContent='📣 Envoyer le planning';});};
@@ -523,10 +534,11 @@ function plLecon(l,init){
   var cs=plProf('Coach').map(function(c){var ok=plIn(plInt(c.nom,i),a,b)&&!plBusy(c.nom,f.date,a,b,l);return {n:c.nom,ok:ok};}).sort(function(x,y){return y.ok-x.ok;});
   var ts=plProf('Tireur').map(function(t){var ok=plIn(plInt(t.nom,i),a,b)&&!plBusy(t.nom,f.date,a,b,l);return {n:t.nom,ok:ok};}).sort(function(x,y){return y.ok-x.ok;});
   function op(list,sel,ph){return (ph?'<option value="">'+ph+'</option>':'')+list.map(function(x){return '<option value="'+esc(x.n)+'"'+(x.n===sel?' selected':'')+'>'+esc(x.n)+(x.ok?' ✓ disponible':' (hors dispo ou occupé)')+'</option>';}).join('');}
-  $('modal').innerHTML='<div class="modal"><div class="card"><div class="row sp"><h3 style="margin:0">'+(l?'Modifier la leçon':'Nouvelle leçon')+' · '+esc(JD[i])+'</h3><button class="btn sm" id="xL">Fermer</button></div><div class="grid g3" style="margin-top:8px"><div><span class="lab">Heure</span><input id="lH" value="'+esc(f.h)+'"></div><div><span class="lab">Durée (min)</span><input id="lD" type="number" value="'+esc(f.duree||30)+'"></div><div><span class="lab">Maître d\'armes</span><select id="lC">'+op(cs,f.coach,'Choisir…')+'</select></div><div><span class="lab">Tireur</span><select id="lT">'+op(ts,f.tireur,'Choisir…')+'</select></div><div><span class="lab">Doublette avec (facultatif)</span><select id="lV">'+op(ts,f.vs,'— leçon individuelle —')+'</select></div><div><span class="lab">Statut</span><select id="lS">'+opts(['validée','proposée'],null,/propos/i.test(f.statut)?'proposée':'validée')+'</select></div></div><span class="lab">Note</span><input id="lN" value="'+esc(f.note||'')+'"><button class="go" id="lOk">Enregistrer</button>'+(l?'<button class="btn sm" id="lX" style="margin-top:8px;color:var(--bad)">Supprimer cette leçon</button>':'')+'</div></div>';
+  $('modal').innerHTML='<div class="modal"><div class="card"><div class="row sp"><h3 style="margin:0">'+(l?'Modifier la leçon':'Nouvelle leçon')+' · '+esc(JD[i])+'</h3><button class="btn sm" id="xL">Fermer</button></div><div class="grid g3" style="margin-top:8px"><div><span class="lab">Heure</span><input id="lH" value="'+esc(f.h)+'"></div><div><span class="lab">Durée (min)</span><input id="lD" type="number" value="'+esc(f.duree||30)+'"></div><div><span class="lab">Maître d\'armes</span><select id="lC">'+op(cs,f.coach,'Choisir…')+'</select></div><div><span class="lab">Tireur</span><select id="lT">'+op(ts,f.tireur,'Choisir…')+'</select></div><div><span class="lab">Doublette avec (facultatif)</span><select id="lV">'+op(ts,f.vs,'— leçon individuelle —')+'</select></div><div><span class="lab">Statut</span><select id="lS">'+opts(['validée','proposée'],null,/propos/i.test(f.statut)?'proposée':'validée')+'</select></div></div><span class="lab">Note</span><input id="lN" value="'+esc(f.note||'')+'">'+(l&&/propos/i.test(l.statut)?'<button class="go" id="lVa" style="background:var(--ok)">✓ Valider cette leçon</button>':'')+'<button class="go" id="lOk"'+(l&&/propos/i.test(l.statut)?' style="background:#fff;color:var(--ink);border:1px solid var(--line)"':'')+'>Enregistrer les modifications</button>'+(l?'<button class="btn sm" id="lX" style="margin-top:8px;color:var(--bad)">Supprimer cette leçon</button>':'')+'</div></div>';
   $('xL').onclick=function(){$('modal').innerHTML='';};
   $('lOk').onclick=function(){var g={id:l&&l.id,date:f.date,h:$('lH').value.trim(),duree:+$('lD').value||30,coach:$('lC').value,tireur:$('lT').value,vs:$('lV').value,statut:$('lS').value,note:$('lN').value};if(!g.coach||!g.tireur){alert('Choisis le maître d\'armes et le tireur');return;}$('modal').innerHTML='';plSave([g],[]);};
   if($('lX'))$('lX').onclick=function(){$('modal').innerHTML='';plSave([],[l.id]);};
+  if($('lVa'))$('lVa').onclick=function(){$('lS').value='validée';$('lOk').click();};
 }
 function plEditDispo(nom){
   var x=PL.data.dispo[nom]||{p:[]};
@@ -1657,6 +1669,41 @@ function vSuivi(){
     if($('suF'))$('suF').onchange=function(){SUIF=this.value;vSuivi();};
     bindSuivi($('app'),L,vSuivi);
   }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
+}
+
+/* ---------------- BILAN DE LA SAISON ---------------- */
+var SAI={data:null};
+function vSaison(forcer){
+  if(!SAI.data||forcer){$('app').innerHTML=loading('Lecture de toutes les semaines depuis la rentrée (quelques secondes la première fois)…');run('getSaison',KEY,!!forcer).then(function(r){SAI.data=r;if(VIEW==='saison')vSaison();}).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});return;}
+  var r=SAI.data,S=r.semaines,act=S.filter(function(s){return s.lecons+s.doublettes+s.collectifs>0;}),na=act.length||1;
+  var tot=function(k){return S.reduce(function(a,s){return a+(Number(s[k])||0);},0);};
+  var TL=tot('lecons'),TD=tot('doublettes'),TE=tot('entretiens');
+  var h='<div class="row sp wrap" style="margin-bottom:10px"><div><b>Saison 2026-2027</b> <span class="mut sm">· du '+esc(frDate(S[0]?S[0].lundi:''))+' à cette semaine · '+act.length+' semaines d\'entraînement sur '+S.length+'</span></div><button class="btn sm" id="saR">↻ Recalculer</button></div>';
+  h+='<div class="grid g4">'+kpi('Leçons individuelles',TL,'≈ '+(TL/na).toFixed(1)+' par semaine active')+kpi('Assauts en doublette',TD,TE?TE+' entretiens':'')+kpi('Séances d\'assauts · fonda',tot('assauts')+' · '+tot('fonda'),'prévues au planning')+kpi('Prépa physique',tot('pp'),'séances prévues')+'</div>';
+  h+='<div class="grid g2" style="margin-top:12px"><div class="card"><h3>Leçons par semaine et par maître d\'armes</h3><div style="height:240px"><canvas id="saC1"></canvas></div></div><div class="card"><h3>Séances collectives par semaine</h3><div style="height:240px"><canvas id="saC2"></canvas></div></div></div>';
+  /* tireurs */
+  var prof={};r.profils.forEach(function(p){prof[p.nom]=p;});
+  var noms={};S.forEach(function(s){Object.keys(s.parTireur).forEach(function(t){noms[t]=1;});});r.profils.filter(function(p){return p.role==='Tireur';}).forEach(function(p){noms[p.nom]=1;});
+  var last4=act.slice(-4);
+  var rows=Object.keys(noms).map(function(t){var n=S.reduce(function(a,s){return a+(s.parTireur[t]||0);},0),l4=last4.reduce(function(a,s){return a+(s.parTireur[t]||0);},0),p=prof[t]||{};return {t:t,n:n,moy:n/na,m4:last4.length?l4/last4.length:0,cible:p.cible||0,gr:p.groupe||'',serie:act.map(function(s){return s.parTireur[t]||0;})};}).sort(function(a,b){return (a.gr>b.gr?-1:a.gr<b.gr?1:0)||b.moy-a.moy;});
+  function ecart(x){if(!x.cible)return '';var d=x.moy-x.cible;return '<span class="pill '+(d>=-0.2?'p-ok':d>=-0.8?'p-warn':'p-bad')+'">'+(d>=0?'+':'')+d.toFixed(1)+'</span>';}
+  function spark(a){var mx=Math.max.apply(null,a.concat([1]));return '<span class="spk">'+a.map(function(v){return '<i style="height:'+Math.round(3+v/mx*17)+'px" title="'+v+'"></i>';}).join('')+'</span>';}
+  h+='<div class="sec">Leçons par tireur (doublettes comprises)</div><div class="card" style="padding:6px 12px"><table class="sm"><tr><th style="text-align:left">Tireur</th><th class="num">Total</th><th class="num">Moy./sem.</th><th class="num">4 dern.</th><th class="num">Objectif</th><th class="num">Écart</th><th>Semaine par semaine</th></tr>'+rows.map(function(x){return '<tr><td><b>'+esc(x.t)+'</b>'+(x.gr?' <span class="mut">'+esc(String(x.gr).toLowerCase())+'</span>':'')+'</td><td class="num">'+x.n+'</td><td class="num">'+x.moy.toFixed(1)+'</td><td class="num">'+x.m4.toFixed(1)+'</td><td class="num">'+(x.cible||'–')+'</td><td class="num">'+ecart(x)+'</td><td>'+spark(x.serie)+'</td></tr>';}).join('')+'</table></div>';
+  /* maîtres d'armes */
+  var co={};S.forEach(function(s){Object.keys(s.parCoach).forEach(function(c){co[c]=(co[c]||0)+s.parCoach[c];});});
+  var tc=Object.keys(co).reduce(function(a,c){return a+co[c];},0)||1;
+  h+='<div class="sec">Maîtres d\'armes</div><div class="card" style="padding:6px 12px"><table class="sm"><tr><th style="text-align:left">Maître d\'armes</th><th class="num">Leçons</th><th class="num">Moy./sem.</th><th class="num">Part</th><th></th></tr>'+Object.keys(co).sort(function(a,b){return co[b]-co[a];}).map(function(c){return '<tr><td><span class="dot" style="background:'+coachCol(c)+'"></span><b>'+esc(c)+'</b></td><td class="num">'+co[c]+'</td><td class="num">'+(co[c]/na).toFixed(1)+'</td><td class="num">'+Math.round(co[c]*100/tc)+' %</td><td style="width:40%"><span class="bar" style="width:'+Math.round(co[c]*100/tc)+'%;background:'+coachCol(c)+'"></span></td></tr>';}).join('')+'</table></div>';
+  /* semaines */
+  h+='<div class="sec">Semaine par semaine</div><div class="card" style="padding:6px 12px;overflow-x:auto"><table class="sm"><tr><th style="text-align:left">Semaine</th><th class="num">Leçons</th><th class="num">Doubl.</th><th class="num">Assauts</th><th class="num">PP</th><th class="num">Fonda</th><th style="text-align:left">Compétitions</th></tr>'+S.slice().reverse().map(function(s){var vide=!(s.lecons+s.doublettes+s.collectifs);return '<tr'+(vide?' style="opacity:.5"':'')+'><td>'+esc(String(s.titre||s.onglet).replace(/^PROGRAMME\s*/i,''))+(vide?' <span class="mut">(vacances)</span>':'')+'</td><td class="num"><b>'+s.lecons+'</b></td><td class="num">'+(s.doublettes||'')+'</td><td class="num">'+(s.assauts||'')+'</td><td class="num">'+(s.pp||'')+'</td><td class="num">'+(s.fonda||'')+'</td><td class="mut">'+esc(s.compets.join(' · '))+'</td></tr>';}).join('')+'</table></div>';
+  h+='<div class="foot">Sources : onglets semaine du fichier maître depuis la rentrée et leçons validées dans le portail. Calculé le '+esc(r.maj)+' (mis en cache 6 h).</div>';
+  $('app').innerHTML=h;
+  $('saR').onclick=function(){vSaison(true);};
+  if(window.Chart){
+    var lab=S.map(function(s){var m=String(s.onglet||'').match(/S(\d+)/);return m?'S'+m[1]:s.lundi.slice(5);});
+    var cs=Object.keys(co).sort(function(a,b){return co[b]-co[a];});
+    charts.push(new Chart($('saC1'),{type:'bar',data:{labels:lab,datasets:cs.map(function(c){return {label:c,data:S.map(function(s){return s.parCoach[c]||0;}),backgroundColor:coachCol(c)};})},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,beginAtZero:true}}}}));
+    charts.push(new Chart($('saC2'),{type:'bar',data:{labels:lab,datasets:[{label:'Assauts',data:S.map(function(s){return s.assauts||0;}),backgroundColor:'#c0392b'},{label:'Fonda',data:S.map(function(s){return s.fonda||0;}),backgroundColor:'#2563eb'},{label:'Prépa physique',data:S.map(function(s){return s.pp||0;}),backgroundColor:'#18794e'}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}}));
+  }
 }
 function vConnexions(){
   $('app').innerHTML=loading('Lecture des connexions…');
