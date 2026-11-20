@@ -256,6 +256,7 @@ a.nm{color:var(--ink);text-decoration:underline}
 .bk>div{border-top:3px solid var(--k)}
 .modal .card .card{min-height:0!important;max-height:none;border-radius:12px}.n5{flex-wrap:nowrap}.n5 .chip{flex:1;justify-content:center;text-align:center;font-weight:800;padding:8px 0}.n5 .chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .sui{padding:12px}.ens{padding:10px 12px}.ens table td,.ens table th{padding:3px 4px}.ens1 td{background:var(--ok-bg)}
+.ced{cursor:pointer}.ced:hover{background:#eef3ff}.cedi{float:right;opacity:.45;font-size:12px}.cadd{margin:6px 8px 8px;width:calc(100% - 16px);border-style:dashed}
 .scb{min-width:54px;text-align:center;background:#0f1b3d;color:#fff;border-radius:6px;padding:1px 6px}
 /* ===== Mobile : affichage et ergonomie ===== */
 html{overflow-x:hidden}
@@ -748,7 +749,7 @@ function vSemaine(){
   if(s.compets.length)h+='<div class="banner" id="bn">'+s.compets.map(function(c,i){return compHtml(c,i);}).join('')+'</div>';
   if(SEM.off===0&&D.vacations){var v=D.vacations,b=D.budget,tot=v.lignes[v.lignes.length-1];
   h+='<div class="grid g4">'+kpi('Leçons POL · PE',esc(s.leconsPol)+' · '+esc(s.leconsPe),'prévues cette semaine')+kpi('Assauts · PP · fonda',esc(s.assauts)+' · '+esc(s.pp)+' · '+esc(s.fonda),'séances collectives')+kpi('Vacations consommées',tot?esc(tot.conso)+' h':'–',tot?'sur '+esc(tot.env)+' · '+esc(tot.euros):'')+kpi('Budget commission',Math.round((b.pct||0)*100)+' %','atterrissage '+eur(b.atterrissage)+' / '+eur(b.enveloppe),b.marge<0)+'</div>';}
-  h+='<div class="row sp wrap"><div class="sec">Programme</div><div class="row wrap sm">'+['Leçons','Fonda','Assauts','Prépa physique','Récup'].map(function(x){return '<span class="tag '+tagCls(x)+'">'+x+'</span>';}).join('')+'</div></div><div class="days">'+daysHtml(s,true)+'</div>';
+  h+='<div class="row sp wrap"><div class="sec">Programme</div><div class="row wrap sm">'+['Leçons','Fonda','Assauts','Prépa physique','Récup'].map(function(x){return '<span class="tag '+tagCls(x)+'">'+x+'</span>';}).join('')+'</div></div>'+(isStaff()?'<div class="mut sm" style="margin:-4px 0 8px">Touche un créneau pour le modifier, ou « + créneau » pour en ajouter un. Les changements s\'écrivent dans le fichier maître.</div>':'')+'<div class="days">'+daysHtml(s,true,isStaff())+'</div>';
   if(s.suivantes.length)h+='<div class="mut sm" style="margin-top:8px">Semaine suivante : '+s.suivantes.map(esc).join(' · ')+'</div>';
   h+='<div class="sec">Créneaux entraînements individuels</div><div class="card"><div class="lgrid">'+leconsHtml(s)+'</div></div>';
   if(pp.length){var gb={};pp.forEach(function(x){(gb[x.bloc]=gb[x.bloc]||[]).push(x);});h+='<details class="ppd"><summary><div class="sec">Prépa physique de la semaine (programme de Mathieu) · cliquer pour afficher</div></summary><div class="grid g4">'+Object.keys(gb).map(function(k){return '<div class="ppb"><b>'+esc(k)+'</b>'+(PPJ[k.replace(/\s*\(.*$/,'')]?' <span class="mut sm">· '+PPJ[k.replace(/\s*\(.*$/,'')]+'</span>':'')+gb[k].map(function(x){return '<pre>'+esc(x.txt)+'</pre>';}).join('')+'</div>';}).join('')+'</div></details>';}
@@ -757,6 +758,35 @@ function vSemaine(){
   if($('bn'))$('bn').onclick=function(e){var el=e.target.closest('[data-ci]');if(el)showParticipants(s.compets[Number(el.dataset.ci)]);};
   $('prS').onclick=function(){doPrint(printSemaine(s));};
   $('prL').onclick=function(){doPrint(printLecons(s));};
+  if(isStaff())[].forEach.call(document.querySelectorAll('[data-crj]'),function(el){el.onclick=function(){var j=s.jours.filter(function(x){return x.date===el.dataset.crj;})[0],c=el.dataset.crs?j.creneaux.filter(function(x){return x.slot===el.dataset.crs;})[0]:null;creneauForm(s,j,c);};});
+}
+/* ---- édition d'une séance collective (écrit dans l'onglet de la semaine du fichier maître) ---- */
+var SLOTS=[['m','Matin'],['a','Après-midi'],['s','Soir'],['i1','INSEP (1)'],['i2','INSEP (2)']];
+var ACTS=['LEÇONS','FONDA','ASSAUTS','ASSAUTS EN DOUBLETTE','PRÉPA PHYSIQUE','RÉCUP','BALNÉO'];
+var PUBLICS=['Tous','Polistes','Partenaires','Ceux qui ne partent pas','plus ceux qui veulent'];
+function creneauForm(s,j,c){
+  var libres=SLOTS.filter(function(x){return !j.creneaux.some(function(k){return k.slot===x[0];});});
+  if(!c&&!libres.length){alert('Les 5 créneaux de ce jour sont déjà utilisés.');return;}
+  var salles=["Salle d'armes",'Salle Muscu LA','Salle Muscu Sydney','INSEP'];(s.jours||[]).forEach(function(x){x.creneaux.forEach(function(k){if(k.lieu&&salles.indexOf(k.lieu)<0)salles.push(k.lieu);});});
+  var acts=c?String(c.quoi).split(/\s*,\s*/).map(function(x){return x.trim();}).filter(Boolean):[];
+  var autres=acts.filter(function(a){return !ACTS.some(function(b){return norm(a)===norm(b);});});
+  $('modal').innerHTML='<div class="modal"><div class="card" style="max-width:560px"><div class="row sp"><h3 style="margin:0">'+(c?'Modifier':'Ajouter')+' · '+esc(j.jour)+'</h3><button class="btn sm" id="cfX">Fermer</button></div>'
+   +'<span class="lab">Moment</span>'+(c?'<div><b>'+esc((SLOTS.filter(function(x){return x[0]===c.slot;})[0]||['',''])[1])+'</b></div>':'<select id="cfS">'+libres.map(function(x){return '<option value="'+x[0]+'">'+x[1]+'</option>';}).join('')+'</select>')
+   +'<div class="grid" style="grid-template-columns:1fr 2fr;gap:8px"><div><span class="lab">Heure</span><input id="cfH" value="'+esc(c?c.h:'')+'" placeholder="16h30"></div><div><span class="lab">Salle</span><input id="cfL" list="cfLl" value="'+esc(c?c.lieu:"Salle d'armes")+'"><datalist id="cfLl">'+salles.map(function(x){return '<option value="'+esc(x)+'">';}).join('')+'</datalist></div></div>'
+   +'<span class="lab">Activité</span><div class="chips" id="cfA">'+ACTS.map(function(a){return '<button type="button" class="chip'+(acts.some(function(x){return norm(x)===norm(a);})?' on':'')+'" data-a="'+esc(a)+'">'+esc(a)+'</button>';}).join('')+'</div><input id="cfAo" placeholder="Autre activité (facultatif)" value="'+esc(autres.join(', '))+'" style="margin-top:6px">'
+   +'<span class="lab">Public concerné / consigne</span><input id="cfN" list="cfNl" value="'+esc(c?c.note:'')+'" placeholder="Ex. : Tous · CRIST, DUBREUIL · pour ceux qui ne vont pas à Šamorín"><datalist id="cfNl">'+PUBLICS.map(function(x){return '<option value="'+esc(x)+'">';}).join('')+'</datalist>'
+   +'<div class="chips" style="margin-top:6px">'+PUBLICS.map(function(p){return '<button type="button" class="chip" data-p="'+esc(p)+'">'+esc(p)+'</button>';}).join('')+'</div>'
+   +'<button class="go" id="cfOk">Enregistrer</button>'+(c?'<button class="btn sm" id="cfDel" style="margin-top:8px;color:var(--bad)">Supprimer ce créneau</button>':'')+'<div class="msg" id="cfM"></div></div></div>';
+  $('cfX').onclick=function(){$('modal').innerHTML='';};
+  $('cfA').onclick=function(e){var b=e.target.closest('[data-a]');if(b)b.classList.toggle('on');};
+  [].forEach.call(document.querySelectorAll('[data-p]'),function(b){b.onclick=function(){var v=$('cfN').value.trim();$('cfN').value=v?v+' · '+b.dataset.p:b.dataset.p;};});
+  function fini(sem){$('modal').innerHTML='';if(SEM.off===0){D.semaine=sem;cacheD(D);JOUR.c={};}else{SEM.data=null;}vSemaine();}
+  function envoyer(f,slot){var m=$('cfM');m.className='msg';m.textContent='Écriture dans le fichier maître…';run('saveCreneau',KEY,s.lundi,j.date,slot,f).then(fini).catch(function(e){m.className='msg err';m.textContent=e.message;});}
+  $('cfOk').onclick=function(){var q=[].map.call(document.querySelectorAll('#cfA .chip.on'),function(b){return b.dataset.a;});var o=$('cfAo').value.trim();if(o)q=q.concat(o.split(/\s*,\s*/));
+    if(!q.length){$('cfM').className='msg err';$('cfM').textContent='Choisis au moins une activité.';return;}
+    if(!$('cfH').value.trim()){$('cfM').className='msg err';$('cfM').textContent='Indique l\'heure.';return;}
+    envoyer({h:$('cfH').value,lieu:$('cfL').value,quoi:q.join(', '),note:$('cfN').value},c?c.slot:$('cfS').value);};
+  if($('cfDel'))$('cfDel').onclick=function(){if(confirm('Supprimer le créneau '+c.h+' · '+c.quoi+' du '+j.jour+' ?'))envoyer(null,c.slot);};
 }
 
 function moment(h){var n=hnum(h);return n>=9999?0:n<12*60+30?0:n<17*60?1:2;}
@@ -784,9 +814,11 @@ function printLecons(s){
   return h;
 }
 function bindWeekNav(){$('pw').onclick=function(){SEM.off--;SEM.data=null;vSemaine();};$('nw').onclick=function(){SEM.off++;SEM.data=null;vSemaine();};if($('cw'))$('cw').onclick=function(){SEM.off=0;SEM.data=null;vSemaine();};}
-function daysHtml(s,nbLec){var td=today();return s.jours.map(function(j){
+function daysHtml(s,nbLec,ed){var td=today();return s.jours.map(function(j){
+  var e=ed&&!j.dimanche;
   var x='<div class="day"><div class="dh'+(j.date===td?' today':'')+'">'+esc(j.jour)+'</div>'+(j.evt?'<div class="evt">'+evtHtml(j.evt)+'</div>':'');
-  x+=j.creneaux.map(function(c){return '<div class="c"><div class="h">'+esc(c.h)+'</div><div>'+tags(c.quoi)+'</div><div class="l">'+esc(c.lieu)+(c.note?' · '+esc(c.note):'')+'</div></div>';}).join('');
+  x+=j.creneaux.map(function(c){return '<div class="c'+(e&&c.slot?' ced':'')+'"'+(e&&c.slot?' data-crj="'+j.date+'" data-crs="'+c.slot+'"':'')+'><div class="h">'+esc(c.h)+(e&&c.slot?' <span class="cedi">✎</span>':'')+'</div><div>'+tags(c.quoi)+'</div><div class="l">'+esc(c.lieu)+(c.note?' · '+esc(c.note):'')+'</div></div>';}).join('');
+  if(e&&j.creneaux.filter(function(c){return c.slot;}).length<5)x+='<button class="btn sm cadd" data-crj="'+j.date+'">+ créneau</button>';
   if(!j.creneaux.length)x+='<div class="c mut sm">'+(j.dimanche?(j.evt?'':'Repos'):'Repos')+'</div>';
   var ne=(j.entretiens||[]).length;if(nbLec&&(j.lecons.length||ne)){var nl=j.lecons.filter(function(l){return !l.doublette;}).length,nd=j.lecons.length-nl;x+='<div class="lc">'+[nl?nl+' leçon'+(nl>1?'s':'')+' individuelle'+(nl>1?'s':''):'',nd?nd+' assaut'+(nd>1?'s':'')+' en doublette':'',ne?ne+' entretien'+(ne>1?'s':''):''].filter(Boolean).join(' · ')+'</div>';}
   return x+'</div>';}).join('');}
