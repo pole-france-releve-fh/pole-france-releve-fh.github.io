@@ -229,7 +229,8 @@ a.nm{color:var(--ink);text-decoration:underline}
 .pgt{border-collapse:collapse;font-size:11px}.pgt th{color:#fff;font-size:10.5px;padding:4px 6px;min-width:78px;white-space:nowrap}.pgt td{border:1px solid #e3e7ef;height:30px;padding:2px;vertical-align:top}
 .pgt td.ph{font-weight:700;color:var(--mut);font-size:10.5px;width:38px;border:0;text-align:right;padding-right:5px;vertical-align:middle}.pgt td.pfr{background:#fff}.pgt td.na{background:repeating-linear-gradient(45deg,#f1f3f7,#f1f3f7 4px,#e8ebf1 4px,#e8ebf1 8px)}
 .pgt td.hl{background:#d9f3e3;box-shadow:inset 0 0 0 2px #2f9e62;cursor:pointer}.pgt tr.pgb td{height:6px;border:0;background:transparent}
-.pl2{display:block;height:100%;min-height:24px;border-radius:6px;background:var(--lc);color:#fff;font-size:10.5px;font-weight:700;padding:2px 4px;cursor:pointer;line-height:1.2}.pl2.en{background:#18794e!important;color:#fff!important;border:2px solid #0f5132}.pl2.pr{background:#fff;color:var(--lc);border:2px dashed var(--lc)}.pl2.db{background:repeating-linear-gradient(135deg,var(--lc),var(--lc) 10px,color-mix(in srgb,var(--lc) 80%,#000) 10px,color-mix(in srgb,var(--lc) 80%,#000) 20px)}.pl2.mine{outline:3px solid #f6d365}
+.pl2{display:block;height:100%;min-height:24px;border-radius:6px;background:var(--lc);color:#fff;font-size:10.5px;font-weight:700;padding:2px 4px;cursor:pointer;line-height:1.2}.pl2.en{background:#18794e!important;color:#fff!important;border:2px solid #0f5132}.pkl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}.pkt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;text-align:left;border:1px solid var(--line,#e3e6ee);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font:inherit;color:inherit}.pkt:hover{border-color:#18794e;background:#f1faf4}.pkt.on{border:2px solid #18794e;background:#e3f6ea}.pkt.no{opacity:.6}.pkt small{flex-basis:100%;color:#8a5a00;font-size:11px}.pkt b{flex:1}
+.pl2.pr{background:#fff;color:var(--lc);border:2px dashed var(--lc)}.pl2.db{background:repeating-linear-gradient(135deg,var(--lc),var(--lc) 10px,color-mix(in srgb,var(--lc) 80%,#000) 10px,color-mix(in srgb,var(--lc) 80%,#000) 20px)}.pl2.mine{outline:3px solid #f6d365}
 @media (max-width:900px){.pg{grid-template-columns:1fr}.pg-l{position:static;max-height:none}}
 .clist td{vertical-align:top}.clist tr{cursor:pointer}.clist tr:hover td{background:#f7f8fb}
 @media (max-width:900px){.cal-y{grid-template-columns:repeat(2,minmax(0,1fr))}.cal-w{grid-template-columns:1fr}.wcol{min-height:0}}
@@ -500,7 +501,7 @@ function vLecons(){
         var av=plIn(plInt(c.nom,i),z.s,z.e);
         return '<td class="pc2'+(av?' pfr':' na')+'" data-i="'+i+'" data-c="'+esc(c.nom)+'" data-s="'+z.s+'"></td>';}).join('')+'</tr>';});
     h+='</tbody></table></div>';}
-  h+='</div></div><div class="plegend"><span><i class="lg-fr"></i>maître d\'armes disponible</span><span><i class="lg-na"></i>indisponible</span><span><i class="lg-hl"></i>possible pour le tireur choisi</span><span><i class="lg-ok"></i>leçon validée</span><span><i class="lg-pr"></i>leçon proposée (à valider)</span><span><i class="lg-db"></i>doublette</span></div><div class="mut sm">Pour placer une leçon : choisis un tireur à gauche, puis touche une case verte. Touche une leçon pour la modifier, la valider ou la supprimer.</div>';
+  h+='</div></div><div class="plegend"><span><i class="lg-fr"></i>maître d\'armes disponible</span><span><i class="lg-na"></i>indisponible</span><span><i class="lg-hl"></i>possible pour le tireur choisi</span><span><i class="lg-ok"></i>leçon validée</span><span><i class="lg-pr"></i>leçon proposée (à valider)</span><span><i class="lg-db"></i>doublette</span></div><div class="mut sm">Pour placer une leçon : touche une case pour voir qui est disponible à ce moment-là, ou choisis d\'abord un tireur à gauche puis une case verte. Touche une leçon pour la modifier, la valider ou la supprimer.</div>';
   h+='<div class="sec">Maîtres d\'armes</div><div class="lsum">'+plProf('Coach').map(function(p){var n=D.lecons.filter(function(l){return l.coach===p.nom;}).length;return '<span style="border-left:4px solid '+coachCol(p.nom)+';cursor:pointer" data-ed="'+esc(p.nom)+'">'+esc(p.nom)+' <b>'+n+'</b>/'+(p.max||'–')+' ✎</span>';}).join('')+'</div>';
   $('app').innerHTML=h;
   if($('ldsp'))$('ldsp').onclick=function(){VIEW='dispos';render();};
@@ -515,7 +516,7 @@ function vLecons(){
     r.onclick=function(e){if(e.target.dataset.obj){plObj(e.target.dataset.obj);return;}var k=PL.sel.indexOf(n);if(k>=0)PL.sel.splice(k,1);else{PL.sel.push(n);if(PL.sel.length>(PL.mode==='dbl'?2:1))PL.sel.shift();}
       [].forEach.call(document.querySelectorAll('.pt'),function(x){x.classList.toggle('on',PL.sel.indexOf(x.dataset.t)>=0);});hl(PL.sel);};
     r.ondragstart=function(e){if(PL.mode!=='dbl'||!PL.sel.length)PL.sel=[n];else if(PL.sel.indexOf(n)<0){PL.sel.push(n);if(PL.sel.length>2)PL.sel.shift();}e.dataTransfer.setData('text','x');hl(PL.sel);};});
-  [].forEach.call(document.querySelectorAll('td.pc2[data-s]'),function(td){td.onclick=function(){place(td);};td.ondragover=function(e){if(td.classList.contains('hl'))e.preventDefault();};td.ondrop=function(e){e.preventDefault();place(td);};});
+  [].forEach.call(document.querySelectorAll('td.pc2[data-s]'),function(td){td.onclick=function(){if(PL.sel.length)place(td);else plPick(+td.dataset.i,td.dataset.c,+td.dataset.s);};td.ondragover=function(e){if(td.classList.contains('hl'))e.preventDefault();};td.ondrop=function(e){e.preventDefault();place(td);};});
   [].forEach.call(document.querySelectorAll('.pl2'),function(b){b.onclick=function(){plLecon(D.lecons[+b.dataset.l]);};});
   [].forEach.call(document.querySelectorAll('[data-du]'),function(s){s.onchange=function(){PL.dur[s.dataset.du]=+s.value;vLecons();};});
   [].forEach.call(document.querySelectorAll('[data-ed]'),function(b){b.onclick=function(){plEditDispo(b.dataset.ed);};});
@@ -555,6 +556,33 @@ function plRegles(){
     ti.forEach(function(t,n){var o={},any=false;[1,2,3,4].forEach(function(k){var v=$('rp_'+n+'_'+k).value;if(v){o[k]=[v];any=true;}});if(any)r.prio[t.nom]=o;});
     var m=$('rM');m.className='msg';m.textContent='Enregistrement…';
     run('saveReglesLecons',KEY,r).then(function(x){D.profils=x.profils;D.regles=x.regles;$('modal').innerHTML='';vLecons();}).catch(function(e){m.className='msg err';m.textContent=e.message;});};
+}
+/* Clic sur une case vide : qui est disponible à ce moment-là ? */
+function plPick(i,c,s,type){
+  var D=PL.data,d=plDay(i),ty=type||(PL.mode==='dbl'?'dbl':PL.mode==='ent'?'ent':'lec'),m0=PL.mode;PL.mode=ty==='dbl'?'dbl':'lec';var dur=plNeed(i,s);PL.mode=m0;
+  var coOk=plIn(plInt(c,i),s,s+dur)&&!plBusy(c,d,s,s+dur),co=plProf('Coach').filter(function(x){return x.nom===c;})[0]||{};
+  var L=plProf('Tireur').map(function(t){var ok=plIn(plInt(t.nom,i),s,s+dur)&&!plBusy(t.nom,d,s,s+dur),dj=D.lecons.some(function(l){return l.date===d&&(l.tireur===t.nom||l.vs===t.nom);}),n=plCount(t.nom),reste=(t.cible||0)-n.l;
+    return {t:t,ok:ok&&plAllowed(co,t.nom),dj:dj,n:n,reste:reste};});
+  L.sort(function(a,b){return (b.ok-a.ok)||(a.dj-b.dj)||(b.reste-a.reste)||(a.t.nom<b.t.nom?-1:1);});
+  var sel=[];
+  function row(x){return '<button class="pkt'+(x.ok?'':' no')+'" data-pk="'+esc(x.t.nom)+'"><b>'+esc(x.t.nom)+'</b><span class="po'+(x.t.cible&&x.n.l>=x.t.cible?' ok':'')+'">L '+x.n.l+'/'+(x.t.cible||0)+'</span>'+(ty==='dbl'?'<span class="po">D '+x.n.d+'/'+(x.t.dbl||0)+'</span>':'')+(x.dj?'<small>déjà une leçon ce jour</small>':'')+(!x.ok?'<small>pas dispo à cette heure</small>':'')+'</button>';}
+  var ok=L.filter(function(x){return x.ok;}),no=L.filter(function(x){return !x.ok;});
+  $('modal').innerHTML='<div class="modal"><div class="card" style="max-width:640px"><div class="row sp"><h3 style="margin:0">'+esc(JD[i])+' '+cDate(d).getDate()+' · '+tfmt(s)+' · '+esc(c)+'</h3><button class="btn sm" id="xP">Fermer</button></div>'
+   +'<div class="chips" id="pkty" style="margin:8px 0">'+[['lec','Leçon'],['ent','💬 Entretien'],['dbl','Doublette']].map(function(x){return '<button class="chip'+(ty===x[0]?' on':'')+'" data-ty="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>'
+   +(coOk?'':'<div class="msg err" style="margin-bottom:8px">'+esc(c)+' n\'est pas disponible à cette heure (ou a déjà une leçon).</div>')
+   +'<div class="mut sm" style="margin-bottom:6px">'+(ty==='dbl'?'Choisis deux tireurs, puis « Placer la doublette » ('+dur+' min).':'Touche un tireur pour placer '+(ty==='ent'?'l\'entretien':'la leçon')+' ('+dur+' min). En premier : ceux à qui il manque le plus de leçons.')+'</div>'
+   +'<div class="sec" style="margin-top:4px">Disponibles · '+ok.length+'</div><div class="pkl">'+(ok.length?ok.map(row).join(''):'<div class="mut sm">Personne n\'est disponible à cette heure.</div>')+'</div>'
+   +(no.length?'<details style="margin-top:8px"><summary class="mut sm" style="cursor:pointer">Pas disponibles · '+no.length+' (placer quand même)</summary><div class="pkl">'+no.map(row).join('')+'</div></details>':'')
+   +(ty==='dbl'?'<button class="go" id="pkD" disabled>Placer la doublette</button>':'')+'</div></div>';
+  $('xP').onclick=function(){$('modal').innerHTML='';};
+  $('pkty').onclick=function(e){var b=e.target.closest('[data-ty]');if(b)plPick(i,c,s,b.dataset.ty);};
+  function go(names){$('modal').innerHTML='';plSave([{date:d,h:tfmt(s),duree:dur,coach:c,tireur:names[0],vs:names[1]||'',statut:'validée',note:ty==='ent'?'Entretien':''}],[]);}
+  [].forEach.call(document.querySelectorAll('[data-pk]'),function(b){b.onclick=function(){var n=b.dataset.pk,x=L.filter(function(y){return y.t.nom===n;})[0];
+    if(!x.ok&&!confirm(n+' n\'est pas disponible à cette heure. Placer quand même ?'))return;
+    if(ty!=='dbl'){go([n]);return;}
+    var k=sel.indexOf(n);if(k>=0)sel.splice(k,1);else{sel.push(n);if(sel.length>2)sel.shift();}
+    [].forEach.call(document.querySelectorAll('[data-pk]'),function(z){z.classList.toggle('on',sel.indexOf(z.dataset.pk)>=0);});$('pkD').disabled=sel.length<2;};});
+  if($('pkD'))$('pkD').onclick=function(){if(sel.length===2)go(sel);};
 }
 function plObj(nom){
   var p=PL.data.profils.filter(function(x){return x.nom===nom;})[0];
