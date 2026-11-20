@@ -312,6 +312,7 @@ nav::-webkit-scrollbar{display:none}
 .gst{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}.gst.ok{background:#e3f6ea;color:#17703a}.gst.old{background:#fff3d6;color:#8a5a00}.gst.prov{background:#e8eefc;color:#2a4a9a}
 .logi{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 14px}.logd{margin-top:12px;border:1px solid var(--line,#e3e6ee);border-radius:12px;padding:8px 10px}.logd summary{cursor:pointer;font-weight:700}
 .trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}.trl{border:1px dashed var(--line,#e3e6ee);border-radius:10px;padding:8px;display:grid;gap:6px}.modal textarea{width:100%;font:inherit;font-size:16px;border:1px solid var(--line,#e3e6ee);border-radius:8px;padding:6px}
+.rtab{border-collapse:collapse;width:100%}.rtab th,.rtab td{padding:4px 6px;border-bottom:1px solid var(--line,#e3e6ee);text-align:left;font-size:13px}.rtab select,.rtab input{font-size:14px;padding:4px}
 </style>
 </head>
 <body>
@@ -477,7 +478,7 @@ function vLecons(){
   var lun=lundiIso(PL.off);
   if(!PL.data||PL.data.lundi!==lun){$('app').innerHTML=loading('Lecture des disponibilités…');run('getPlanif',KEY,lun).then(function(r){PL.data=r;PL.sel=[];if(VIEW==='lecons')vLecons();}).catch(function(e){$('app').innerHTML='<div class="card">'+esc(e.message)+'</div>';});return;}
   var D=PL.data,ti=plProf('Tireur'),nP=D.lecons.filter(function(l){return /propos/i.test(l.statut);}).length;
-  var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="lp">←</button><b>Leçons · semaine du '+esc(frLun(lun))+'</b><button class="btn sm" id="ln">→</button></div><div class="row wrap"><div class="chips" id="lmode"><button class="chip'+(PL.mode!=='dbl'?' on':'')+'" data-m="lec">Placer une leçon</button><button class="chip'+(PL.mode==='dbl'?' on':'')+'" data-m="dbl">Placer une doublette (2 tireurs, 1 h min.)</button></div><button class="btn sm" id="lprop">✨ Remplir automatiquement</button>'+(D.lecons.some(function(l){return /valid/i.test(l.statut);})?'<button class="btn sm pr" id="lenv">📣 Envoyer le planning</button>':'')+'<button class="btn sm" id="lpr">🖨 Leçons</button><button class="btn sm" id="ldsp">🕒 Disponibilités</button></div></div>';
+  var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="lp">←</button><b>Leçons · semaine du '+esc(frLun(lun))+'</b><button class="btn sm" id="ln">→</button></div><div class="row wrap"><div class="chips" id="lmode"><button class="chip'+(PL.mode!=='dbl'?' on':'')+'" data-m="lec">Placer une leçon</button><button class="chip'+(PL.mode==='dbl'?' on':'')+'" data-m="dbl">Placer une doublette (2 tireurs, 1 h min.)</button></div><button class="btn sm" id="lprop">✨ Remplir automatiquement</button><button class="btn sm" id="lreg">⚙ Objectifs et priorités</button>'+(D.lecons.length?'<button class="btn sm" id="lvid">🗑 Vider la semaine</button>':'')+''+(D.lecons.some(function(l){return /valid/i.test(l.statut);})?'<button class="btn sm pr" id="lenv">📣 Envoyer le planning</button>':'')+'<button class="btn sm" id="lpr">🖨 Leçons</button><button class="btn sm" id="ldsp">🕒 Disponibilités</button></div></div>';
   if(nP)h+='<div class="propbar"><div>✨ <b>'+nP+' leçon'+(nP>1?'s':'')+' proposée'+(nP>1?'s':'')+'</b> (cadres en pointillés). Elles restent invisibles pour les tireurs tant qu\'elles ne sont pas validées. Touche une leçon pour la valider seule, la modifier ou la supprimer.</div><div class="row"><button class="btn pr" id="lval">✓ Tout valider</button><button class="btn sm" id="ldel">Tout effacer</button></div></div>';
   if(D.maitre&&!D.lecons.length&&D.maitre.some(function(n){return n;}))h+='<div class="mut sm" style="margin-bottom:8px">Cette semaine a déjà '+D.maitre.reduce(function(a,b){return a+b;},0)+' leçons dans l\'onglet semaine du fichier maître. Dès que tu places des leçons ici, ce sont elles qui s\'affichent dans l\'onglet Semaine.</div>';
   h+='<div class="pg"><div class="pg-l"><div class="sec" style="margin-top:0">Tireurs · objectifs</div><div class="mut sm" style="margin-bottom:6px">Survole un tireur pour voir ses créneaux possibles · clique-le (ou glisse-le) puis clique une case verte.</div>'+ti.map(function(p){var c=plCount(p.nom),on=PL.sel.indexOf(p.nom)>=0,src=(D.dispo[p.nom]||{}).src;
@@ -520,10 +521,36 @@ function vLecons(){
   if($('ljour'))$('ljour').onclick=function(e){var b=e.target.closest('[data-jo]');if(b){PL.jour=+b.dataset.jo;vLecons();}};
   $('lp').onclick=function(){PL.off--;PL.data=null;vLecons();};$('ln').onclick=function(){PL.off++;PL.data=null;vLecons();};
   $('lprop').onclick=plProposer;
+  $('lreg').onclick=plRegles;
+  if($('lvid'))$('lvid').onclick=function(){var nv=D.lecons.filter(function(x){return /valid/i.test(x.statut);}).length,np=D.lecons.length-nv;
+    if(!confirm('Effacer les '+D.lecons.length+' leçons de la semaine du '+frLun(lun)+' ('+nv+' validée'+(nv>1?'s':'')+', '+np+' proposée'+(np>1?'s':'')+') ?\n\nLes leçons validées disparaîtront aussi du planning des tireurs et du fichier maître.'))return;
+    plSave([],D.lecons.map(function(x){return x.id;}));};
   if($('lenv'))$('lenv').onclick=function(){if(!confirm('Envoyer à chaque tireur et à chaque maître d\'armes ses leçons validées de la semaine ?'))return;var b=$('lenv');b.disabled=true;b.textContent='Envoi…';run('envoyerPlanningLecons',KEY,PL.data.lundi).then(function(m){alert(m);b.disabled=false;b.textContent='📣 Envoyer le planning';}).catch(function(e){alert(e.message);b.disabled=false;b.textContent='📣 Envoyer le planning';});};
   if($('lval'))$('lval').onclick=function(){var l=D.lecons.filter(function(x){return /propos/i.test(x.statut);});l.forEach(function(x){x.statut='validée';});plSave(l,[]);};
-  if($('ldel'))$('ldel').onclick=function(){plSave([],D.lecons.filter(function(x){return /propos/i.test(x.statut);}).map(function(x){return x.id;}));};
+  if($('ldel'))$('ldel').onclick=function(){if(!confirm('Effacer les '+nP+' leçons proposées (les validées restent) ?'))return;plSave([],D.lecons.filter(function(x){return /propos/i.test(x.statut);}).map(function(x){return x.id;}));};
   $('lpr').onclick=function(){var s={titre:'Semaine du '+frLun(lun),jours:JD.map(function(j,i){var d=plDay(i);return {jour:j.toUpperCase()+' '+cDate(d).getDate(),date:d,lecons:D.lecons.filter(function(l){return l.date===d;}).map(function(l){return {moment:tmin(l.h)<13*60?'matin':'après-midi',coach:l.coach,h:l.h,tireur:l.tireur,vs:l.vs,doublette:!!l.vs};})};})};doPrint(printLecons(s));};
+}
+/* Objectifs par groupe (appliqués à tous d'un coup) et priorité des maîtres d'armes selon le rang de la leçon. */
+function plRegles(){
+  var D=PL.data,ti=plProf('Tireur'),co=plProf('Coach').map(function(c){return c.nom;}),R=D.regles||{};
+  var grp=[];ti.forEach(function(t){var g=norm(t.groupe)||'TOUS';if(grp.indexOf(g)<0)grp.push(g);});
+  function lib(g){return g==='POLISTE'?'Polistes':g==='PARTENAIRE'?'Partenaires':g==='TOUS'?'Sans groupe':g.charAt(0)+g.slice(1).toLowerCase();}
+  function mode(g,k){var c={};ti.filter(function(t){return (norm(t.groupe)||'TOUS')===g;}).forEach(function(t){var v=+t[k]||0;c[v]=(c[v]||0)+1;});var b=null;Object.keys(c).forEach(function(v){if(b===null||c[v]>c[b])b=v;});return b===null?0:+b;}
+  function sel(id,v){return '<select id="'+id+'"><option value="">—</option>'+co.map(function(c){return '<option'+(c===v?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>';}
+  var h='<div class="modal"><div class="card" style="max-width:860px"><div class="row sp"><h3 style="margin:0">Objectifs et priorités des maîtres d\'armes</h3><button class="btn sm" id="xR">Fermer</button></div>';
+  h+='<div class="sec">Objectifs par groupe</div><div class="mut sm" style="margin-bottom:6px">Appliqués à tous les tireurs du groupe d\'un coup. Ensuite, tu ajustes au cas par cas avec le ✎ à côté de chaque tireur.</div><table class="rtab"><tr><th>Groupe</th><th>Tireurs</th><th>Leçons / semaine</th><th>Doublettes / semaine</th></tr>'
+    +grp.map(function(g){var n=ti.filter(function(t){return (norm(t.groupe)||'TOUS')===g;}).length;return '<tr><td><b>'+esc(lib(g))+'</b></td><td>'+n+'</td><td><input type="number" min="0" id="rl_'+g+'" value="'+mode(g,'cible')+'" style="width:80px"></td><td><input type="number" min="0" id="rd_'+g+'" value="'+mode(g,'dbl')+'" style="width:80px"></td></tr>';}).join('')+'</table>'
+    +'<label class="row sm" style="gap:6px;margin-top:6px;cursor:pointer"><input type="checkbox" id="rApp" style="width:auto"> Appliquer ces objectifs à tous les tireurs (remplace les objectifs individuels actuels)</label>';
+  h+='<div class="sec" style="margin-top:14px">Priorité des maîtres d\'armes selon la leçon</div><div class="mut sm" style="margin-bottom:6px">Pour chaque tireur, sa 1<sup>re</sup> leçon de la semaine va en priorité au 1<sup>er</sup> choix, sinon au 2<sup>e</sup>, etc. « ✨ Remplir automatiquement » en tient compte ; ça reste une proposition à valider.</div>'
+    +grp.map(function(g){var P=R[g]||{};return '<div style="margin-bottom:10px"><b>'+esc(lib(g))+'</b><table class="rtab"><tr><th>Leçon</th><th>1<sup>er</sup> choix</th><th>2<sup>e</sup> choix</th><th>3<sup>e</sup> choix</th></tr>'
+      +[1,2,3,4].map(function(k){var L=P[k]||[];return '<tr><td>n° '+k+'</td>'+[0,1,2].map(function(q){return '<td>'+sel('rp_'+g+'_'+k+'_'+q,L[q])+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';}).join('');
+  h+='<button class="go" id="rOk">Enregistrer</button><div class="msg" id="rM"></div></div></div>';
+  $('modal').innerHTML=h;$('xR').onclick=function(){$('modal').innerHTML='';};
+  $('rOk').onclick=function(){var r={prio:{}};
+    if($('rApp').checked){r.objectifs={};grp.forEach(function(g){r.objectifs[g]={l:$('rl_'+g).value,d:$('rd_'+g).value};});}
+    grp.forEach(function(g){r.prio[g]={};[1,2,3,4].forEach(function(k){r.prio[g][k]=[0,1,2].map(function(q){return $('rp_'+g+'_'+k+'_'+q).value;}).filter(Boolean);});});
+    var m=$('rM');m.className='msg';m.textContent='Enregistrement…';
+    run('saveReglesLecons',KEY,r).then(function(x){D.profils=x.profils;D.regles=x.regles;$('modal').innerHTML='';vLecons();}).catch(function(e){m.className='msg err';m.textContent=e.message;});};
 }
 function plObj(nom){
   var p=PL.data.profils.filter(function(x){return x.nom===nom;})[0];
@@ -564,7 +591,7 @@ function plProposer(){
   for(var round=0;round<6;round++){var placed=false;
     order.forEach(function(t){
       var have=cnt(function(l){return l.tireur===t.nom&&!l.vs;});if(have>=t.cible||have>round)return;
-      var best=null,pf=prefs(t);
+      var best=null,pf=prefs(t),RG=D.regles||{},rk=((RG[norm(t.groupe)||'TOUS']||RG.TOUS||{})[have+1])||[];
       for(var i=0;i<6;i++){var d=plDay(i);if(all.some(function(l){return l.date===d&&(l.tireur===t.nom||l.vs===t.nom);}))continue;
         plInt(t.nom,i).forEach(function(ti_){co.forEach(function(c){if(!plAllowed(c,t.nom))return;
           var nc=cnt(function(l){return l.coach===c.nom;}),nj=cnt(function(l){return l.coach===c.nom&&l.date===d;});if((c.max&&nc>=c.max)||(c.maxJour&&nj>=c.maxJour))return;
@@ -572,6 +599,7 @@ function plProposer(){
             plSlots(i).filter(function(z){return z.s>=a&&z.e<=b;}).forEach(function(z){var s=z.s,dur=z.e-z.s;if(busy(c.nom,d,s,s+dur)||busy(t.nom,d,s,s+dur))return;
               var sc=0;pf.forEach(function(p){if(p.j===i){sc+=30;if(p.t!=null&&Math.abs(p.t-s)<=30)sc+=30;}});
               if(all.some(function(l){return l.date===d&&l.coach===c.nom&&(tmin(l.h)+(+l.duree||30)===s||s+dur===tmin(l.h));}))sc+=15;
+              if(rk.length){var q=rk.indexOf(c.nom);sc+=q>=0?60-20*q:-40;}
               sc-=nc*0.8;sc-=(s-a)/60;if(!c.autorises)sc+=5;
               if(!best||sc>best.sc)best={sc:sc,date:d,h:tfmt(s),coach:c.nom,dur:dur};});
           });});});}
