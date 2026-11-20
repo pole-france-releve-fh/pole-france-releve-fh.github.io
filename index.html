@@ -240,6 +240,7 @@ a.nm{color:var(--ink);text-decoration:underline}
 @media (max-width:600px){main{padding:10px}.card{padding:14px}header h1{font-size:17px}.kpi .v{font-size:22px}.m{grid-template-columns:44px 58px 1fr}}
 @media print{
   header,nav,#app,.modal{display:none!important}#print{display:block!important}
+  #stabs,#pltoast{display:none!important}#print .prc{columns:2;column-gap:12px;zoom:.74}#print .prc .pc{break-inside:avoid;overflow:visible!important;margin-bottom:6px;display:block}#print .rt{zoom:.68}#print .rt table{width:100%}
   body{background:#fff;font-size:12px}main{max-width:none;padding:0}
   .pr-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f1b3d;padding-bottom:6px;margin-bottom:10px}
   .pr-h h1{font-size:20px;margin:0;font-weight:800}.pr-h .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#1f3a93;font-weight:800}
@@ -1890,7 +1891,7 @@ function renderFiche(f,retour,target){
   $(target||'app').innerHTML=h;
   if($('back'))$('back').onclick=function(){render();};
   [].forEach.call(document.querySelectorAll('[data-ft]'),function(b){b.onclick=function(){FT=b.dataset.ft;renderFiche(f,retour,target);};});
-  $('prF').onclick=function(){var html=printHead('Fiche tireur',(t.prenom||'')+' '+(t.nom||f.nom),[t.annee,t.club].filter(Boolean).join(' · '))+'<div>'+ficheResume(f)+'</div><div class="sec">Parcours en compétition</div>'+parcoursHtml(f.parcours,true);doPrint(html);};
+  $('prF').onclick=function(){var html=printHead('Fiche tireur',(t.prenom||'')+' '+(t.nom||f.nom),[t.annee,t.club].filter(Boolean).join(' · '))+'<div>'+ficheResume(f)+'</div><div class="sec">Parcours en compétition</div><div class="prc">'+parcoursHtml(f.parcours,true)+'</div>';doPrint(html);};
   var ft=$('ftab');
   if(FT==='resume'){ft.innerHTML=ficheResume(f);drawWellChart(f);}
   else if(FT==='parcours')ft.innerHTML=parcoursHtml(f.parcours,false);
