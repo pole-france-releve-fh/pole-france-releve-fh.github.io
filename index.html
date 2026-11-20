@@ -310,6 +310,8 @@ nav::-webkit-scrollbar{display:none}
 }
 .gbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:var(--card,#fff);border:1px solid var(--line,#e3e6ee);border-radius:12px;padding:8px 10px;margin:0 0 8px}
 .gst{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}.gst.ok{background:#e3f6ea;color:#17703a}.gst.old{background:#fff3d6;color:#8a5a00}.gst.prov{background:#e8eefc;color:#2a4a9a}
+.logi{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 14px}.logd{margin-top:12px;border:1px solid var(--line,#e3e6ee);border-radius:12px;padding:8px 10px}.logd summary{cursor:pointer;font-weight:700}
+.trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}.trl{border:1px dashed var(--line,#e3e6ee);border-radius:10px;padding:8px;display:grid;gap:6px}.modal textarea{width:100%;font:inherit;font-size:16px;border:1px solid var(--line,#e3e6ee);border-radius:8px;padding:6px}
 </style>
 </head>
 <body>
@@ -672,7 +674,7 @@ function cPlanning(){
       });
     });
     h+='</tr>';}
-  return h+'</tbody></table></div><div class="pfoot"><span>Compétitions masculines du fichier maître (types et priorités) · vacances, jours fériés et stages : onglet Événements.</span>'+(CAL.tir?'<span>Lettre entre crochets = priorité de '+esc(CAL.tir)+'</span>':'')+'</div>';
+  return h+'</tbody></table></div><div class="pfoot"><span>Compétitions masculines (types et priorités) · vacances, jours fériés et stages : onglet Événements.</span>'+(CAL.tir?'<span>Lettre entre crochets = priorité de '+esc(CAL.tir)+'</span>':'')+'</div>';
 }
 function cMonth(){return '<div class="cal-m">'+cGrid(CAL.d.getFullYear(),CAL.d.getMonth(),true)+'</div>';}
 function cYear(){
@@ -709,7 +711,8 @@ function cDetail(e){
   return '<div class="row sp"><h3 style="margin:0">'+esc(e.nom)+' · '+esc(e.lieu)+'</h3><button class="btn sm" data-edc="'+CAL.data.ev.indexOf(e)+'">✎ Modifier</button></div><div class="mut sm" style="margin:4px 0 8px">'+esc(cDates(e))+' · '+esc(e.cat)+' · '+esc(e.ie)+' · '+esc(e.cal)+(e.dep?' · départ '+esc(cFr(e.dep))+' · retour '+esc(cFr(e.ret)):'')+'</div>'
    +'<div class="row wrap" style="gap:6px;margin-bottom:6px"><span class="ev" style="--ec:'+cCol(e)+';display:inline-block">'+esc(e.type)+'</span>'+['A','B','C','D'].map(function(k){return '<span class="prio prio-'+k+'">'+k+' · '+cnt[k]+'</span>';}).join('')+'</div>'
    +Object.keys(gr).map(function(g){return '<div class="sec" style="margin-top:10px">'+esc(g)+'</div><div class="grid g3" style="gap:6px">'+gr[g].map(function(x){return '<div class="row sp" style="border:1px solid var(--line);border-radius:10px;padding:6px 10px'+(CAL.tir===x.nom?';border-color:var(--ink2);background:var(--acc-bg)':'')+'"><span>'+esc(x.nom)+'</span><span class="prio ed '+pc(x.prio)+'" data-pr="'+esc(x.nom)+'" title="Cliquer pour changer">'+esc(x.prio||'–')+'</span></div>';}).join('')+'</div>';}).join('')
-   +'<div class="mut sm" style="margin-top:10px">Clique sur une lettre pour la changer (A → B → C → D → non → vide) : c\'est enregistré tout de suite dans l\'onglet « Priorisation A-D » du fichier maître.</div>';
+   +cLogi(e)
+   +'<div class="mut sm" style="margin-top:10px">Clique sur une lettre pour la changer (A → B → C → D → non → vide) : c\'est enregistré tout de suite.</div>';
 }
 var PCY=['A','B','C','D','non',''];
 function bindPrio(root){
@@ -717,23 +720,38 @@ function bindPrio(root){
     var b=ev.target.closest('[data-pr]');
     if(b){ev.stopPropagation();var card=b.closest('[data-ce]'),e=CAL.data.ev[+card.dataset.ce],i=CAL.data.heads.map(function(h){return h.nom;}).indexOf(b.dataset.pr);if(i<0)return;
       var cur=String(e.p[i]||''),nx=PCY[(PCY.indexOf(PCY.indexOf(cur)<0?'':cur)+1)%PCY.length],old=e.p[i];e.p[i]=nx;b.textContent=nx||'–';b.className='prio ed '+(/^[ABCD]$/.test(nx)?'prio-'+nx:'prio-x');b.style.opacity=.5;
-      run('savePriorite',KEY,{d1:e.d1,nom:e.nom,lieu:e.lieu},b.dataset.pr,nx).then(function(){b.style.opacity=1;}).catch(function(er){e.p[i]=old;b.textContent=old||'–';b.style.opacity=1;alert(er.message);});return;}
+      run('savePriorite',KEY,{id:e.id,d1:e.d1,nom:e.nom,lieu:e.lieu},b.dataset.pr,nx).then(function(){b.style.opacity=1;}).catch(function(er){e.p[i]=old;b.textContent=old||'–';b.style.opacity=1;alert(er.message);});return;}
     var ed=ev.target.closest('[data-edc]');if(ed){ev.stopPropagation();competForm(CAL.data.ev[+ed.dataset.edc]);}
   },true);
 }
+function cLogi(e){
+  var TRL=['Aller 1','Aller 2','Retour 1','Retour 2'],tr=(e.tr||[]).map(function(t,k){return t&&(t.d||t.v||t.p)?'<tr><td><b>'+TRL[k]+'</b></td><td>'+esc(t.d?cFr(t.d):'')+'</td><td style="white-space:pre-line">'+esc(t.v||'')+'</td><td style="white-space:pre-line">'+esc(t.p||'')+(t.n?' <span class="mut">('+esc(t.n)+')</span>':'')+'</td></tr>':'';}).join('');
+  var L=[['Chef de délégation',e.chd],['Entraîneurs',e.ent],['Arbitres',e.arb],['Hôtel',e.hotel],['Délégation',e.deleg],['Note',e.note]].filter(function(x){return String(x[1]||'').trim()&&String(x[1]).trim()!=='-';});
+  if(!L.length&&!tr)return '';
+  return '<div class="sec" style="margin-top:12px">Logistique</div><div class="logi">'+L.map(function(x){return '<div><span class="lab">'+x[0]+'</span><div style="white-space:pre-line">'+esc(x[1])+'</div></div>';}).join('')+'</div>'+(tr?'<table class="clist" style="margin-top:6px"><tr><th>Trajet</th><th>Date</th><th>Vol / train</th><th>Qui</th></tr>'+tr+'</table>':'');
+}
 function competForm(e){
-  var n=!e;e=e||{d1:cIso(CAL.d),d2:'',dep:'',ret:'',nom:'',lieu:'',cat:'M20',ie:'Indiv',type:'Sélective',cal:'FIE',hf:'H'};
+  var n=!e;e=e||{d1:cIso(CAL.d),d2:'',dep:'',ret:'',nom:'',lieu:'',cat:'M20',ie:'Indiv',type:'Sélective',cal:'FIE',hf:'H',tr:[]};
   function inp(id,l,v,t){return '<div><span class="lab">'+l+'</span><input id="'+id+'" '+(t?'type="'+t+'" ':'')+'value="'+esc(v||'')+'"></div>';}
+  function ta(id,l,v){return '<div><span class="lab">'+l+'</span><textarea id="'+id+'" rows="2">'+esc(v||'')+'</textarea></div>';}
+  var TRL=['Aller 1','Aller 2','Retour 1','Retour 2'],tr=e.tr||[];
   $('modal').innerHTML='<div class="modal"><div class="card"><div class="row sp"><h3 style="margin:0">'+(n?'Nouvelle compétition':'Modifier la compétition')+'</h3><button class="btn sm" id="xF">Fermer</button></div><div class="grid g3" style="margin-top:8px">'
    +inp('fN','Nom (ex. Coupe du Monde FIE M20)',e.nom)+inp('fL','Lieu',e.lieu)+'<div><span class="lab">Catégorie</span><select id="fC">'+opts(['M17','M20','U23','S'],null,e.cat)+'</select></div>'
    +inp('f1','Début','' +e.d1,'date')+inp('f2','Fin',e.d2,'date')+'<div><span class="lab">Type</span><select id="fT">'+opts(Object.keys(CTYPE),null,e.type)+'</select></div>'
    +inp('fD','Départ',e.dep,'date')+inp('fR','Retour',e.ret,'date')+'<div><span class="lab">Calendrier</span><select id="fK">'+opts(['FIE','EFC','FFE','Autre'],null,e.cal)+'</select></div>'
    +'<div><span class="lab">Format</span><select id="fI">'+opts(['Indiv','Indiv, équipe','Équipe'],null,e.ie)+'</select></div><div><span class="lab">Hommes / dames</span><select id="fH">'+opts(['H','H, D'],null,e.hf||'H')+'</select></div></div>'
-   +'<div class="mut sm" style="margin-top:8px">Enregistré dans les onglets « Liste compet » et « Priorisation A-D » du fichier maître, à sa place dans l\'ordre des dates.</div><button class="go" id="fS">Enregistrer</button><div class="msg" id="fM"></div></div></div>';
+   +'<details class="logd"'+(n?'':' open')+'><summary>Logistique : encadrement, arbitres, hôtel, transports</summary><div class="grid g3" style="margin-top:8px">'
+   +ta('gC','Chef de délégation',e.chd)+ta('gE','Entraîneurs',e.ent)+ta('gA','Arbitres',e.arb)+ta('gH','Hôtel',e.hotel)+ta('gD','Infos délégation',e.deleg)+ta('gN','Note',e.note)+'</div>'
+   +'<div class="trg">'+TRL.map(function(l,k){var t=tr[k]||{};return '<div class="trl"><b>'+l+'</b>'+inp('t'+k+'d','Date',t.d,'date')+ta('t'+k+'v','Vol / train',t.v)+ta('t'+k+'p','Personnes',t.p)+inp('t'+k+'n','Nombre',t.n)+'</div>';}).join('')+'</div></details>'
+   +'<div class="row sp" style="margin-top:10px"><button class="go" id="fS" style="flex:1">Enregistrer</button>'+(n?'':'<button class="btn sm" id="fX" style="margin-left:8px;color:#b42318">Supprimer</button>')+'</div><div class="msg" id="fM"></div><div class="mut sm" style="margin-top:6px">Recopié aussi dans « Liste compet » et « Priorisation A-D » du fichier maître pendant la transition.</div></div></div>';
   $('xF').onclick=function(){$('modal').innerHTML='';};
-  $('fS').onclick=function(){var f={nom:$('fN').value.trim(),lieu:$('fL').value.trim(),cat:$('fC').value,d1:$('f1').value,d2:$('f2').value||$('f1').value,type:$('fT').value,dep:$('fD').value,ret:$('fR').value,cal:$('fK').value,ie:$('fI').value,hf:$('fH').value};
-    var m=$('fM');m.className='msg';m.textContent='Enregistrement dans le fichier maître…';
-    run('saveCompet',KEY,f,n?null:{d1:e.d1,nom:e.nom,lieu:e.lieu}).then(function(){m.className='msg okm';m.textContent='Enregistré.';CAL.data=null;setTimeout(function(){$('modal').innerHTML='';vCalendrier();},600);}).catch(function(er){m.className='msg err';m.textContent=er.message;});};
+  function fin(m,t){m.className='msg okm';m.textContent=t;CAL.data=null;setTimeout(function(){$('modal').innerHTML='';vCalendrier();},700);}
+  $('fS').onclick=function(){var f={nom:$('fN').value.trim(),lieu:$('fL').value.trim(),cat:$('fC').value,d1:$('f1').value,d2:$('f2').value||$('f1').value,type:$('fT').value,dep:$('fD').value,ret:$('fR').value,cal:$('fK').value,ie:$('fI').value,hf:$('fH').value,
+      log:true,chd:$('gC').value,ent:$('gE').value,arb:$('gA').value,hotel:$('gH').value,deleg:$('gD').value,note:$('gN').value,tr:[0,1,2,3].map(function(k){return {d:$('t'+k+'d').value,v:$('t'+k+'v').value,p:$('t'+k+'p').value,n:$('t'+k+'n').value};})};
+    var m=$('fM');m.className='msg';m.textContent='Enregistrement…';
+    run('saveCompet',KEY,f,n?null:{id:e.id}).then(function(r){fin(m,r==='ok'?'Enregistré.':r);}).catch(function(er){m.className='msg err';m.textContent=er.message;});};
+  if($('fX'))$('fX').onclick=function(){if(!confirm('Supprimer « '+e.nom+' · '+e.lieu+' » et ses priorités ?'))return;var m=$('fM');m.className='msg';m.textContent='Suppression…';
+    run('supprimerCompet',KEY,{id:e.id}).then(function(){fin(m,'Supprimée.');}).catch(function(er){m.className='msg err';m.textContent=er.message;});};
 }
 function evtForm(e){
   var n=!e;e=e||{id:'',d1:cIso(CAL.d),d2:'',type:'Stage',titre:'',lieu:'',qui:'',notes:''};
@@ -866,7 +884,7 @@ function showParticipants(c){
   $('modal').innerHTML='<div class="modal"><div class="card"><div class="row sp"><h3 style="margin:0">'+esc(c.nom)+' · '+esc(c.lieu)+'</h3><button class="btn sm" id="xP">Fermer</button></div><div id="pBody">'+loading('Recherche dans la priorisation…')+'</div></div></div>';
   $('xP').onclick=function(){$('modal').innerHTML='';};
   run('getParticipants',KEY,c.date,c.lieu).then(function(p){
-    if(!p){$('pBody').innerHTML='<div class="empty">Compétition introuvable dans l\'onglet « Priorisation A-D » du fichier maître.</div>';return;}
+    if(!p){$('pBody').innerHTML='<div class="empty">Compétition introuvable dans le calendrier.</div>';return;}
     var gr={};p.liste.forEach(function(x){(gr[x.groupe||'']=gr[x.groupe||'']||[]).push(x);});
     function pc(v){v=String(v||'').trim().toUpperCase();return /^[ABCD]$/.test(v)?'prio-'+v:'prio-x';}
     var y=p.liste.filter(function(x){return /^[ABC]$/i.test(String(x.prio).trim());}).length;
