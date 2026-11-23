@@ -241,11 +241,11 @@ a.nm{color:var(--ink);text-decoration:underline}
 @media (max-width:900px){.cal-y{grid-template-columns:repeat(2,minmax(0,1fr))}.cal-w{grid-template-columns:1fr}.wcol{min-height:0}}
 @media (max-width:600px){.cbar,.cbar0{height:15px;line-height:15px;font-size:9px;padding:0 2px}.cbar.jl{margin-left:-3px}.cbar.jr{margin-right:-2px}.cal-m .cd{min-height:62px;padding:2px}.ev{font-size:9px;padding:1px 3px}.ev .pl{display:none}}
 @media (max-width:600px){main{padding:10px}.card{padding:14px}header h1{font-size:17px}.kpi .v{font-size:22px}.m{grid-template-columns:44px 58px 1fr}}
-.rp{border-collapse:collapse;width:100%;table-layout:auto}.rp td.rg{font-weight:600}.rp th,.rp td{border:.4px solid #c9cfda;padding:1.2px 3px;text-align:center;white-space:nowrap;line-height:1.15}.rp th{font-size:.9em;font-weight:600;color:#1d1d1f;background:#f2f3f6;vertical-align:bottom}.rp th.xbl{background:#0d1b3e;color:#fff;font-size:7px;letter-spacing:.03em}.rp .rd{color:#6e6e73;font-weight:400}.rp td.xnm,.rp th.xnm,.rp td.xcl,.rp th.xcl{text-align:left}.rp td.xcl{color:#555;font-size:.88em}.rp td.xpt{color:#6e6e73}.rp td.xtt{font-weight:700}.rp tr.xpp td{font-weight:700;color:#000}.rp tr.xsep td{border-left:0;border-right:0;padding-top:5px;font-size:6.8px;font-weight:600;color:#6e6e73;text-align:left;letter-spacing:.03em}.rp th,.rp td{-webkit-print-color-adjust:exact;print-color-adjust:exact}.rpp+.rpp{break-before:page}
+.rp{border-collapse:collapse;table-layout:fixed;width:auto}.rp td,.rp th{overflow:hidden}.rp td.xold{font-style:italic;color:#6e6e73}.rp th.xold{background:#f7f7f9;color:#6e6e73;font-style:italic}.rp th.xblo{background:#8e8e93}.rp th.xnb{border:0;background:none}.rp td.c1{background:#f6d365}.rp td.c2{background:#dfe6ee}.rp td.c3{background:#f0c9a5}.rp td.c8{background:#d7f0e0}.rp td.c16{background:#eaf6ee}.rp td.c32{background:#eef2fb}.rp td.rg{font-weight:600}.rp th,.rp td{border:.4px solid #c9cfda;padding:1.2px 2px;text-align:center;white-space:nowrap;line-height:1.15}.rp th{white-space:normal}.rp th{font-size:.9em;font-weight:600;color:#1d1d1f;background:#f2f3f6;vertical-align:bottom}.rp th.xbl{background:#0d1b3e;color:#fff;font-size:7px;letter-spacing:.03em}.rp .rd{color:#6e6e73;font-weight:400}.rp td.xnm,.rp th.xnm,.rp td.xcl,.rp th.xcl{text-align:left}.rp td.xcl{color:#555;font-size:.88em}.rp td.xpt{color:#6e6e73}.rp td.xtt{font-weight:700}.rp tr.xpp td{font-weight:700;color:#000}.rp tr.xsep td{border-left:0;border-right:0;padding-top:5px;font-size:6.8px;font-weight:600;color:#6e6e73;text-align:left;letter-spacing:.03em}.rp th,.rp td{-webkit-print-color-adjust:exact;print-color-adjust:exact}.rpp+.rpp{break-before:page}
 @media print{
   header,nav,#app,.modal{display:none!important}#print{display:block!important}
   #stabs,#pltoast{display:none!important}
-  .pang{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.pan{border-collapse:collapse;width:100%;font-size:6.6px;table-layout:fixed}.pan th,.pan td{border:.4px solid #c9cfda;padding:0 1px;height:19px;overflow:hidden;line-height:1.05;vertical-align:middle}.pan th{font-size:6px;background:#eef1f7;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan .mh{background:#0f1b3d;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em}.pan td.j,.pan td.d,.pan td.w{text-align:center;width:9px}.pan th:nth-child(1),.pan th:nth-child(2),.pan th:nth-child(3){width:9px}.pan td.w{color:#1f3a93;font-weight:700}.pan td.en{font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;font-size:5.6px}.pan td.pk{color:#fff;font-weight:700;font-size:5.6px;text-align:center}.pan td.pk.ptv{font-size:7px;font-weight:800}.pan td.lc{white-space:nowrap;overflow:hidden;max-width:0;font-size:5.6px}.pan tr.we td{background:#e9ecf2}.pan tr.vac td{background:#e8f1fb}.pan tr.vac.we td{background:#d7e2ef}.pan tr.vide td{border:0;background:none}.pan td,.pan tr td{-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan td.lc i{color:#2e5f8a}#print .prc{columns:2;column-gap:12px;zoom:.74}#print .prc .pc{break-inside:avoid;overflow:visible!important;margin-bottom:6px;display:block}#print .rt{zoom:.68}#print .rt table{width:100%}
+  .pang{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.pan{border-collapse:collapse;width:100%;font-size:7.4px;table-layout:fixed}.pan th,.pan td{border:.4px solid #c9cfda;padding:0 1px;height:22px;overflow:hidden;line-height:1.05;vertical-align:middle}.pan th{font-size:7px;background:#eef1f7;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan .mh{background:#0f1b3d;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em}.pan td.j,.pan td.d,.pan td.w{text-align:center;width:9px}.pan th:nth-child(1),.pan th:nth-child(2),.pan th:nth-child(3){width:9px}.pan td.w{color:#1f3a93;font-weight:700}.pan td.en{font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;font-size:7px}.pan td.pk{color:#fff;font-weight:700;font-size:7.4px;line-height:1.1;text-align:center;width:auto}.pan th.lch{width:22%}.pan th.enh{width:11%}.pan td.pk.ptv{font-size:7px;font-weight:800}.pan td.lc{white-space:nowrap;overflow:hidden;max-width:0;font-size:7px}.pan tr.we td{background:#e9ecf2}.pan tr.vac td{background:#e8f1fb}.pan tr.vac.we td{background:#d7e2ef}.pan tr.vide td{border:0;background:none}.pan td,.pan tr td{-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan td.lc i{color:#2e5f8a}#print .prc{columns:2;column-gap:12px;zoom:.74}#print .prc .pc{break-inside:avoid;overflow:visible!important;margin-bottom:6px;display:block}#print .rt{zoom:.68}#print .rt table{width:100%}
   body{background:#fff;font-size:12px}main{max-width:none;padding:0}
   .pr-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f1b3d;padding-bottom:6px;margin-bottom:10px}
   .pr-h h1{font-size:20px;margin:0;font-weight:800}.pr-h .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#1f3a93;font-weight:800}
@@ -322,6 +322,55 @@ nav::-webkit-scrollbar{display:none}
 .logi{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 14px}.logd{margin-top:12px;border:1px solid var(--line,#e3e6ee);border-radius:12px;padding:8px 10px}.logd summary{cursor:pointer;font-weight:700}
 .trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}.trl{border:1px dashed var(--line,#e3e6ee);border-radius:10px;padding:8px;display:grid;gap:6px}.modal textarea{width:100%;font:inherit;font-size:16px;border:1px solid var(--line,#e3e6ee);border-radius:8px;padding:6px}
 .rtab{border-collapse:collapse;width:100%}.rtab th,.rtab td{padding:4px 6px;border-bottom:1px solid var(--line,#e3e6ee);text-align:left;font-size:13px}.rtab select,.rtab input{font-size:14px;padding:4px}.rprio .rg td{background:var(--acc-bg,#eef2fb);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}.rprio select{min-width:110px}
+
+/* ===== Thème « épuré » (proposition) ===== */
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d1f;--ink2:#0a5bc4;--mut:#6e6e73;--line:#e5e5ea;--acc:#0a5bc4;--acc-bg:#eaf2fd;--red:#c4122f;--red2:#c4122f;--ok:#1f8a4c;--ok-bg:#e9f6ee;--warn:#b25a00;--warn-bg:#fdf1e3;--bad:#c4122f;--bad-bg:#fdecee;--gold:#a87a12;--gold-bg:#fbf3df;--r:18px}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,system-ui,sans-serif;font-size:14px;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+header{background:#0d1b3e;padding:12px 22px 13px}
+header h1{font-weight:700;font-size:19px;letter-spacing:-.02em}
+header .k{letter-spacing:.06em;font-weight:600;color:#9aa6c4}
+.hb button{background:rgba(255,255,255,.1);border:0}
+nav{background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.12);gap:2px;padding:8px 16px}
+nav button{font-weight:500;color:#424245;padding:7px 13px;font-size:14px}
+nav button.on{background:#1d1d1f;color:#fff}
+main{padding:22px 20px;max-width:1240px}
+.sec{text-transform:none;letter-spacing:-.01em;font-size:19px;font-weight:700;color:var(--ink);margin:30px 0 12px}
+.card{border:0;border-radius:var(--r);box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);padding:18px 20px}
+.card h3{font-weight:600;font-size:16px;letter-spacing:-.01em}
+.kpi .l{font-weight:500}.kpi .v{font-weight:600;font-size:30px;letter-spacing:-.03em}
+.pill{font-weight:600}
+.btn{border:0;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.05);font-weight:500}
+.btn.pr{background:#1d1d1f;border:0;box-shadow:none}
+.chip{border:0;background:#e8e8ed;color:#1d1d1f;font-weight:500}.chip.on{background:#1d1d1f;color:#fff}
+input,select,textarea{border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.16);border-radius:10px}
+.tag{font-weight:600;border-radius:6px;letter-spacing:0}
+.t-lec{background:#eaf2fd;color:#0a5bc4}.t-fon{background:#fdf1e3;color:#9a4d00}.t-ass{background:#fdecee;color:#b3112b}.t-pp{background:#e9f6ee;color:#1f7a45}.t-rec{background:#f2ecfb;color:#6b3fb0}.t-oth{background:#f0f0f3;color:#6e6e73}
+div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box-shadow:0 0 0 .5px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);border-left:4px solid var(--red);border-radius:14px}div.cmp.nat{border-left-color:var(--acc)}div.cmp.reg{border-left-color:#8e8e93}.cmp small{color:var(--mut);opacity:1}
+/* semaine */
+.day{border:0;border-radius:16px;box-shadow:0 0 0 .5px rgba(0,0,0,.07),0 2px 6px rgba(0,0,0,.03)}
+.day .dh{background:#fff;color:var(--ink);font-weight:600;font-size:13px;letter-spacing:-.01em;text-transform:lowercase;border-bottom:.5px solid var(--line);padding:10px 12px}
+.day .dh::first-letter{text-transform:uppercase}
+.day .dh.today{background:#fff;color:var(--acc)}.tdy{background:var(--acc);color:#fff;text-transform:none}
+.day .c{border-top:.5px solid var(--line)}.day .c .h{font-weight:600}
+.b-cmp{background:var(--red)}.b-dep,.b-ret,.b-tra{background:#f9e3e6;color:var(--red)}.ev-cmp{background:var(--red)}.ev-dep,.ev-ret{background:#f9e3e6;color:var(--red)}
+.lday h4{font-weight:600;color:var(--ink);letter-spacing:-.01em;text-transform:lowercase}.lday h4::first-letter{text-transform:uppercase}
+/* calendrier */
+.cal-m{border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.08);border-radius:16px;background:var(--line);gap:.5px}
+.cal-m .dw{background:#fff;font-weight:600;text-transform:capitalize}
+.cal-m .cd.we{background:#fafafc}.cal-m .cd.vac{background:#eef4fc}
+.cal-m .cd.t .n{background:var(--acc);border-radius:999px}
+.mm{border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.07);border-radius:16px}.mm h4{font-weight:600;text-transform:capitalize}
+.wcol{border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.08)}.wcol h5{background:#fff;color:var(--ink);border-bottom:.5px solid var(--line)}.wcol.t h5{background:#fff;color:var(--acc)}
+.leg span:before{border-radius:50%}
+.blk{color:var(--mut);font-weight:600;letter-spacing:.04em}
+.V{background:#1f8a4c}.D{background:#c4122f}
+/* Variante A : pastille d'initiale colorée + fin liseré */
+.cav{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;font-weight:700;margin-right:6px;flex:none}
+.lcard{border-left:0;box-shadow:inset 0 3px 0 var(--c),0 0 0 .5px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04)}
+.lcard .cnm{color:var(--ink);font-weight:600}
+.lco{border-left:0;padding:8px 0 4px;margin:4px 0;border-top:.5px solid var(--line)}
+.lco .cn{display:flex;align-items:center;color:var(--mut);font-weight:500;font-size:12px;letter-spacing:0;margin-bottom:2px}.lco .cnm{color:var(--ink);font-weight:600}
+@media (min-width:1000px){.lgrid.l5{grid-template-columns:repeat(5,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -674,7 +723,7 @@ function plProposer(){
 
 /* ---------------- CALENDRIER ---------------- */
 var CAL={mode:'mois',d:new Date(),tir:'',hide:true,data:null};
-var CTYPE={'Sélective':'#8b1a1a','Référence':'#5b2a91','Open':'#1f3a93','Préparation':'#18794e','Sur qualif':'#a15c00','Pas de participation':'#9aa1ad'};
+var CTYPE={'Sélective':'#c4122f','Référence':'#7d3fc2','Open':'#0a5bc4','Préparation':'#1f8a4c','Sur qualif':'#c46a00','Pas de participation':'#a1a1a6'};
 var MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],JS=['lun','mar','mer','jeu','ven','sam','dim'];
 function cIso(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
 function cDate(s){var p=String(s).split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
@@ -738,17 +787,17 @@ function printAnnuel(ent){
   function lab(e){var n=String(e.nom).replace(/Coupe du Monde FIE( M\d\d| Senior)?/i,'CdM').replace(/Coupe Euro EFC( M\d\d)?/i,'CE').replace(/Tournoi Satellite FIE/i,'Sat.').replace(/EFC Eurofence League/i,'Eurofence').replace(/Championnats? d'Europe( M\d\d)?/i,'Ch. Europe').replace(/Championnats? du Monde( M\d\d)?/i,'Ch. Monde').replace(/Championnat de France/i,'CF').replace(/ M\d\d$| Seniors?$/i,'').replace(/\s+/g,' ').trim();return n+(e.lieu?' '+String(e.lieu).split(/[ -]/)[0]:'');}
   function ok(e){return !/pas de participation/i.test(e.type)&&/H/.test(e.hf||'H');}
   var NOEL=((CAL.data.evts||[]).filter(function(e){return /vacances/i.test(e.type)&&/no[eë]l/i.test(e.titre)&&e.d1>=y0+'-09-01';}).sort(function(a,b){return a.d1<b.d1?-1:1;})[0]||{}).d1||'9999';
-  function month(y,m){var nd=new Date(y,m+1,0).getDate(),SK={},h='<table class="pan"><thead><tr><th colspan="11" class="mh">'+MOIS[m]+' '+y+'</th></tr><tr><th></th><th></th><th>S.</th><th>CREPS / stage</th><th>Entr.</th><th>M17<br>nat.</th><th>M20<br>nat.</th><th>Sen.<br>nat.</th><th>M17<br>inter.</th><th>M20<br>inter.</th><th>Sen.<br>inter.</th></tr></thead><tbody>';
-    for(var i=1;i<=31;i++){if(i>nd){h+='<tr class="vide"><td colspan="11"></td></tr>';continue;}
+  function month(y,m){var nd=new Date(y,m+1,0).getDate(),SK={},h='<table class="pan"><colgroup><col style="width:4.5%"><col style="width:5%"><col style="width:6.5%"><col style="width:19%"><col style="width:11%"><col><col><col></colgroup><thead><tr><th colspan="8" class="mh">'+MOIS[m]+' '+y+'</th></tr><tr><th></th><th></th><th>S.</th><th class="lch">Stage / férié</th><th class="enh">Entr.</th><th>M17</th><th>M20</th><th>Seniors</th></tr></thead><tbody>';
+    for(var i=1;i<=31;i++){if(i>nd){h+='<tr class="vide"><td colspan="8"></td></tr>';continue;}
       var dt=new Date(y,m,i),iso=cIso(dt),we=dt.getDay()%6===0,V=cVac(iso),F=cFer(iso),S=cEv(iso);
       var lieu=F?F.titre:S.length?S.map(function(e){return e.titre;}).join(', '):'';
-      function day(x,cat,n){var L=CAL.data.ev.filter(function(e){return e.d1<=x&&e.d2>=x&&ok(e)&&catOf(e)===cat&&nat(e)===n;});if(L.length)return {k:'c',L:L,key:'c'+L.map(function(e){return CAL.data.ev.indexOf(e);}).join(',')};
-        var T=CAL.data.ev.filter(function(e){return ok(e)&&e.dep&&e.ret&&e.dep<=x&&e.ret>=x&&!(e.d1<=x&&e.d2>=x)&&catOf(e)===cat&&nat(e)===n;});if(!T.length)return null;var t=T[0],q=x<t.d1?(x===t.dep?'D':''):(x===t.ret?'R':'');return {k:'t',L:[t],q:q,key:'t'+CAL.data.ev.indexOf(t)+(x<t.d1?'a':'b')+q};}
+      function day(x,cat,n){var L=CAL.data.ev.filter(function(e){return e.d1<=x&&e.d2>=x&&ok(e)&&catOf(e)===cat;});if(L.length)return {k:'c',L:L,key:'c'+L.map(function(e){return CAL.data.ev.indexOf(e);}).join(',')};
+        var T=CAL.data.ev.filter(function(e){return ok(e)&&e.dep&&e.ret&&e.dep<=x&&e.ret>=x&&!(e.d1<=x&&e.d2>=x)&&catOf(e)===cat;});if(!T.length)return null;var t=T[0],q=x<t.d1?(x===t.dep?'D':''):(x===t.ret?'R':'');return {k:'t',L:[t],q:q,key:'t'+CAL.data.ev.indexOf(t)+(x<t.d1?'a':'b')+q};}
       function cell(cat,n){var id=cat+n;if(SK[id]&&SK[id]>=i)return '';var c=day(iso,cat,n);if(!c)return '<td class="pk"></td>';var r=1;while(i+r<=nd){var c2=day(cIso(new Date(y,m,i+r)),cat,n);if(!c2||c2.key!==c.key)break;r++;}SK[id]=i+r-1;
         if(c.k==='t')return '<td class="pk ptv" rowspan="'+r+'" style="background:color-mix(in srgb,'+cCol(c.L[0])+' 22%,#fff);color:'+cCol(c.L[0])+'">'+c.q+'</td>';
-        return '<td class="pk" rowspan="'+r+'" style="background:'+cCol(c.L[0])+'"><div style="max-height:'+(r*19-1)+'px;overflow:hidden">'+c.L.map(function(e){return esc(lab(e));}).join('<br>')+'</div></td>';}
+        return '<td class="pk" rowspan="'+r+'" style="background:'+cCol(c.L[0])+'"><div style="max-height:'+(r*22-1)+'px;overflow:hidden">'+c.L.map(function(e){return esc(lab(e));}).join(' · ')+'</div></td>';}
       h+='<tr class="'+(we?'we':'')+(V?' vac':'')+'"><td class="j">'+JL[dt.getDay()]+'</td><td class="d">'+i+'</td><td class="w">'+(dt.getDay()===1?isoW(dt):'')+'</td><td class="lc">'+esc(lieu)+(V&&(iso===V.d1||dt.getDay()===1)&&!lieu?'<i>'+esc(String(V.titre).replace(/^Vacances (de la |de |d\')?/i,'Vac. ').replace(/\s*\(zone C\)/i,''))+'</i>':'')+'</td><td class="en">'+(iso<NOEL?esc(ent[iso]||''):'')+'</td>'
-        +CATS.map(function(c){return cell(c[0],true);}).join('')+CATS.map(function(c){return cell(c[0],false);}).join('')+'</tr>';}
+        +CATS.map(function(c){return cell(c[0],'');}).join('')+'</tr>';}
     return h+'</tbody></table>';}
   var pages=[[8,9,10,11,0,1],[2,3,4,5,6,7]],h='<style>@page{size:A3 landscape;margin:6mm}</style>';
   pages.forEach(function(P,pi){h+='<div class="panp"'+(pi?' style="break-before:page"':'')+'>'+printHead('Pôle France Relève · fleuret hommes','Planning de la saison '+y0+'-'+(y0+1)+(pi?' · mars à août':' · septembre à février'),'Imprimé le '+new Date().toLocaleDateString('fr-FR'))
@@ -912,7 +961,7 @@ function vSemaine(){
   h+='<div class="grid g4">'+kpi('Leçons POL · PE',esc(s.leconsPol)+' · '+esc(s.leconsPe),'prévues cette semaine')+kpi('Assauts · PP · fonda',esc(s.assauts)+' · '+esc(s.pp)+' · '+esc(s.fonda),'séances collectives')+kpi('Vacations consommées',tot?esc(tot.conso)+' h':'–',tot?'sur '+esc(tot.env)+' · '+esc(tot.euros):'')+kpi('Budget commission',Math.round((b.pct||0)*100)+' %','atterrissage '+eur(b.atterrissage)+' / '+eur(b.enveloppe),b.marge<0)+'</div>';}
   h+='<div class="row sp wrap"><div class="sec">Programme</div><div class="row wrap sm">'+['Leçons','Fonda','Assauts','Prépa physique','Récup'].map(function(x){return '<span class="tag '+tagCls(x)+'">'+x+'</span>';}).join('')+'</div></div>'+(isStaff()?semBarre(s):'')+'<div class="days" style="--dr:'+(bandHtml(s).n+1)+'">'+daysHtml(s,true,isStaff())+'</div>';
   if(s.suivantes.length)h+='<div class="mut sm" style="margin-top:8px">Semaine suivante : '+s.suivantes.map(esc).join(' · ')+'</div>';
-  h+='<div class="sec">Créneaux entraînements individuels</div><div class="card"><div class="lgrid">'+leconsHtml(s)+'</div></div>';
+  h+='<div class="sec">Créneaux entraînements individuels</div><div class="card"><div class="lgrid l5">'+leconsHtml(s)+'</div></div>';
   if(pp.length){var gb={};pp.forEach(function(x){(gb[x.bloc]=gb[x.bloc]||[]).push(x);});h+='<details class="ppd"><summary><div class="sec">Prépa physique de la semaine (programme de Mathieu) · cliquer pour afficher</div></summary><div class="grid g4">'+Object.keys(gb).map(function(k){return '<div class="ppb"><b>'+esc(k)+'</b>'+(PPJ[k.replace(/\s*\(.*$/,'')]?' <span class="mut sm">· '+PPJ[k.replace(/\s*\(.*$/,'')]+'</span>':'')+gb[k].map(function(x){return '<pre>'+esc(x.txt)+'</pre>';}).join('')+'</div>';}).join('')+'</div></details>';}
   if(SEM.off===0&&isStaff())h+='<div class="sec">À surveiller</div><div class="card">'+alertes()+'</div>';
   $('app').innerHTML=h;bindWeekNav();
@@ -1038,7 +1087,7 @@ function showParticipants(c){
   }).catch(function(e){$('pBody').textContent=e.message;});
 }
 
-function leconsHtml(s){return s.jours.filter(function(j){return !(j.dimanche&&!j.lecons.length&&!(j.entretiens||[]).length);}).map(function(j){
+function leconsHtml(s){return s.jours.filter(function(j){return !/^(SAMEDI|DIMANCHE)/i.test(String(j.jour).trim());}).map(function(j){
   var by={};j.lecons.concat((j.entretiens||[]).map(function(x){return Object.assign({e:true},x);})).forEach(function(x){var c=x.coach||'?';(by[c]=by[c]||[]).push(x);});
   var ks=Object.keys(by).sort(coachOrd);
   return '<div class="lday"><h4>'+esc(j.jour)+'</h4>'+(ks.length?ks.map(function(c){var l=by[c].sort(function(a,b){return hnum(a.h)-hnum(b.h);}),nl=l.filter(function(x){return !x.e;}).length,ne=l.length-nl;return '<div class="lco" style="--c:'+coachCol(c)+'"><div class="cn">'+cav(c)+'<span class="cnm">'+esc(c)+'</span> · '+[nl?nl+' leçon'+(nl>1?'s':''):'',ne?ne+' entretien'+(ne>1?'s':''):''].filter(Boolean).join(' · ')+'</div>'+l.map(function(x){return '<div class="lrow'+(x.doublette?' dbl':'')+'" style="grid-template-columns:46px 1fr"><b>'+esc(x.h)+'</b><span'+(x.e?' style="color:#18794e;font-style:italic"':'')+'>'+(x.e?'Entretien · ':'')+esc(x.tireur)+(x.vs?' ⚔ '+esc(x.vs):'')+'</span></div>';}).join('')+'</div>';}).join(''):'<div class="empty">—</div>')+'</div>';}).join('');}
@@ -2215,27 +2264,30 @@ function rpHead(t){t=String(t||'').replace(/\s*\(.*?\)\s*/g,' ').replace(/\s+/g,
 function rpKey(r){return norm(r[2]+' '+r[3]);}
 function rpPole(d){var P={};(d.pole||[]).forEach(function(k){P[norm(k)]=1;});var Q=(d.part||[]).map(function(p){return [norm(p[0]),norm(p[1]||'')];});
   return function(r){var k=rpKey(r);if(P[k])return true;return Q.some(function(q){return q[0]&&k.indexOf(q[0])===0&&(!q[1]||norm(r[3]).indexOf(q[1])===0);});};}
-/* rows : [{r, rang, cells:[html]}] déjà triées ; garde le top 25 puis les tireurs du pôle et partenaires */
+/* rows : [{r, rang, cells:[html]}] déjà triées. On va jusqu'au dernier tireur du pôle ou partenaire si ça tient sur la page. */
+function rpMed(v){var n=parseInt(String(v).replace(/[^\d]/g,''),10);if(!n||/[,.]/.test(String(v)))return '';return n===1?'c1':n===2?'c2':n===3?'c3':n<=8?'c8':n<=16?'c16':n<=32?'c32':'';}
 function rpTable(cols,rows,isP,blocs){
-  var top=rows.slice(0,25),rest=rows.slice(25).filter(function(x){return isP(x.r);});
-  var nr=top.length+rest.length+(rest.length?1:0),fs=Math.min(9.5,Math.max(5.4,300/(nr+6)));
-  var h='<table class="rp" style="font-size:'+fs.toFixed(1)+'px"><thead>'+(blocs?'<tr><th colspan="4"></th>'+blocs.map(function(b){return '<th class="xbl" colspan="'+b.n+'">'+esc(b.t)+'</th>';}).join('')+'</tr>':'')+'<tr><th class="rg">Rg</th><th class="xnm">Nom</th><th>Né</th><th class="xcl">Club</th>'+cols.map(function(c){return '<th class="'+(c.cls||'')+'">'+c.h+'</th>';}).join('')+'</tr></thead><tbody>';
-  function line(x){return '<tr'+(isP(x.r)?' class="xpp"':'')+'><td class="rg">'+esc(x.rang)+'</td><td class="xnm">'+esc(x.r[2])+' '+esc(x.r[3])+'</td><td>'+esc(String(x.r[4]||'').slice(-2))+'</td><td class="xcl">'+esc(String(x.r[6]||'').slice(0,16))+'</td>'+x.cells.map(function(v,i){return '<td class="'+(cols[i].cls||'')+'">'+v+'</td>';}).join('')+'</tr>';}
-  h+=top.map(line).join('');
-  if(rest.length)h+='<tr class="xsep"><td colspan="'+(4+cols.length)+'">Pôle France Relève et partenaires hors du top 25</td></tr>'+rest.map(line).join('');
+  var MAXR=46,last=-1;rows.forEach(function(x,i){if(isP(x.r))last=i;});
+  var show,rest=[];if(last<MAXR){show=rows.slice(0,Math.max(25,last+1));}else{rest=rows.filter(function(x,i){return i>=25&&isP(x.r);});var k=Math.max(25,MAXR-1-rest.length);show=rows.slice(0,k);rest=rest.filter(function(x){return show.indexOf(x)<0;});}
+  var nr=show.length+rest.length+(rest.length?1:0),fs=Math.min(9.5,Math.max(5.6,300/(nr+6)));
+  var W={xpl:10,xpt:8,xtt:10,xcl8:8},cg='<colgroup><col style="width:6mm"><col style="width:42mm"><col style="width:5mm"><col style="width:24mm">'+cols.map(function(c){return '<col style="width:'+(W[(c.cls||'').split(' ')[0]]||10)+'mm">';}).join('')+'</colgroup>';
+  var h='<table class="rp" style="font-size:'+fs.toFixed(1)+'px">'+cg+'<thead>'+(blocs?'<tr><th colspan="4" class="xnb"></th>'+blocs.map(function(b){var t=b.n<=2?String(b.t).replace('International','Inter.').replace('National','Nat.').replace('Clt sans ER','Clt'):b.t;return '<th class="xbl'+(b.old?' xblo':'')+'" colspan="'+b.n+'">'+esc(t)+'</th>';}).join('')+'</tr>':'')+'<tr><th class="rg">Rg</th><th class="xnm">Nom</th><th>Né</th><th class="xcl">Club</th>'+cols.map(function(c){return '<th class="'+(c.cls||'')+'">'+c.h+'</th>';}).join('')+'</tr></thead><tbody>';
+  function line(x){return '<tr'+(isP(x.r)?' class="xpp"':'')+'><td class="rg">'+esc(x.rang)+'</td><td class="xnm">'+esc(x.r[2])+' '+esc(x.r[3])+'</td><td>'+esc(String(x.r[4]||'').slice(-2))+'</td><td class="xcl">'+esc(String(x.r[6]||'').slice(0,18))+'</td>'+x.cells.map(function(v,i){var c=cols[i].cls||'',m=/xpl/.test(c)?rpMed(v):'';return '<td class="'+c+(m?' '+m:'')+'">'+v+'</td>';}).join('')+'</tr>';}
+  h+=show.map(line).join('');
+  if(rest.length)h+='<tr class="xsep"><td colspan="'+(4+cols.length)+'">Pôle France Relève et partenaires plus loin au classement</td></tr>'+rest.map(line).join('');
   return h+'</tbody></table>';
 }
 function rpSelectif(cat,d,dS){
   var isP=rpPole(d),cols=[],rows=[],note='',g;
   if(/^M1|^M20/.test(cat)&&(g=rpGrp(d,'SELECTIF|'+cat.slice(0,3)+'|2026/2027'))){
     var c=g.cols,ev=c.slice(0,-2),tot=c[c.length-2],clt=c[c.length-1];
-    for(var i=0;i<ev.length;i+=2){cols.push({h:rpHead(d.titres[ev[i]]),c:ev[i]});cols.push({h:esc(String(d.titres[ev[i+1]]).replace('Pts','pts')),c:ev[i+1],cls:'xpt'});}
+    for(var i=0;i<ev.length;i+=2){cols.push({h:rpHead(d.titres[ev[i]]),c:ev[i],cls:'xpl'});cols.push({h:esc(String(d.titres[ev[i+1]]).replace('Pts','pts')),c:ev[i+1],cls:'xpt'});}
     cols.push({h:'Total',c:tot,cls:'xtt'});
     rows=d.lignes.filter(function(r){return rpNum(r[clt]);}).sort(function(a,b){return rpNum(a[clt])-rpNum(b[clt]);}).map(function(r){return {r:r,rang:r[clt],cells:cols.map(function(k){return esc(r[k.c]||'');})};});
     note=String(d.titres[tot]).replace(/\n/g,' ')+' · points par place × coefficient de l\'épreuve.';
   }else if(cat==='Senior'&&(g=rpGrp(d,'RESULTATS_INTER|Senior|2026/2027'))){
     var c=g.cols,tot=c.filter(function(x){return /^Total/i.test(d.titres[x]);})[0];
-    for(var i=0;i<c.length;i++){var t=String(d.titres[c[i]]);if(/^(Total|Europe|Monde|Pts)/i.test(t)||!rpHas(d,c[i]))continue;cols.push({h:rpHead(t),c:c[i]});if(/^Pts/i.test(d.titres[c[i+1]]))cols.push({h:'pts',c:c[i+1],cls:'xpt'});}
+    for(var i=0;i<c.length;i++){var t=String(d.titres[c[i]]);if(/^(Total|Europe|Monde|Pts)/i.test(t)||!/\(s[ée]lective\)/i.test(t))continue;cols.push({h:rpHead(t),c:c[i],cls:'xpl'});if(/^Pts/i.test(d.titres[c[i+1]]))cols.push({h:'pts',c:c[i+1],cls:'xpt'});}
     cols.push({h:'Total',c:tot,cls:'xtt'});
     var gC=rpGrp(d,'CLASSEMENT|Senior|2026/2027'),kN=gC?gC.cols[gC.cols.length-1]:-1,nb=0;
     rows=d.lignes.filter(function(r){return rpNum(r[tot])>0||rpNum(r[kN]);}).sort(function(a,b){return (rpNum(b[tot])||0)-(rpNum(a[tot])||0)||(rpNum(a[kN])||9999)-(rpNum(b[kN])||9999);}).map(function(r){var t=rpNum(r[tot])>0;if(t)nb++;return {r:r,rang:t?nb:'–',cells:cols.map(function(k){return esc(r[k.c]||'');})};});
@@ -2243,9 +2295,9 @@ function rpSelectif(cat,d,dS){
   }else if(cat==='M23'){
     var gN=rpGrp(d,'RESULTATS_NAT|Senior|2026/2027'),gI=dS&&rpGrp(dS,'RESULTATS_INTER|Senior|2026/2027'),EV=[];
     if(gN)gN.cols.forEach(function(c){var t=String(d.titres[c]),k=/H[ÉE]NIN/i.test(t)?.5:/^CF/i.test(t)?2:/ANTONY|^EN/i.test(t)?1:0;if(k&&rpHas(d,c))EV.push({h:rpHead(t),k:k,get:function(r){return r[c];},o:(t.match(/(\d{2})-(\d{2})-(\d{2})/)||[]).slice(1).reverse().join('')});});
-    var byCode={};if(gI){dS.lignes.forEach(function(r){byCode[r[1]]=r;});gI.cols.forEach(function(c){var t=String(dS.titres[c]);if(!/PLOVDIV|PALMA|SHANGHAI|PARIS|TURIN|ISTANBUL|LIMA/i.test(t)||/^Pts/i.test(t))return;if(!dS.lignes.some(function(r){return r[c]&&byCode[r[1]];}))return;
+    var byCode={};if(gI){dS.lignes.forEach(function(r){byCode[r[1]]=r;});gI.cols.forEach(function(c){var t=String(dS.titres[c]);if(!/PLOVDIV|PALMA|SHANGHAI|PARIS|TURIN|ISTANBUL|LIMA/i.test(t)||/^Pts/i.test(t))return;
       EV.push({h:rpHead(t.replace(/^EI\s*\d*\s*/,'CdM ').replace(/CdM (TURIN|LIMA)/i,'GP $1')),k:5,get:function(r){var s=byCode[r[1]];return s?s[c]:'';}});});}
-    EV.forEach(function(e){cols.push({h:e.h+'<br><span class="rd">×'+String(e.k).replace('.',',')+'</span>'});cols.push({h:'pts',cls:'xpt'});});cols.push({h:'Total',cls:'xtt'});
+    EV.forEach(function(e){cols.push({h:e.h+'<br><span class="rd">×'+String(e.k).replace('.',',')+'</span>',cls:'xpl'});cols.push({h:'pts',cls:'xpt'});});cols.push({h:'Total',cls:'xtt'});
     rows=d.lignes.map(function(r){var tot=0,cells=[];EV.forEach(function(e){var p=e.get(r),pts=p?rpBareme(p)*e.k:0;tot+=pts;cells.push(esc(p||''));cells.push(p?String(pts).replace('.',','):'');});cells.push(tot?String(tot).replace('.',','):'');return {r:r,tot:tot,cells:cells};})
       .filter(function(x){return x.tot>0;}).sort(function(a,b){return b.tot-a.tot;});rows.forEach(function(x,i){x.rang=i+1;});
     note='Barème du classement sélectif M20 (1er 32 · 2e 26 · 3e 20 · 5-8 12 · 9-16 8 · 17-32 4 · 33-64 1) × coefficient : CdM et GP 5 · France Élite 2 · Antony et CN 1 · Hénin 0,5. Tous les résultats comptent.';
@@ -2254,15 +2306,19 @@ function rpSelectif(cat,d,dS){
   return '<div class="rpp">'+printHead('Pôle France Relève · fleuret hommes','Classement sélectif '+cat+' · 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP)+'<div class="pfoot">'+esc(note)+' En gras : tireurs du pôle et partenaires.</div></div>';
 }
 function rpBlocs(cat,d){
-  var isP=rpPole(d),C=cat==='Senior'?['Senior']:cat==='M20'?['M20','Senior']:['M17','M20','Senior'],cols=[],blocs=[];
-  function sansER(c){var g=rpGrp(d,'CLASSEMENT|'+c+'|2026/2027');return g?g.cols[g.cols.length-1]:-1;}
-  var n0=cols.length;C.forEach(function(c){var k=sansER(c);if(k>=0)cols.push({h:c==='Senior'?'S':c,c:k});});blocs.push({t:'Classements sans ER',n:cols.length-n0});
-  function add(code,t){var g=rpGrp(d,code);if(!g)return;var n=cols.length;g.cols.forEach(function(c){var tt=String(d.titres[c]);if(/^(Pts|Total|Europe|Monde)/i.test(tt)||!rpHas(d,c))return;cols.push({h:rpHead(tt),c:c});});if(cols.length>n)blocs.push({t:t,n:cols.length-n});}
-  add('RESULTATS_INTER|'+C[0]+'|2026/2027','International '+(C[0]==='Senior'?'S':C[0]));
-  C.forEach(function(c){add('RESULTATS_NAT|'+c+'|2026/2027','National '+(c==='Senior'?'S':c));});
+  var isP=rpPole(d),C=cat==='Senior'?['Senior']:cat==='M20'?['M20','Senior']:['M17','M20','Senior'],cols=[],blocs=[],MAXC=22;
+  function sansER(c,sa){var g=rpGrp(d,'CLASSEMENT|'+c+'|'+(sa||'2026/2027'));return g?g.cols[g.cols.length-1]:-1;}
+  var n0=cols.length;C.forEach(function(c){var k=sansER(c);if(k>=0)cols.push({h:c==='Senior'?'S':c,c:k,cls:'xcl8'});});blocs.push({t:'Clt sans ER',n:cols.length-n0});
+  function list(code){var g=rpGrp(d,code);if(!g)return [];return g.cols.filter(function(c){var tt=String(d.titres[c]);return !/^(Pts|Total|Europe|Monde)/i.test(tt)&&rpHas(d,c);});}
+  function add(code,t,old){var L=list(code),room=MAXC-cols.length;if(!L.length||room<=0)return;if(L.length>room)L=L.slice(L.length-room);L.forEach(function(c){cols.push({h:rpHead(d.titres[c]),c:c,cls:'xpl'+(old?' xold':'')});});blocs.push({t:t,n:L.length,old:old});}
+  var sh=function(c){return c==='Senior'?'S':c;};
+  add('RESULTATS_INTER|'+C[0]+'|2026/2027','International '+sh(C[0]));
+  C.forEach(function(c){add('RESULTATS_NAT|'+c+'|2026/2027','National '+sh(c));});
+  add('RESULTATS_INTER|'+C[0]+'|2025/2026','Inter. '+sh(C[0])+' 25/26',true);
+  add('RESULTATS_NAT|'+C[0]+'|2025/2026','National '+sh(C[0])+' 25/26',true);
   var k0=sansER(C[0]);
   var rows=d.lignes.filter(function(r){return rpNum(r[k0]);}).sort(function(a,b){return rpNum(a[k0])-rpNum(b[k0]);}).map(function(r){return {r:r,rang:r[k0],cells:cols.map(function(k){return esc(r[k.c]||'');})};});
-  return '<div class="rpp">'+printHead('Pôle France Relève · fleuret hommes','Résultats '+(cat==='Senior'?'Seniors':cat)+' par bloc · 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP,blocs)+'<div class="pfoot">Lignes rangées selon le classement national '+(cat==='Senior'?'Senior':cat)+' sans ER. Épreuves dans l\'ordre chronologique. En gras : tireurs du pôle et partenaires.</div></div>';
+  return '<div class="rpp">'+printHead('Pôle France Relève · fleuret hommes','Résultats '+(cat==='Senior'?'Seniors':cat)+' · saison 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP,blocs)+'<div class="pfoot">Lignes rangées selon le classement national '+(cat==='Senior'?'Senior':cat)+' sans ER. Épreuves dans l\'ordre chronologique ; en gris italique, la saison 2025-2026. Couleurs : or 1er, argent 2e, bronze 3e, vert jusqu\'à 8e, vert clair 16e, bleu clair 32e. En gras : tireurs du pôle et partenaires.</div></div>';
 }
 function rpCharge(cats){return Promise.all(cats.map(function(c){return RES.data[c]?Promise.resolve(RES.data[c]):run('getResultats',KEY,c).then(function(r){RES.data[c]=r;return r;});}));}
 function printResPages(tout){
