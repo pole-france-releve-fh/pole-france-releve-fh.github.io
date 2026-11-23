@@ -1808,7 +1808,7 @@ function escDictee(t){
 }
 /* ---------------- APPLICATION (PWA) ET NOTIFICATIONS ---------------- */
 var VAPID='';
-var WELLNESS_T=false; /* questionnaire wellness côté tireur : activé seulement après l'accord du médecin et des familles */
+var WELLNESS_T=true; /* questionnaire wellness côté tireur : activé seulement après l'accord du médecin et des familles */
 var APP_URL='https://pole-france-releve-fh.github.io/';
 function estIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent);}
 function estInstallee(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}
