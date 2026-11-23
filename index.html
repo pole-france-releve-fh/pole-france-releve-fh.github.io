@@ -2377,6 +2377,15 @@ function vImprimables(){
     x.f(o).then(function(html){b.disabled=false;b.textContent=t;doPrint(html);}).catch(function(e){b.disabled=false;b.textContent=t;alert(e.message);});};});
 }
 
+
+/* Ouverture directe de l'écran visé par une notification (#wellness, #rpe, #dispos…), que l'appli soit déjà ouverte ou non. */
+function routeHash(){if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=null;
+  if(r==='Tireur')v=h==='#wellness'&&WELLNESS_T?'wellnessT':h==='#dispos'?'dispos':h==='#rpe'?'rpe':h==='#semaine'?'semaine':h==='#resultats'?'resultats':null;
+  else if(r==='Coach')v=h==='#dispos'?'dispos':h==='#suivi'?'suivi':h==='#semaine'?'semaine':null;
+  else v=h==='#jour'?'jour':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
+  if(v&&v!==VIEW){VIEW=v;[].forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('on',b.dataset.v===v);});render();scrollTo(0,0);}}
+window.addEventListener('hashchange',routeHash);
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var m=e.data||{};if(m.type==='ouvrir'&&m.lien){if(location.hash===m.lien)routeHash();else location.hash=m.lien;}});
 /* ---------------- WELLNESS, BUDGET, MATÉRIEL ---------------- */
 function vWellness(){
   var pole=D.tireurs.filter(function(t){return t.pole;}),jours=[];
