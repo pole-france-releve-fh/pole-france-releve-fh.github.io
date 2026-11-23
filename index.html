@@ -240,7 +240,8 @@ a.nm{color:var(--ink);text-decoration:underline}
 @media (max-width:600px){main{padding:10px}.card{padding:14px}header h1{font-size:17px}.kpi .v{font-size:22px}.m{grid-template-columns:44px 58px 1fr}}
 @media print{
   header,nav,#app,.modal{display:none!important}#print{display:block!important}
-  #stabs,#pltoast{display:none!important}#print .prc{columns:2;column-gap:12px;zoom:.74}#print .prc .pc{break-inside:avoid;overflow:visible!important;margin-bottom:6px;display:block}#print .rt{zoom:.68}#print .rt table{width:100%}
+  #stabs,#pltoast{display:none!important}
+  .pang{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.pan{border-collapse:collapse;width:100%;font-size:6.6px;table-layout:fixed}.pan th,.pan td{border:.4px solid #c9cfda;padding:0 1px;height:15.5px;overflow:hidden;line-height:1.05;vertical-align:middle}.pan th{font-size:6px;background:#eef1f7;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan .mh{background:#0f1b3d;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em}.pan td.j,.pan td.d,.pan td.w{text-align:center;width:9px}.pan th:nth-child(1),.pan th:nth-child(2),.pan th:nth-child(3){width:9px}.pan td.w{color:#1f3a93;font-weight:700}.pan td.en{font-weight:700;text-align:center}.pan td.pc{color:#fff;font-weight:700;font-size:5.6px}.pan tr.we td{background:#e9ecf2}.pan tr.vac td{background:#fff3cf}.pan tr.vac.we td{background:#efe3bd}.pan tr.vide td{border:0;background:none}.pan td,.pan tr td{-webkit-print-color-adjust:exact;print-color-adjust:exact}.pan td.lc i{color:#8a5a00}#print .prc{columns:2;column-gap:12px;zoom:.74}#print .prc .pc{break-inside:avoid;overflow:visible!important;margin-bottom:6px;display:block}#print .rt{zoom:.68}#print .rt table{width:100%}
   body{background:#fff;font-size:12px}main{max-width:none;padding:0}
   .pr-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f1b3d;padding-bottom:6px;margin-bottom:10px}
   .pr-h h1{font-size:20px;margin:0;font-weight:800}.pr-h .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#1f3a93;font-weight:800}
@@ -714,7 +715,7 @@ function vCalendrier(){
   $('cm').onclick=function(e){var m=e.target.dataset.m;if(m){CAL.mode=m;vCalendrier();}};
   $('cf').onchange=function(){CAL.tir=this.value;vCalendrier();};
   if($('ch'))$('ch').onchange=function(){CAL.hide=this.checked;vCalendrier();};
-  $('cpr').onclick=function(){doPrint((CAL.mode==='planning'?'<style>@page{size:A3 landscape;margin:7mm}</style>':'')+printHead('Pôle France Relève · fleuret hommes'+(CAL.tir?' · '+CAL.tir:''),t,'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+$('cb').innerHTML);};
+  $('cpr').onclick=function(){if(CAL.mode==='annee'){var b=this;b.disabled=true;b.textContent='Préparation…';run('getEntrainementsSaison',KEY).then(function(ent){b.disabled=false;b.textContent='🖨 Imprimer';doPrint(printAnnuel(ent));}).catch(function(e){b.disabled=false;b.textContent='🖨 Imprimer';alert(e.message);});return;}doPrint((CAL.mode==='planning'?'<style>@page{size:A3 landscape;margin:7mm}</style>':'')+printHead('Pôle France Relève · fleuret hommes'+(CAL.tir?' · '+CAL.tir:''),t,'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+$('cb').innerHTML);};
   $('cadd').onclick=function(){competForm(null);};
   $('eadd').onclick=function(){evtForm(null);};
   bindPrio($('cb'));
@@ -724,6 +725,26 @@ function vCalendrier(){
     var dd=e.target.closest('[data-d]');if(dd){CAL.d=cDate(dd.dataset.d);CAL.mode=dd.dataset.to||'jour';vCalendrier();return;}
     var sw=e.target.closest('[data-sw]');if(sw){SEM.off=Math.round((cDate(sw.dataset.sw)-cLun(new Date()))/6048e5);SEM.data=null;VIEW='semaine';render();}
   };
+}
+/* Planning annuel imprimable (sur le modèle de « Planning 2026-2027 » du fichier maître) : 6 mois par page A3. */
+function printAnnuel(ent){
+  var d=CAL.d,y0=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1,JL=['D','L','M','M','J','V','S'],CATS=[['M17','M17'],['M20','M20'],['S','Senior']];
+  function nat(e){return /FFE/i.test(e.cal)||/\bEN ?\d|CHAMPIONNAT DE FRANCE|\bCN\b|CF /i.test(norm(e.nom));}
+  function catOf(e){var c=String(e.cat).toUpperCase();return /M17/.test(c)?'M17':/M20/.test(c)?'M20':'S';}
+  function lab(e){var n=String(e.nom).replace(/Coupe du Monde FIE( M\d\d| Senior)?/i,'CdM').replace(/Coupe Euro EFC( M\d\d)?/i,'CE').replace(/Tournoi Satellite FIE/i,'Sat.').replace(/EFC Eurofence League/i,'Eurofence').replace(/Championnats? d'Europe( M\d\d)?/i,'Ch. Europe').replace(/Championnats? du Monde( M\d\d)?/i,'Ch. Monde').replace(/Championnat de France/i,'CF').replace(/ M\d\d$| Seniors?$/i,'').replace(/\s+/g,' ').trim();return n+(e.lieu?' '+String(e.lieu).split(/[ -]/)[0]:'');}
+  function month(y,m){var nd=new Date(y,m+1,0).getDate(),h='<table class="pan"><thead><tr><th colspan="11" class="mh">'+MOIS[m]+' '+y+'</th></tr><tr><th></th><th></th><th>S.</th><th>CREPS / stage</th><th>Entr.</th><th>M17<br>nat.</th><th>M20<br>nat.</th><th>Sen.<br>nat.</th><th>M17<br>inter.</th><th>M20<br>inter.</th><th>Sen.<br>inter.</th></tr></thead><tbody>';
+    for(var i=1;i<=31;i++){if(i>nd){h+='<tr class="vide"><td colspan="11"></td></tr>';continue;}
+      var dt=new Date(y,m,i),iso=cIso(dt),we=dt.getDay()%6===0,V=cVac(iso),F=cFer(iso),S=cEv(iso),E=CAL.data.ev.filter(function(e){return e.d1<=iso&&e.d2>=iso&&!/pas de participation/i.test(e.type)&&/H/.test(e.hf||'H');});
+      var lieu=F?F.titre:S.length?S.map(function(e){return e.titre;}).join(', '):'';
+      function cell(cat,n){var L=E.filter(function(e){return catOf(e)===cat&&nat(e)===n;});return '<td class="pc"'+(L.length?' style="background:'+cCol(L[0])+'"':'')+'>'+L.map(function(e){return esc(lab(e));}).join('<br>')+'</td>';}
+      h+='<tr class="'+(we?'we':'')+(V?' vac':'')+'"><td class="j">'+JL[dt.getDay()]+'</td><td class="d">'+i+'</td><td class="w">'+(dt.getDay()===1?isoW(dt):'')+'</td><td class="lc">'+esc(lieu)+(V&&(iso===V.d1||dt.getDay()===1)&&!lieu?'<i>'+esc(V.titre)+'</i>':'')+'</td><td class="en">'+esc(ent[iso]||'')+'</td>'
+        +CATS.map(function(c){return cell(c[0],true);}).join('')+CATS.map(function(c){return cell(c[0],false);}).join('')+'</tr>';}
+    return h+'</tbody></table>';}
+  var pages=[[8,9,10,11,0,1],[2,3,4,5,6,7]],h='<style>@page{size:A3 landscape;margin:6mm}</style>';
+  pages.forEach(function(P,pi){h+='<div class="panp"'+(pi?' style="break-before:page"':'')+'>'+printHead('Pôle France Relève · fleuret hommes','Planning de la saison '+y0+'-'+(y0+1)+(pi?' · mars à août':' · septembre à février'),'Imprimé le '+new Date().toLocaleDateString('fr-FR'))
+    +'<div class="pang">'+P.map(function(m){return month(m>=8?y0:y0+1,m);}).join('')+'</div>'
+    +'<div class="pfoot">Entr. : PP prépa physique · F fonda · A assauts — S. : numéro de semaine — fond jaune : vacances scolaires zone C — couleurs des compétitions : '+Object.keys(CTYPE).filter(function(k){return !/pas de part/i.test(k);}).map(function(k){return '<span class="tag" style="background:'+CTYPE[k]+';color:#fff">'+esc(k)+'</span>';}).join(' ')+'</div></div>';});
+  return h;
 }
 function cGrid(y,m,big){
   var f=new Date(y,m,1),s=cLun(f),td=today(),h='';
@@ -929,11 +950,12 @@ function creneauForm(s,j,c){
 
 function moment(h){var n=hnum(h);return n>=9999?0:n<12*60+30?0:n<17*60?1:2;}
 function printSemaine(s){
+  function moment(h){var n=hnum(h);return n>=9999?0:n<13*60?0:1;}
   var td=today(),J=s.jours;
   var h=printHead('Pôle France Relève · fleuret hommes',s.titre,'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+(s.compets.length?'<div class="banner" style="margin-bottom:8px">'+s.compets.map(function(c){return compHtml(c,-1);}).join('')+'</div>':'');
   h+='<table class="psem"><thead><tr><th class="rh"></th>'+J.map(function(j){return '<th'+(j.date===td?' class="td"':'')+'>'+esc(j.jour)+'</th>';}).join('')+'</tr></thead><tbody>';
   if(J.some(function(j){return j.evt;}))h+='<tr><th class="rh">Déplac. / compét.</th>'+J.map(function(j){return '<td>'+(j.evt?evtHtml(j.evt):'')+'</td>';}).join('')+'</tr>';
-  ['Matin','Après-midi','Soir'].forEach(function(lab,mi){
+  ['Matin','Après-midi'].forEach(function(lab,mi){
     if(!J.some(function(j){return j.creneaux.some(function(c){return moment(c.h)===mi;});}))return;
     h+='<tr><th class="rh">'+lab+'</th>'+J.map(function(j){var we=j.dimanche;return '<td'+(we?' class="we"':'')+'>'+j.creneaux.filter(function(c){return moment(c.h)===mi;}).map(function(c){return '<div class="cr"><b>'+esc(c.h)+'</b> '+tags(c.quoi)+'<div class="l">'+esc(c.lieu)+(c.note?' · '+esc(c.note):'')+'</div></div>';}).join('')+'</td>';}).join('')+'</tr>';
   });
@@ -944,6 +966,8 @@ function printSemaine(s){
 function printLecons(s){
   var J=s.jours.filter(function(j){return !(j.dimanche&&!j.lecons.length);}),co=[],cnt={};
   J.forEach(function(j){j.lecons.forEach(function(l){var c=l.coach||'?';if(co.indexOf(c)<0)co.push(c);[l.tireur,l.vs].forEach(function(n){if(n)cnt[n]=(cnt[n]||0)+1;});});});
+  var ORD=['GUY','TOM','SEB','ANTH'];function rk(c){var n=norm(c).replace(/ /g,''),i=ORD.findIndex(function(o){return n.indexOf(o)===0;});return i<0?ORD.length:i;}
+  co.sort(function(a,b){return rk(a)-rk(b)||(a<b?-1:1);});
   var h=printHead('Leçons individuelles et assauts en doublette',s.titre,'Imprimé le '+new Date().toLocaleDateString('fr-FR'));
   h+='<table class="psem plec"><thead><tr><th class="rh">Maître d\'armes</th>'+J.map(function(j){return '<th>'+esc(j.jour)+'</th>';}).join('')+'</tr></thead><tbody>';
   co.forEach(function(c){h+='<tr><th class="co" style="background:'+coachCol(c)+'">'+esc(c)+'</th>'+J.map(function(j){var L=j.lecons.filter(function(l){return (l.coach||'?')===c;}).sort(function(a,b){return hnum(a.h)-hnum(b.h);});
@@ -1273,7 +1297,7 @@ function vJour(){
   if(!c||Date.now()-c.t>60000)jourData(off,function(){if(VIEW==='jour'&&!$('modal').innerHTML&&JOUR.d===dj)vJour();});
   var s=r?r.semaine:(off===0?D.semaine:null),j=s&&s.jours.filter(function(x){return x.date===dj;})[0];
   var faites=r?r.seances.filter(function(x){return x.date===dj;}):[],now=new Date(),nm=now.getHours()*60+now.getMinutes();
-  var d=cDate(dj),h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row" style="gap:6px;align-items:center"><button class="btn sm jnav" id="jPrev" aria-label="Jour précédent">‹</button><div style="min-width:170px;text-align:center"><div class="mut sm" style="text-transform:uppercase;letter-spacing:.1em;font-weight:800">'+(estAuj?'Aujourd\'hui':dj===cIso(cAdd(new Date(),1))?'Demain':dj===cIso(cAdd(new Date(),-1))?'Hier':'&nbsp;')+'</div><h2 style="margin:2px 0 0">'+['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][d.getDay()]+' '+d.getDate()+' '+MOIS[d.getMonth()]+'</h2></div><button class="btn sm jnav" id="jNext" aria-label="Jour suivant">›</button>'+(estAuj?'':'<button class="btn sm" id="jAuj">Aujourd\'hui</button>')+'</div><button class="btn sm" id="jNew">+ Séance hors planning</button></div>';
+  var d=cDate(dj),h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row" style="gap:6px;align-items:center"><button class="btn sm jnav" id="jPrev" aria-label="Jour précédent">‹</button><div style="min-width:170px;text-align:center"><div class="mut sm" style="text-transform:uppercase;letter-spacing:.1em;font-weight:800">'+(estAuj?'Aujourd\'hui':dj===cIso(cAdd(new Date(),1))?'Demain':dj===cIso(cAdd(new Date(),-1))?'Hier':'&nbsp;')+'</div><h2 style="margin:2px 0 0">'+['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][d.getDay()]+' '+d.getDate()+' '+MOIS[d.getMonth()]+'</h2><div class="mut sm" style="font-weight:700;color:var(--acc,#1f3a93)">Semaine '+isoW(d)+'</div></div><button class="btn sm jnav" id="jNext" aria-label="Jour suivant">›</button>'+(estAuj?'':'<button class="btn sm" id="jAuj">Aujourd\'hui</button>')+'</div><button class="btn sm" id="jNew">+ Séance hors planning</button></div>';
   h+='<button class="bigbtn" id="jMic">🎤 Mémo vocal <span style="font-weight:600;font-size:13px;opacity:.8">score · absence · rdv · examen · tâche · note</span></button>';
   if(j&&j.evt)h+='<div class="evt" style="margin-top:10px">'+evtHtml(j.evt)+'</div>';
   /* mémos */
