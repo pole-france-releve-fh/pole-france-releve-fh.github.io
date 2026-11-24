@@ -420,6 +420,7 @@ div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box
 .lps{width:34px;padding:2px 0;border-radius:6px;border:1px solid #dfe3ea;font-weight:800;font-size:12px;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;background:#fff;cursor:pointer}
 .lp-A{background:#1f8a4c;color:#fff;border-color:#1f8a4c}.lp-B{background:#0a5bc4;color:#fff;border-color:#0a5bc4}.lp-C{background:#c46a00;color:#fff;border-color:#c46a00}.lp-D{background:#ece5f7;color:#7d3fc2}.lp-non{background:#f3f4f6;color:#9aa1ad;font-weight:600;font-size:10px}.lp-x{color:#c0c4cc}
 .mcp{border-left:5px solid var(--c)}
+.ltab .lpart span{font-style:italic;color:#6b7280}
 @media (max-width:700px){.ltab .l1,.ltab .lcat{display:none}.ltab .l2{left:0!important;min-width:118px;max-width:118px;white-space:normal;font-size:11px;line-height:1.2}.ltab .l2 b{font-weight:700}.ltab .ld{display:block;color:#6b7280;font-size:10px;margin-top:2px}.ltab .lh{height:74px;width:30px;min-width:30px}.lps{width:30px}.lsc{max-height:72vh}}
 </style>
 </head>
@@ -503,7 +504,7 @@ function boot(d){
     render();
 }
 $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');run('rafraichir',KEY).then(function(d){D=d;cacheD(d);SEM.data=null;CAL.data=null;$('maj').textContent='Données du '+d.maj;render();});};
-var GRP={gcal:[['semaine','Semaine'],['calendrier','Année'],['saison','Bilan saison']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['charge','Charge'],['muscu','Muscu']]},SUBV={};
+var GRP={gcal:[['semaine','Semaine'],['priorites','Compétitions'],['annuel','Année'],['calendrier','Calendrier'],['saison','Bilan saison']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['charge','Charge'],['muscu','Muscu']]},SUBV={};
 function grpDe(v){for(var g in GRP){if(GRP[g].some(function(x){return x[0]===v;})&&document.querySelector('#nav [data-v="'+g+'"]'))return g;}return null;}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-sv]');if(b){VIEW=b.dataset.sv;render();}});
 function render(){
@@ -511,7 +512,7 @@ function render(){
   var g=grpDe(VIEW);if(g)SUBV[g]=VIEW;
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW||b.dataset.v===g);});
   $('stabs').innerHTML=g?'<div class="chips stabs">'+GRP[g].map(function(x){return '<button class="chip'+(x[0]===VIEW?' on':'')+'" data-sv="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>':'';
-  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,compets:vMesCompets,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
+  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,compets:vMesCompets,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalMois,priorites:vPriorites,annuel:vAnnuel,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -807,8 +808,8 @@ function vCalendrier(){
   else t=JS[(d.getDay()+6)%7]+'. '+cFr(cIso(d),true);
   t=t.charAt(0).toUpperCase()+t.slice(1);
   var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="cp">←</button><b>'+esc(t)+'</b><button class="btn sm" id="cn">→</button><button class="btn sm" id="ct">Aujourd\'hui</button></div>'
-   +'<div class="chips" id="cm">'+[['liste','Liste et priorités'],['planning','Planning annuel'],['annee','Année'],['mois','Mois'],['semaine','Semaine'],['jour','Jour']].map(function(m){return '<button class="chip'+(CAL.mode===m[0]?' on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>';}).join('')+'</div></div>'
-   +'<div class="row wrap" style="gap:10px;margin-bottom:10px"><select id="cf" style="width:auto;min-width:220px"><option value="">Tout le groupe</option>'+CAL.data.heads.map(function(x){return '<option'+(CAL.tir===x.nom?' selected':'')+'>'+esc(x.nom)+'</option>';}).join('')+'</select>'
+   +'<div class="chips" id="cm">'+calModes().map(function(m){return '<button class="chip'+(CAL.mode===m[0]?' on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>';}).join('')+'</div></div>'
+   +'<div class="row wrap" style="gap:10px;margin-bottom:10px"><select id="cf" style="width:auto;min-width:220px'+(CAL.mode==='liste'?';display:none':'')+'"><option value="">Tout le groupe</option>'+CAL.data.heads.map(function(x){return '<option'+(CAL.tir===x.nom?' selected':'')+'>'+esc(x.nom)+'</option>';}).join('')+'</select>'
    +(CAL.tir?'':'<label class="row sm" style="gap:6px;cursor:pointer"><input type="checkbox" id="ch" style="width:auto"'+(CAL.hide?' checked':'')+'> Masquer « pas de participation »</label>')
    +'<button class="btn sm" id="cpr">🖨 Imprimer</button><button class="btn pr sm" id="cadd">+ Compétition</button><button class="btn sm" id="eadd">+ Stage / événement</button></div>'
    +'<div class="leg" style="margin-bottom:10px;'+(CAL.mode==='planning'||CAL.mode==='liste'?'display:none':'')+'">'+Object.keys(CTYPE).filter(function(k){return !(CAL.hide&&!CAL.tir&&k==='Pas de participation');}).map(function(k){return '<span style="--ec:'+CTYPE[k]+'">'+k+'</span>';}).join('')+'<span style="--ec:#0e8a9a">Stage</span><span style="--ec:#c2185b">Regroupement</span><span style="--ec:#cfe0f3">Vacances scolaires</span><span style="--ec:#e8c9c9">D / R : départ et retour (teinte claire)</span><span style="--ec:transparent;border:0">plein = international · contour = national</span>'+(CAL.tir?'<span style="--ec:transparent">lettre = priorité de '+esc(CAL.tir)+'</span>':'')+'</div><div id="cb">';
@@ -1775,17 +1776,20 @@ function abLab(e){var v=abVille(e.lieu);return abComp(e)+(v?' '+v:'');}
 
 /* ---------- Calendrier > Liste : les compétitions en lignes, les tireurs en colonnes, priorité au menu déroulant ---------- */
 function cListe(){
-  var y0=CAL.d.getMonth()>=8?CAL.d.getFullYear():CAL.d.getFullYear()-1,a=y0+'-09-01',b=(y0+1)+'-08-31',H=CAL.data.heads,cat=CAL.lcat||'',td=today();
-  var L=CAL.data.ev.filter(function(e){if(e.d1<a||e.d1>b)return false;if(CAL.hide&&/pas de participation/i.test(e.type))return false;if(!cat)return true;var c=String(e.cat).toUpperCase();return cat==='S'?!/M17|M20/.test(c):c.indexOf(cat)>=0;});
-  var G=[];H.forEach(function(x){var g=x.groupe||'';if(!G.length||G[G.length-1].g!==g)G.push({g:g,n:0});G[G.length-1].n++;});
-  var h='<div class="row wrap" style="gap:8px;margin-bottom:8px;align-items:center"><div class="chips">'+[['','Toutes'],['M17','M17'],['M20','M20'],['S','Seniors']].map(function(c){return '<button class="chip'+(cat===c[0]?' on':'')+'" data-lc="'+c[0]+'">'+c[1]+'</button>';}).join('')+'</div><span class="mut sm">Choisis la priorité dans le menu de chaque case : c\'est enregistré tout de suite (et recopié dans le fichier maître).</span></div>';
-  h+='<div class="hsc lsc"><table class="ltab"><thead><tr><th class="l1" rowspan="2">Dates</th><th class="l2" rowspan="2">Compétition</th><th rowspan="2" class="lcat">Cat.</th><th rowspan="2">A·B·C</th>'+G.map(function(g){return '<th colspan="'+g.n+'" class="lg">'+esc(g.g)+'</th>';}).join('')+'</tr><tr>'+H.map(function(x){return '<th class="lh"><span>'+esc(x.nom)+'</span></th>';}).join('')+'</tr></thead><tbody>';
+  var y0=CAL.d.getMonth()>=8?CAL.d.getFullYear():CAL.d.getFullYear()-1,a=y0+'-09-01',b=(y0+1)+'-08-31',H0=CAL.data.heads,cat=CAL.lcat||'',ni=CAL.lni||'',td=today();
+  function gCat(x){var g=String(x.groupe||'');return /M17/i.test(g)?'M17':/M20/i.test(g)?'M20':'Senior';}
+  var RK={M17:0,M20:1,Senior:2},HK=H0.map(function(x,k){return {x:x,k:k,g:gCat(x),p:/partenaire/i.test(x.groupe||'')};}).sort(function(a,b){return RK[a.g]-RK[b.g]||a.k-b.k;}),H=HK.map(function(o){return o.x;});
+  var L=CAL.data.ev.filter(function(e){if(e.d1<a||e.d1>b)return false;if(CAL.hide&&/pas de participation/i.test(e.type))return false;if(ni&&(ni==='N')!==!!cNat(e))return false;if(!cat)return true;var c=String(e.cat).toUpperCase();return cat==='S'?!/M17|M20/.test(c):c.indexOf(cat)>=0;});
+  var G=[];HK.forEach(function(o){var g=o.g;if(!G.length||G[G.length-1].g!==g)G.push({g:g,n:0});G[G.length-1].n++;});
+  var h='<div class="row wrap" style="gap:8px;margin-bottom:8px;align-items:center"><div class="chips">'+[['','Toutes'],['M17','M17'],['M20','M20'],['S','Seniors']].map(function(c){return '<button class="chip'+(cat===c[0]?' on':'')+'" data-lc="'+c[0]+'">'+c[1]+'</button>';}).join('')+'</div><div class="chips">'+[['','Inter. et nat.'],['I','Internationales'],['N','Nationales']].map(function(c){return '<button class="chip'+(ni===c[0]?' on':'')+'" data-ln="'+c[0]+'">'+c[1]+'</button>';}).join('')+'</div><span class="mut sm">Choisis la priorité dans le menu de chaque case : c\'est enregistré tout de suite (et recopié dans le fichier maître).</span></div>';
+  h+='<div class="hsc lsc"><table class="ltab"><thead><tr><th class="l1" rowspan="2">Dates</th><th class="l2" rowspan="2">Compétition</th><th rowspan="2" class="lcat">Cat.</th><th rowspan="2">A·B·C</th>'+G.map(function(g){return '<th colspan="'+g.n+'" class="lg">'+esc(g.g)+'</th>';}).join('')+'</tr><tr>'+HK.map(function(o){return '<th class="lh'+(o.p?' lpart':'')+'" title="'+esc(o.x.groupe||'')+'"><span>'+esc(o.x.nom)+'</span></th>';}).join('')+'</tr></thead><tbody>';
   L.forEach(function(e){var i=CAL.data.ev.indexOf(e),pass=e.d2<td;
     h+='<tr class="'+(pass?'lp':'')+'"><td class="l1">'+esc(e.d1===e.d2?frDate(e.d1):frDate(e.d1)+'→'+frDate(e.d2))+'</td><td class="l2" data-e="'+i+'"><span class="lsw" style="background:'+cCol(e)+(cNat(e)?';background:#fff;border:2px solid '+cCol(e):'')+'"></span><b>'+esc(e.nom)+'</b> <span class="mut">· '+esc(e.lieu||'')+'</span><span class="ld">'+esc(e.d1===e.d2?frDate(e.d1):frDate(e.d1)+'→'+frDate(e.d2))+'</span></td><td class="ctr lcat">'+esc(/M17|M20/i.test(e.cat)?e.cat:'Sr')+'</td><td class="ctr"><b>'+cNb(e)+'</b></td>'
-      +H.map(function(x,k){var v=String(e.p[k]||'');return '<td class="lpc"><select data-lp="'+i+'|'+k+'" class="lps lp-'+(v||'x')+'">'+['','A','B','C','D','non'].map(function(o){return '<option value="'+o+'"'+(o===v?' selected':'')+'>'+(o||'·')+'</option>';}).join('')+'</select></td>';}).join('')+'</tr>';});
+      +HK.map(function(o){var k=o.k,v=String(e.p[k]||'');return '<td class="lpc"><select data-lp="'+i+'|'+k+'" class="lps lp-'+(v||'x')+'">'+['','A','B','C','D','non'].map(function(o){return '<option value="'+o+'"'+(o===v?' selected':'')+'>'+(o||'·')+'</option>';}).join('')+'</select></td>';}).join('')+'</tr>';});
   h+='</tbody></table></div><div class="mut sm" style="margin-top:6px">A·B·C = nombre de tireurs prévus. Case pleine = épreuve internationale, contour = nationale. Clique sur le nom d\'une compétition pour sa fiche (logistique, qui y va).</div>';
   setTimeout(function(){
     [].forEach.call(document.querySelectorAll('[data-lc]'),function(b){b.onclick=function(){CAL.lcat=b.dataset.lc;vCalendrier();};});
+    [].forEach.call(document.querySelectorAll('[data-ln]'),function(b){b.onclick=function(){CAL.lni=b.dataset.ln;vCalendrier();};});
     [].forEach.call(document.querySelectorAll('[data-lp]'),function(s){s.onclick=function(ev){ev.stopPropagation();};s.onchange=function(){var x=s.dataset.lp.split('|'),e=CAL.data.ev[+x[0]],k=+x[1],old=e.p[k],nv=s.value;e.p[k]=nv;s.className='lps lp-'+(nv||'x');s.style.opacity=.5;
       run('savePriorite',KEY,{id:e.id,d1:e.d1,nom:e.nom,lieu:e.lieu},CAL.data.heads[k].nom,nv).then(function(){s.style.opacity=1;var td2=s.closest('tr').children[3];if(td2)td2.innerHTML='<b>'+cNb(e)+'</b>';}).catch(function(er){e.p[k]=old;s.value=old||'';s.className='lps lp-'+(old||'x');s.style.opacity=1;alert(er.message);});};});
   },0);
@@ -1851,6 +1855,10 @@ function vMesCompets(){
   }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
 }
 
+function calModes(){return VIEW==='priorites'?[]:VIEW==='annuel'?[['planning','Planning annuel'],['annee','Année']]:[['mois','Mois'],['semaine','Semaine'],['jour','Jour']];}
+function vPriorites(){CAL.mode='liste';vCalendrier();}
+function vAnnuel(){if(!/^(planning|annee)$/.test(CAL.mode))CAL.mode='planning';vCalendrier();}
+function vCalMois(){if(!/^(mois|semaine|jour)$/.test(CAL.mode))CAL.mode='mois';vCalendrier();}
 function ouvrirCreneau(date,slot){
   var off=Math.round((cLun(cDate(date))-cLun(new Date()))/6048e5);SEM.off=off;if(off!==0)SEM.data=null;
   goView('semaine');var n=0;(function att(){var el=document.querySelector('[data-crj="'+date+'"][data-crs="'+slot+'"]');if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(function(){el.click();},350);}else if(n++<40)setTimeout(att,150);})();
