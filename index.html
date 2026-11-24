@@ -1840,7 +1840,7 @@ function vMesCompets(){
   $('app').innerHTML=loading('Lecture de tes compétitions…');
   run('getMesCompets',KEY).then(function(r){if(VIEW!=='compets')return;
     if(!r.trouve){$('app').innerHTML='<div class="card empty">Ton nom n\'est pas encore dans le calendrier des compétitions. Demande au staff.</div>';return;}
-    var td=today(),av=r.ev.filter(function(e){return e.d2>=td;}),pa=r.ev.filter(function(e){return e.d2<td;}).reverse();
+    r.ev=r.ev.filter(function(e){return !/pas de participation/i.test(e.type);});var td=today(),av=r.ev.filter(function(e){return e.d2>=td;}),pa=r.ev.filter(function(e){return e.d2<td;}).reverse();
     function carte(e){var nat=cNat(e);return '<div class="card mcp" style="--c:'+cCol(e)+'"><div class="row sp wrap" style="gap:6px"><div><div class="b" style="font-size:16px">'+esc(e.nom)+'</div><div class="mut">'+esc(e.lieu||'')+' · '+esc(cDates(e))+'</div></div>'+(e.statut!=='Prévue'?'<span class="pill p-warn">'+esc(e.statut)+'</span>':'')+'</div>'
       +'<div class="row wrap" style="gap:6px;margin-top:6px"><span class="ev" style="--ec:'+cCol(e)+';display:inline-block">'+esc(e.type)+'</span><span class="pill p-ink">'+(nat?'national':'international')+'</span>'+(e.dep?'<span class="pill p-acc">départ '+esc(cFr(e.dep))+'</span>':'')+(e.ret?'<span class="pill p-acc">retour '+esc(cFr(e.ret))+'</span>':'')+'</div>'
       +(e.hotel&&String(e.hotel).trim()!=='-'?'<div class="sm" style="margin-top:6px"><span class="mut">Hôtel :</span> '+esc(e.hotel)+'</div>':'')+(e.ent&&String(e.ent).trim()!=='-'?'<div class="sm"><span class="mut">Encadrement :</span> '+esc(e.ent)+'</div>':'')+'</div>';}
