@@ -391,6 +391,23 @@ div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box
 .tg.on{background:#34c759}.tg.on i{left:21px}
 .wdot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#e5e7eb;margin-right:3px}
 .wdot.ok{background:#34c759}.wdot.td{outline:2px solid #0a5bc4;outline-offset:1px}
+.lsc{max-height:75vh;overflow:auto;border:1px solid var(--line,#e5e7eb);border-radius:12px;background:#fff}
+.ltab{border-collapse:separate;border-spacing:0;font-size:12px}
+.ltab th,.ltab td{border-bottom:1px solid #eceef2;border-right:1px solid #f1f2f5;padding:3px 5px;white-space:nowrap;background:#fff}
+.ltab thead th{position:sticky;top:0;z-index:3;background:#f6f7f9;font-weight:700;color:#444}
+.ltab thead tr:nth-child(2) th{top:24px}
+.ltab .lg{text-align:center;font-size:11px;color:#0a5bc4}
+.ltab .lh{height:84px;vertical-align:bottom;padding:2px 0;width:34px;min-width:34px}
+.ltab .lh span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;font-size:11px}
+.ltab .l1{position:sticky;left:0;z-index:2;min-width:84px}
+.ltab .l2{position:sticky;left:84px;z-index:2;min-width:170px;cursor:pointer;box-shadow:2px 0 0 #e5e7eb}
+.ltab thead .l1,.ltab thead .l2{z-index:4}
+.ltab tr.lp td{opacity:.55}
+.lsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.lpc{padding:1px!important;text-align:center}
+.lps{width:34px;padding:2px 0;border-radius:6px;border:1px solid #dfe3ea;font-weight:800;font-size:12px;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;background:#fff;cursor:pointer}
+.lp-A{background:#1f8a4c;color:#fff;border-color:#1f8a4c}.lp-B{background:#0a5bc4;color:#fff;border-color:#0a5bc4}.lp-C{background:#c46a00;color:#fff;border-color:#c46a00}.lp-D{background:#ece5f7;color:#7d3fc2}.lp-non{background:#f3f4f6;color:#9aa1ad;font-weight:600;font-size:10px}.lp-x{color:#c0c4cc}
+.mcp{border-left:5px solid var(--c)}
 </style>
 </head>
 <body>
@@ -461,7 +478,7 @@ function boot(d){
     $('compte').classList.remove('hide');if(KEYMEM)$('logout').classList.remove('hide');
     var tabs;
     if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['gcal','Calendrier'],['gind','Individuel'],['seances','Séances'],['gtir','Tireurs'],['resultats','Résultats'],['imprimables','Imprimables'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']].concat(d.user.admin?[['connexions','Suivi appli']]:[]);$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
-    else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['semaine','Planning'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':location.hash==='#semaine'?'semaine':'moi';$('sub').textContent=d.user.nom;}
+    else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['semaine','Planning'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['compets','Compétitions'],['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':location.hash==='#semaine'?'semaine':'moi';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Coach'){tabs=[['semaine','Planning'],['suivi','Suivi leçons'],['dispos','Mes dispos'],['resultats','Résultats']];VIEW=location.hash==='#dispos'?'dispos':location.hash==='#suivi'?'suivi':'semaine';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
     else {tabs=[['resultats','Résultats']];VIEW='resultats';$('sub').textContent='Accès résultats · '+d.user.nom;}
@@ -481,7 +498,7 @@ function render(){
   var g=grpDe(VIEW);if(g)SUBV[g]=VIEW;
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW||b.dataset.v===g);});
   $('stabs').innerHTML=g?'<div class="chips stabs">'+GRP[g].map(function(x){return '<button class="chip'+(x[0]===VIEW?' on':'')+'" data-sv="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>':'';
-  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
+  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,compets:vMesCompets,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -771,25 +788,25 @@ function cDates(e){return e.d1===e.d2?cFr(e.d1,true):cFr(e.d1)+' → '+cFr(e.d2,
 function vCalendrier(){
   if(!CAL.data){$('app').innerHTML=loading('Lecture du calendrier…');run('getCalendrier',KEY).then(function(r){CAL.data=r;vCalendrier();}).catch(function(e){$('app').innerHTML='<div class="card">'+esc(e.message)+'</div>';});return;}
   var d=CAL.d,t;
-  if(CAL.mode==='annee'||CAL.mode==='planning'){var y0=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1;t=(CAL.mode==='planning'?'Planning des épreuves ':'Saison ')+y0+'-'+(y0+1);}
+  if(CAL.mode==='annee'||CAL.mode==='planning'||CAL.mode==='liste'){var y0=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1;t=(CAL.mode==='planning'?'Planning des épreuves ':CAL.mode==='liste'?'Compétitions et priorités ':'Saison ')+y0+'-'+(y0+1);}
   else if(CAL.mode==='mois')t=MOIS[d.getMonth()]+' '+d.getFullYear();
   else if(CAL.mode==='semaine'){var l=cLun(d);t='Semaine du '+cFr(cIso(l))+' au '+cFr(cIso(cAdd(l,6)),true);}
   else t=JS[(d.getDay()+6)%7]+'. '+cFr(cIso(d),true);
   t=t.charAt(0).toUpperCase()+t.slice(1);
   var h='<div class="row sp wrap" style="margin-bottom:10px;gap:8px"><div class="row"><button class="btn sm" id="cp">←</button><b>'+esc(t)+'</b><button class="btn sm" id="cn">→</button><button class="btn sm" id="ct">Aujourd\'hui</button></div>'
-   +'<div class="chips" id="cm">'+[['planning','Planning annuel'],['annee','Année'],['mois','Mois'],['semaine','Semaine'],['jour','Jour']].map(function(m){return '<button class="chip'+(CAL.mode===m[0]?' on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>';}).join('')+'</div></div>'
+   +'<div class="chips" id="cm">'+[['liste','Liste et priorités'],['planning','Planning annuel'],['annee','Année'],['mois','Mois'],['semaine','Semaine'],['jour','Jour']].map(function(m){return '<button class="chip'+(CAL.mode===m[0]?' on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>';}).join('')+'</div></div>'
    +'<div class="row wrap" style="gap:10px;margin-bottom:10px"><select id="cf" style="width:auto;min-width:220px"><option value="">Tout le groupe</option>'+CAL.data.heads.map(function(x){return '<option'+(CAL.tir===x.nom?' selected':'')+'>'+esc(x.nom)+'</option>';}).join('')+'</select>'
    +(CAL.tir?'':'<label class="row sm" style="gap:6px;cursor:pointer"><input type="checkbox" id="ch" style="width:auto"'+(CAL.hide?' checked':'')+'> Masquer « pas de participation »</label>')
    +'<button class="btn sm" id="cpr">🖨 Imprimer</button><button class="btn pr sm" id="cadd">+ Compétition</button><button class="btn sm" id="eadd">+ Stage / événement</button></div>'
    +'<div class="leg" style="margin-bottom:10px;'+(CAL.mode==='planning'?'display:none':'')+'">'+Object.keys(CTYPE).filter(function(k){return !(CAL.hide&&!CAL.tir&&k==='Pas de participation');}).map(function(k){return '<span style="--ec:'+CTYPE[k]+'">'+k+'</span>';}).join('')+'<span style="--ec:#0e8a9a">Stage</span><span style="--ec:#c2185b">Regroupement</span><span style="--ec:#cfe0f3">Vacances scolaires</span><span style="--ec:#e8c9c9">D / R : départ et retour (teinte claire)</span><span style="--ec:transparent;border:0">plein = international · contour = national</span>'+(CAL.tir?'<span style="--ec:transparent">lettre = priorité de '+esc(CAL.tir)+'</span>':'')+'</div><div id="cb">';
-  h+=({planning:cPlanning,annee:cYear,mois:cMonth,semaine:cWeek,jour:cDay})[CAL.mode]()+'</div>';
+  h+=({liste:cListe,planning:cPlanning,annee:cYear,mois:cMonth,semaine:cWeek,jour:cDay})[CAL.mode]()+'</div>';
   $('app').innerHTML=h;
-  function step(n){var x=new Date(CAL.d);if(CAL.mode==='annee'||CAL.mode==='planning')x.setFullYear(x.getFullYear()+n);else if(CAL.mode==='mois'){x.setDate(1);x.setMonth(x.getMonth()+n);}else x=cAdd(x,CAL.mode==='semaine'?7*n:n);CAL.d=x;vCalendrier();}
+  function step(n){var x=new Date(CAL.d);if(CAL.mode==='annee'||CAL.mode==='planning'||CAL.mode==='liste')x.setFullYear(x.getFullYear()+n);else if(CAL.mode==='mois'){x.setDate(1);x.setMonth(x.getMonth()+n);}else x=cAdd(x,CAL.mode==='semaine'?7*n:n);CAL.d=x;vCalendrier();}
   $('cp').onclick=function(){step(-1);};$('cn').onclick=function(){step(1);};$('ct').onclick=function(){CAL.d=new Date();vCalendrier();};
   $('cm').onclick=function(e){var m=e.target.dataset.m;if(m){CAL.mode=m;vCalendrier();}};
   $('cf').onchange=function(){CAL.tir=this.value;vCalendrier();};
   if($('ch'))$('ch').onchange=function(){CAL.hide=this.checked;vCalendrier();};
-  $('cpr').onclick=function(){if(CAL.mode==='annee'){var b=this;b.disabled=true;b.textContent='Préparation…';run('getEntrainementsSaison',KEY).then(function(ent){b.disabled=false;b.textContent='🖨 Imprimer';doPrint(printAnnuel(ent));}).catch(function(e){b.disabled=false;b.textContent='🖨 Imprimer';alert(e.message);});return;}doPrint((CAL.mode==='planning'?'<style>@page{size:A3 landscape;margin:7mm}</style>':'')+printHead('Pôle France Relève · fleuret hommes'+(CAL.tir?' · '+CAL.tir:''),t,'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+$('cb').innerHTML);};
+  $('cpr').onclick=function(){if(CAL.mode==='annee'){var b=this;b.disabled=true;b.textContent='Préparation…';run('getEntrainementsSaison',KEY).then(function(ent){b.disabled=false;b.textContent='🖨 Imprimer';doPrint(printAnnuel(ent));}).catch(function(e){b.disabled=false;b.textContent='🖨 Imprimer';alert(e.message);});return;}if(CAL.mode==='planning'){doPrint(printEpreuves());return;}doPrint((CAL.mode==='liste'?'<style>@page{size:A3 landscape;margin:6mm}</style>':'')+printHead('Pôle France Relève · fleuret hommes'+(CAL.tir?' · '+CAL.tir:''),t,'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+$('cb').innerHTML);};
   $('cadd').onclick=function(){competForm(null);};
   $('eadd').onclick=function(){evtForm(null);};
   bindPrio($('cb'));
@@ -1732,6 +1749,95 @@ function vConnexions(){
   }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
 }
 
+/* ================= COMPÉTITIONS : abréviations, liste des priorités, planning des épreuves imprimable ================= */
+var VILLES={'BARI':'BARI','SAMORIN':'SAMO','SAMSUN':'SAMS','BRATISLAVA':'BRAT','ANTONY':'ANT','LIMA':'LIMA','ETAMPES':'ETA','TAKAMATSU':'TAKA','HENIN BEAUMONT':'HEN','HAMMAMET':'HAM','TUNIS':'TUN','GOTEBORG':'GOT','BUDAPEST':'BUDA','PLOVDIV':'PLOV','DRESDE':'DRES','MURET':'MUR','VALENCE':'VAL','CABRIES':'CAB','SHANGHAI':'SHA','TBILISSI':'TBI','TBILISI':'TBI','ZAGREB':'ZAG','SAINT MAUR DES FOSSES':'StMAUR','FUJAIRAH':'FUJ','PARIS':'PAR','RAJGIR':'RAJ','BOURG LA REINE':'BLR','CALAIS':'CAL','LONDRES':'LON','BORDEAUX':'BDX','TURIN':'TUR','BRNO':'BRNO','ISTANBUL':'IST','AIX EN PROVENCE':'AIX','PRAGUE':'PRA','ANKARA':'ANK','MELUN':'MEL','PODGORICA':'POD','HONG KONG':'HK','NANTES':'NAN','NUREMBERG':'NUR','RIGA':'RIGA','BANGKOK':'BKK','MADRID':'MAD','LE CAIRE':'CAI','CAIRE':'CAI','FUKUOKA':'FUK','BUSAN':'BUS','PALMA':'PAL','LYON':'LYON','REIMS':'REIMS','MARSEILLE':'MAR','DORMAGEN':'DORM','HAGUENAU':'HAG','VARSOVIE':'VAR','POZNAN':'POZ','TAUBERBISCHOFSHEIM':'TBB','CHAMBERY':'CHAM','RIO DE JANEIRO':'RIO'};
+function abVille(l){var n=norm(l||'');if(!n)return '';if(VILLES[n])return VILLES[n];var k=Object.keys(VILLES).filter(function(v){return n.indexOf(v)===0;})[0];return k?VILLES[k]:n.replace(/ /g,'').slice(0,4);}
+function abComp(e){var n=String(e.nom||''),N=norm(n),m;
+  if(m=N.match(/\bEN ?(\d)/))return 'EN'+m[1];
+  if(/COUPE DU MONDE/.test(N))return 'CDM';if(/COUPE EURO/.test(N))return 'CEE';if(/SATELLITE/.test(N))return 'SAT';if(/EUROFENCE/.test(N))return 'EFL';
+  if(/^GP|GRAND PRIX/.test(N))return 'GP';if(/CHAMPIONNATS? D ?EUROPE/.test(N))return 'CE'+(/U23/.test(N)?' U23':'');if(/CHAMPIONNATS? DU MONDE/.test(N))return 'CM';
+  if(/CHAMPIONNATS? DE FRANCE/.test(N))return 'CF'+(/ELITE/.test(N)?' Él':/N2|N3/.test(N)?' N2-3':'');if(/JEUX EUROPEENS/.test(N))return 'JE';if(/U23/.test(N))return 'U23';if(/\bTI\b|TOURNOI/.test(N))return 'TI';
+  return n.split(/\s+/).slice(0,2).join(' ');}
+function abLab(e){var v=abVille(e.lieu);return abComp(e)+(v?' '+v:'');}
+
+/* ---------- Calendrier > Liste : les compétitions en lignes, les tireurs en colonnes, priorité au menu déroulant ---------- */
+function cListe(){
+  var y0=CAL.d.getMonth()>=8?CAL.d.getFullYear():CAL.d.getFullYear()-1,a=y0+'-09-01',b=(y0+1)+'-08-31',H=CAL.data.heads,cat=CAL.lcat||'',td=today();
+  var L=CAL.data.ev.filter(function(e){if(e.d1<a||e.d1>b)return false;if(CAL.hide&&/pas de participation/i.test(e.type))return false;if(!cat)return true;var c=String(e.cat).toUpperCase();return cat==='S'?!/M17|M20/.test(c):c.indexOf(cat)>=0;});
+  var G=[];H.forEach(function(x){var g=x.groupe||'';if(!G.length||G[G.length-1].g!==g)G.push({g:g,n:0});G[G.length-1].n++;});
+  var h='<div class="row wrap" style="gap:8px;margin-bottom:8px;align-items:center"><div class="chips">'+[['','Toutes'],['M17','M17'],['M20','M20'],['S','Seniors']].map(function(c){return '<button class="chip'+(cat===c[0]?' on':'')+'" data-lc="'+c[0]+'">'+c[1]+'</button>';}).join('')+'</div><span class="mut sm">Choisis la priorité dans le menu de chaque case : c\'est enregistré tout de suite (et recopié dans le fichier maître).</span></div>';
+  h+='<div class="hsc lsc"><table class="ltab"><thead><tr><th class="l1" rowspan="2">Dates</th><th class="l2" rowspan="2">Compétition</th><th rowspan="2">Cat.</th><th rowspan="2">A·B·C</th>'+G.map(function(g){return '<th colspan="'+g.n+'" class="lg">'+esc(g.g)+'</th>';}).join('')+'</tr><tr>'+H.map(function(x){return '<th class="lh"><span>'+esc(x.nom)+'</span></th>';}).join('')+'</tr></thead><tbody>';
+  L.forEach(function(e){var i=CAL.data.ev.indexOf(e),pass=e.d2<td;
+    h+='<tr class="'+(pass?'lp':'')+'"><td class="l1">'+esc(e.d1===e.d2?frDate(e.d1):frDate(e.d1)+'→'+frDate(e.d2))+'</td><td class="l2" data-e="'+i+'"><span class="lsw" style="background:'+cCol(e)+(cNat(e)?';background:#fff;border:2px solid '+cCol(e):'')+'"></span><b>'+esc(abLab(e))+'</b> <span class="mut">'+esc(e.lieu||'')+'</span></td><td class="ctr">'+esc(/M17|M20/i.test(e.cat)?e.cat:'Sr')+'</td><td class="ctr"><b>'+cNb(e)+'</b></td>'
+      +H.map(function(x,k){var v=String(e.p[k]||'');return '<td class="lpc"><select data-lp="'+i+'|'+k+'" class="lps lp-'+(v||'x')+'">'+['','A','B','C','D','non'].map(function(o){return '<option value="'+o+'"'+(o===v?' selected':'')+'>'+(o||'·')+'</option>';}).join('')+'</select></td>';}).join('')+'</tr>';});
+  h+='</tbody></table></div><div class="mut sm" style="margin-top:6px">A·B·C = nombre de tireurs prévus. Case pleine = épreuve internationale, contour = nationale. Clique sur le nom d\'une compétition pour sa fiche (logistique, qui y va).</div>';
+  setTimeout(function(){
+    [].forEach.call(document.querySelectorAll('[data-lc]'),function(b){b.onclick=function(){CAL.lcat=b.dataset.lc;vCalendrier();};});
+    [].forEach.call(document.querySelectorAll('[data-lp]'),function(s){s.onclick=function(ev){ev.stopPropagation();};s.onchange=function(){var x=s.dataset.lp.split('|'),e=CAL.data.ev[+x[0]],k=+x[1],old=e.p[k],nv=s.value;e.p[k]=nv;s.className='lps lp-'+(nv||'x');s.style.opacity=.5;
+      run('savePriorite',KEY,{id:e.id,d1:e.d1,nom:e.nom,lieu:e.lieu},CAL.data.heads[k].nom,nv).then(function(){s.style.opacity=1;var td2=s.closest('tr').children[3];if(td2)td2.innerHTML='<b>'+cNb(e)+'</b>';}).catch(function(er){e.p[k]=old;s.value=old||'';s.className='lps lp-'+(old||'x');s.style.opacity=1;alert(er.message);});};});
+  },0);
+  return h;
+}
+
+/* ---------- Planning des épreuves : A3 paysage en deux feuilles A4 portrait (septembre-février | mars-août) ---------- */
+function printEpreuves(){
+  var y0=CAL.d.getMonth()>=8?CAL.d.getFullYear():CAL.d.getFullYear()-1,CK=['M17','M20','Sr'],JL=['D','L','M','M','J','V','S'];
+  function ck(e){return /M17/i.test(e.cat)?'M17':/M20/i.test(e.cat)?'M20':'Sr';}
+  function ok(e){return !/pas de participation/i.test(e.type)&&/H/.test(e.hf||'H');}
+  function on(iso,c){return CAL.data.ev.filter(function(e){return ok(e)&&ck(e)===c&&e.d1<=iso&&e.d2>=iso;});}
+  function tr(iso,c){return CAL.data.ev.filter(function(e){return ok(e)&&ck(e)===c&&e.dep&&e.ret&&e.dep<=iso&&e.ret>=iso&&!(e.d1<=iso&&e.d2>=iso);});}
+  function mois(y,m){var n=new Date(y,m+1,0).getDate(),skip={M17:{},M20:{},Sr:{}},wk={},h='<table class="pe2"><colgroup><col class="cs"><col class="cj"><col><col><col></colgroup><thead><tr><th colspan="5" class="pm">'+MOIS[m].toUpperCase()+' '+y+'</th></tr><tr><th>S.</th><th></th><th>M17</th><th>M20</th><th>Sr</th></tr></thead><tbody>';
+    for(var r=1;r<=31;r++){
+      if(r>n){h+='<tr class="nx"><td colspan="5"></td></tr>';continue;}
+      var dt=new Date(y,m,r),iso=cIso(dt),wd=dt.getDay(),V=cVac(iso),F=cFer(iso),S=cEv(iso),bc=F?'fer':(wd===0||wd===6)?'we':V?'vac':'';
+      h+='<tr>';
+      if(!wk[r]){var len=1;while(r+len<=n&&new Date(y,m,r+len).getDay()!==1)len++;for(var q=r;q<r+len;q++)wk[q]=1;h+='<td class="ws" rowspan="'+len+'">'+isoW(dt)+'</td>';}
+      h+='<td class="jd '+bc+(S.length?' stg':'')+'">'+JL[wd]+r+'</td>';
+      CK.forEach(function(c){
+        if(skip[c][r])return;
+        var L=on(iso,c),key=L.map(function(e){return CAL.data.ev.indexOf(e);}).join(',');
+        if(!L.length){var T=tr(iso,c);if(!T.length){h+='<td class="'+bc+'"></td>';return;}
+          var te=T[0],kd=function(x){return x<te.d1?(x===te.dep?'D':''):(x===te.ret?'R':'');},qq=kd(iso),nt=1;
+          while(r+nt<=n&&!on(cIso(new Date(y,m,r+nt)),c).length){var x2=cIso(new Date(y,m,r+nt));if(tr(x2,c).indexOf(te)<0||kd(x2)!==qq||(x2<te.d1)!==(iso<te.d1))break;skip[c][r+nt]=1;nt++;}
+          h+='<td class="dr" rowspan="'+nt+'" style="background:color-mix(in srgb,'+cCol(te)+' 20%,#fff);color:'+cCol(te)+'">'+qq+'</td>';return;}
+        var nn=1;while(r+nn<=n&&on(cIso(new Date(y,m,r+nn)),c).map(function(e){return CAL.data.ev.indexOf(e);}).join(',')===key){skip[c][r+nn]=1;nn++;}
+        var e0=L[0],nat=cNat(e0),lab=L.map(function(e){return '<b>'+esc(abComp(e))+'</b><br>'+esc(abVille(e.lieu));}).join('<br>');
+        h+='<td class="cp'+(nat?' nat':'')+'" rowspan="'+nn+'" style="--c:'+cCol(e0)+'"><div>'+lab+'</div></td>';});
+      h+='</tr>';}
+    return h+'</tbody></table>';}
+  var leg='<div class="pe2l">'+Object.keys(CTYPE).filter(function(k){return !/pas de part/i.test(k);}).map(function(k){return '<span><i style="background:'+CTYPE[k]+'"></i>'+esc(k)+'</span>';}).join('')
+    +'<span><i style="background:#555"></i>plein = international</span><span><i style="background:#fff;border:1.5px solid #555"></i>contour = national</span><span><i style="background:#f4dada"></i>D / R départ, retour</span><span><i style="background:#e3eefa"></i>vacances zone C</span><span><i style="background:#e4e7ee"></i>week-end, férié</span><span><i style="background:#fff;border-left:3px solid #0e8a9a"></i>stage</span></div>'
+    +'<div class="pe2a">EN n épreuve nationale · CDM coupe du monde · CEE coupe d\'Europe · CE championnat d\'Europe · CM championnat du monde · CF championnat de France · GP grand prix · SAT satellite · EFL Eurofence League · JE Jeux européens · S. semaine</div>';
+  var css='<style>@page{size:A4 portrait;margin:5mm}.pe2p{height:286mm;display:flex;flex-direction:column;break-after:page;font-family:-apple-system,Inter,Helvetica,Arial,sans-serif}.pe2p:last-child{break-after:auto}'
+   +'.pe2h{display:flex;justify-content:space-between;align-items:flex-end;margin:0 0 2mm}.pe2h b{font-size:13px}.pe2h span{font-size:8px;color:#666}'
+   +'.pe2g{display:grid;grid-template-columns:repeat(6,1fr);gap:1mm;flex:1}'
+   +'table.pe2{border-collapse:collapse;table-layout:fixed;width:100%;font-size:6.2px;line-height:1.05}table.pe2 col.cs{width:9%}table.pe2 col.cj{width:15%}'
+   +'table.pe2 th,table.pe2 td{border:0.5px solid #c9ced8;padding:0 .4mm;height:7.15mm;max-height:7.15mm;overflow:hidden;text-align:center;vertical-align:middle;white-space:nowrap}'
+   +'table.pe2 thead th{height:3.6mm;font-size:6px;background:#eef1f6;color:#444}table.pe2 th.pm{background:#0f1b3d;color:#fff;font-size:7px;height:4.2mm}'
+   +'table.pe2 td.ws{font-weight:800;color:#0f1b3d;background:#f5f6f9;font-size:6px}table.pe2 td.jd{color:#333;text-align:left}table.pe2 td.we,table.pe2 td.fer{background:#e4e7ee}table.pe2 td.vac{background:#e3eefa}table.pe2 td.stg{box-shadow:inset 3px 0 0 #0e8a9a}'
+   +'table.pe2 td.cp{background:var(--c);color:#fff;font-weight:600;white-space:normal}table.pe2 td.cp div{overflow:hidden;max-height:100%}table.pe2 td.cp.nat{background:#fff;color:var(--c);box-shadow:inset 0 0 0 1.5px var(--c)}'
+   +'table.pe2 td.dr{font-weight:800;font-size:6px}table.pe2 tr.nx td{border:0;background:transparent}'
+   +'.pe2l{display:flex;flex-wrap:wrap;gap:1.2mm 3mm;font-size:7px;margin-top:2mm}.pe2l i{display:inline-block;width:3mm;height:3mm;border-radius:.6mm;vertical-align:-0.5mm;margin-right:1mm}.pe2a{font-size:6.5px;color:#555;margin-top:1mm}</style>';
+  var P=[[8,9,10,11,0,1],[2,3,4,5,6,7]],h=css;
+  P.forEach(function(pm,pi){h+='<div class="pe2p"><div class="pe2h"><b>Pôle France Relève · fleuret hommes · planning des épreuves '+y0+'-'+(y0+1)+'</b><span>'+(pi?'mars → août · feuille droite':'septembre → février · feuille gauche')+' · imprimé le '+new Date().toLocaleDateString('fr-FR')+'</span></div><div class="pe2g">'+pm.map(function(m){return mois(m>=8?y0:y0+1,m);}).join('')+'</div>'+leg+'</div>';});
+  return h;
+}
+
+/* ---------- Tireur : mes compétitions ---------- */
+function vMesCompets(){
+  $('app').innerHTML=loading('Lecture de tes compétitions…');
+  run('getMesCompets',KEY).then(function(r){if(VIEW!=='compets')return;
+    if(!r.trouve){$('app').innerHTML='<div class="card empty">Ton nom n\'est pas encore dans le calendrier des compétitions. Demande au staff.</div>';return;}
+    var td=today(),av=r.ev.filter(function(e){return e.d2>=td;}),pa=r.ev.filter(function(e){return e.d2<td;}).reverse();
+    function carte(e){var nat=cNat(e);return '<div class="card mcp" style="--c:'+cCol(e)+'"><div class="row sp wrap" style="gap:6px"><div><div class="b" style="font-size:16px">'+esc(e.nom)+'</div><div class="mut">'+esc(e.lieu||'')+' · '+esc(cDates(e))+'</div></div>'+(e.statut!=='Prévue'?'<span class="pill p-warn">'+esc(e.statut)+'</span>':'')+'</div>'
+      +'<div class="row wrap" style="gap:6px;margin-top:6px"><span class="ev" style="--ec:'+cCol(e)+';display:inline-block">'+esc(e.type)+'</span><span class="pill p-ink">'+(nat?'national':'international')+'</span>'+(e.dep?'<span class="pill p-acc">départ '+esc(cFr(e.dep))+'</span>':'')+(e.ret?'<span class="pill p-acc">retour '+esc(cFr(e.ret))+'</span>':'')+'</div>'
+      +(e.hotel&&String(e.hotel).trim()!=='-'?'<div class="sm" style="margin-top:6px"><span class="mut">Hôtel :</span> '+esc(e.hotel)+'</div>':'')+(e.ent&&String(e.ent).trim()!=='-'?'<div class="sm"><span class="mut">Encadrement :</span> '+esc(e.ent)+'</div>':'')+'</div>';}
+    var h='<div class="sec">À venir · '+av.length+'</div>'+(av.length?'<div class="grid g2">'+av.map(carte).join('')+'</div>':'<div class="card empty">Aucune compétition prévue pour l\'instant.</div>');
+    if(pa.length)h+='<div class="sec">Déjà passées · '+pa.length+'</div><div class="grid g2" style="opacity:.75">'+pa.map(carte).join('')+'</div>';
+    $('app').innerHTML=h;
+  }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
+}
+
 function ouvrirCreneau(date,slot){
   var off=Math.round((cLun(cDate(date))-cLun(new Date()))/6048e5);SEM.off=off;if(off!==0)SEM.data=null;
   goView('semaine');var n=0;(function att(){var el=document.querySelector('[data-crj="'+date+'"][data-crs="'+slot+'"]');if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(function(){el.click();},350);}else if(n++<40)setTimeout(att,150);})();
@@ -2575,8 +2681,7 @@ function printResultats(){
 var IMPR=[
   {g:'Semaine',t:'Planning de la semaine',d:'Créneaux collectifs du lundi au dimanche, matin et après-midi.',o:[['Cette semaine',0],['Semaine prochaine',1]],f:function(o){return iSem(o).then(function(s){return printSemaine(s);});}},
   {g:'Semaine',t:'Leçons de la semaine',d:'Leçons par maître d\'armes (Guy, Tom, Seb, Antho, puis les autres) et nombre de passages par tireur.',o:[['Cette semaine',0],['Semaine prochaine',1]],f:function(o){return iSem(o).then(function(s){return printLecons(s);});}},
-  {g:'Saison',t:'Planning de la saison',d:'A3, deux pages : septembre à février puis mars à août. Compétitions, stages, vacances, entraînements jusqu\'aux vacances de Noël.',f:function(){return iCal().then(function(){return run('getEntrainementsSaison',KEY);}).then(function(ent){CAL.d=new Date();return printAnnuel(ent);});}},
-  {g:'Saison',t:'Planning des épreuves',d:'A3 : toutes les compétitions de la saison par catégorie (M17, M20, Seniors), avec départs et retours.',f:function(){return iCal().then(function(){CAL.d=new Date();var y0=CAL.d.getMonth()>=8?CAL.d.getFullYear():CAL.d.getFullYear()-1;return '<style>@page{size:A3 landscape;margin:7mm}</style>'+printHead('Pôle France Relève · fleuret hommes','Planning des épreuves '+y0+'-'+(y0+1),'Imprimé le '+new Date().toLocaleDateString('fr-FR'))+cPlanning();});}},
+  {g:'Saison',t:'Planning des épreuves',d:'A3 paysage imprimé sur deux feuilles A4 portrait à mettre côte à côte : septembre-février à gauche, mars-août à droite. Toutes les compétitions par catégorie, abréviations courtes, légende.',f:function(){return iCal().then(function(){CAL.d=new Date();return printEpreuves();});}},
   {g:'Résultats',t:'Résultats et classements sélectifs',d:'Une page par document, A4 : classement sélectif et résultats de la saison (avec la saison passée en gris).',o:[['Toutes catégories','*'],['M17','M17 FH'],['M20','M20 FH'],['M23','M23 FH'],['Seniors','Senior FH']],f:function(o){if(o!=='*')RES.cat=o;return new Promise(function(ok){var p=doPrint;doPrint=function(h){doPrint=p;ok(h);};printResPages(o==='*');});}},
   {g:'Tireurs',t:'Fiche tireur',d:'Résumé, classements et parcours détaillé en compétition.',sel:true,f:function(o){return run('getFiche',KEY,o).then(function(f){var t=f.tireur||{};return printHead('Fiche tireur',(t.prenom||'')+' '+(t.nom||f.nom),[t.annee,t.club].filter(Boolean).join(' · '))+'<div>'+ficheResume(f)+'</div><div class="sec">Parcours en compétition</div><div class="prc">'+parcoursHtml(f.parcours,true)+'</div>';});}}
 ];
@@ -2596,7 +2701,7 @@ function vImprimables(){
 
 /* Ouverture directe de l'écran visé par une notification (#wellness, #rpe, #dispos…), que l'appli soit déjà ouverte ou non. */
 function routeHash(){if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=null;
-  if(r==='Tireur')v=h==='#wellness'&&WELLNESS_T?'wellnessT':h==='#dispos'?'dispos':h==='#rpe'?'rpe':h==='#semaine'?'semaine':h==='#resultats'?'resultats':null;
+  if(r==='Tireur')v=h==='#competitions'?'compets':h==='#wellness'&&WELLNESS_T?'wellnessT':h==='#dispos'?'dispos':h==='#rpe'?'rpe':h==='#semaine'?'semaine':h==='#resultats'?'resultats':null;
   else if(r==='Coach')v=h==='#dispos'?'dispos':h==='#suivi'?'suivi':h==='#semaine'?'semaine':null;
   else v=h==='#jour'?'jour':h==='#charge'?'charge':h==='#suivi-appli'?'connexions':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
   if(v&&v!==VIEW){VIEW=v;[].forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('on',b.dataset.v===v);});render();scrollTo(0,0);}}
