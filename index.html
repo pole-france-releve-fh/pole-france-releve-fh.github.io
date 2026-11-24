@@ -412,7 +412,7 @@ div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box
 .ltab .lh{height:84px;vertical-align:bottom;padding:2px 0;width:34px;min-width:34px}
 .ltab .lh span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;font-size:11px}
 .ltab .l1{position:sticky;left:0;z-index:2;min-width:84px}
-.ltab .l2{position:sticky;left:84px;z-index:2;min-width:170px;cursor:pointer;box-shadow:2px 0 0 #e5e7eb}
+.ltab .l2{position:sticky;left:84px;z-index:2;min-width:250px;cursor:pointer;box-shadow:2px 0 0 #e5e7eb}
 .ltab thead .l1,.ltab thead .l2{z-index:4}
 .ltab tr.lp td{opacity:.55}
 .lsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
@@ -1780,7 +1780,7 @@ function cListe(){
   var h='<div class="row wrap" style="gap:8px;margin-bottom:8px;align-items:center"><div class="chips">'+[['','Toutes'],['M17','M17'],['M20','M20'],['S','Seniors']].map(function(c){return '<button class="chip'+(cat===c[0]?' on':'')+'" data-lc="'+c[0]+'">'+c[1]+'</button>';}).join('')+'</div><span class="mut sm">Choisis la priorité dans le menu de chaque case : c\'est enregistré tout de suite (et recopié dans le fichier maître).</span></div>';
   h+='<div class="hsc lsc"><table class="ltab"><thead><tr><th class="l1" rowspan="2">Dates</th><th class="l2" rowspan="2">Compétition</th><th rowspan="2">Cat.</th><th rowspan="2">A·B·C</th>'+G.map(function(g){return '<th colspan="'+g.n+'" class="lg">'+esc(g.g)+'</th>';}).join('')+'</tr><tr>'+H.map(function(x){return '<th class="lh"><span>'+esc(x.nom)+'</span></th>';}).join('')+'</tr></thead><tbody>';
   L.forEach(function(e){var i=CAL.data.ev.indexOf(e),pass=e.d2<td;
-    h+='<tr class="'+(pass?'lp':'')+'"><td class="l1">'+esc(e.d1===e.d2?frDate(e.d1):frDate(e.d1)+'→'+frDate(e.d2))+'</td><td class="l2" data-e="'+i+'"><span class="lsw" style="background:'+cCol(e)+(cNat(e)?';background:#fff;border:2px solid '+cCol(e):'')+'"></span><b>'+esc(abLab(e))+'</b> <span class="mut">'+esc(e.lieu||'')+'</span></td><td class="ctr">'+esc(/M17|M20/i.test(e.cat)?e.cat:'Sr')+'</td><td class="ctr"><b>'+cNb(e)+'</b></td>'
+    h+='<tr class="'+(pass?'lp':'')+'"><td class="l1">'+esc(e.d1===e.d2?frDate(e.d1):frDate(e.d1)+'→'+frDate(e.d2))+'</td><td class="l2" data-e="'+i+'"><span class="lsw" style="background:'+cCol(e)+(cNat(e)?';background:#fff;border:2px solid '+cCol(e):'')+'"></span><b>'+esc(e.nom)+'</b> <span class="mut">· '+esc(e.lieu||'')+'</span></td><td class="ctr">'+esc(/M17|M20/i.test(e.cat)?e.cat:'Sr')+'</td><td class="ctr"><b>'+cNb(e)+'</b></td>'
       +H.map(function(x,k){var v=String(e.p[k]||'');return '<td class="lpc"><select data-lp="'+i+'|'+k+'" class="lps lp-'+(v||'x')+'">'+['','A','B','C','D','non'].map(function(o){return '<option value="'+o+'"'+(o===v?' selected':'')+'>'+(o||'·')+'</option>';}).join('')+'</select></td>';}).join('')+'</tr>';});
   h+='</tbody></table></div><div class="mut sm" style="margin-top:6px">A·B·C = nombre de tireurs prévus. Case pleine = épreuve internationale, contour = nationale. Clique sur le nom d\'une compétition pour sa fiche (logistique, qui y va).</div>';
   setTimeout(function(){
