@@ -2126,7 +2126,7 @@ function escDictee(t){
   $('dOk').onclick=function(){var ms=parse();if(!ms.length){alert('Pas compris : il faut deux tireurs du tour et deux scores.');return;}var seq=t.type==='libre'||t.type==='roi';ms.forEach(function(m,i){escSet(t,m.a,m.b,m.sa,m.sb,seq?'m'+(Date.now()+i):null);});fermer();escTour(t);escSave();};
 }
 /* ---------------- APPLICATION (PWA) ET NOTIFICATIONS ---------------- */
-var VAPID='';
+var VAPID='',PUSHFIN='';
 var WELLNESS_T=true; /* questionnaire wellness côté tireur : activé seulement après l'accord du médecin et des familles */
 var APP_URL='https://pole-france-releve-fh.github.io/';
 function estIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent);}
@@ -2134,7 +2134,9 @@ function estInstallee(){return (window.matchMedia&&matchMedia('(display-mode: st
 function pushPossible(){return EN_APP&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;}
 function b64ToU8(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),o=new Uint8Array(b.length);for(var i=0;i<b.length;i++)o[i]=b.charCodeAt(i);return o;}
 function cleSW(){try{if(window.caches)caches.open('pfr').then(function(c){return c.put('cle',new Response(KEY||''));});}catch(e){}}
-function pushSynchro(){if(!pushPossible()||!KEY||Notification.permission!=='granted')return;cleSW();navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription();}).then(function(s){if(s)run('pushAbonner',KEY,s.toJSON(),navigator.userAgent).catch(function(){});});}
+function pushSynchro(){if(!pushPossible()||!KEY||Notification.permission!=='granted')return;cleSW();navigator.serviceWorker.ready.then(function(r){return r.pushManager.getSubscription().then(function(s){if(s)return s;
+  /* autorisation donnée mais plus d'abonnement (iOS l'a supprimé) : on se réabonne sans rien demander */
+  return (VAPID?Promise.resolve(VAPID):run('getVapid').then(function(v){VAPID=v;return v;})).then(function(){return r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID)});});});}).then(function(s){if(s)run('pushAbonner',KEY,s.toJSON(),navigator.userAgent).catch(function(){});}).catch(function(){});}
 function pushActiver(){
   if(estIOS()&&!estInstallee()){alert('Sur iPhone, les notifications ne marchent que depuis l\'application installée : dans Safari, touche le bouton Partager (carré avec flèche) puis « Sur l\'écran d\'accueil », puis ouvre l\'application depuis l\'icône PFR et touche à nouveau la cloche.');return;}
   if(!pushPossible()){alert(EN_APP?(estIOS()?'Il faut iOS 16.4 ou plus récent pour recevoir les notifications (Réglages › Général › Mise à jour logicielle).':'Ce navigateur ne gère pas les notifications. Ouvre l\'application dans Chrome ou Safari.'):'Les notifications passent par l\'application installée.');return;}
@@ -2142,8 +2144,8 @@ function pushActiver(){
     if(p!=='granted')throw new Error('Notifications refusées. Tu peux les réactiver dans les réglages du téléphone.');
     return navigator.serviceWorker.ready;
   }).then(function(r){return (VAPID?Promise.resolve(VAPID):run('getVapid').then(function(v){VAPID=v;return v;})).then(function(){return r.pushManager.getSubscription();}).then(function(s){return s||r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID)});});})
-  .then(function(s){cleSW();return run('pushAbonner',KEY,s.toJSON(),navigator.userAgent);})
-  .then(function(){return run('pushTest',KEY);}).then(function(m){alert(m);majCloche();})
+  .then(function(s){cleSW();PUSHFIN=String(s.endpoint||'').slice(-6);return run('pushAbonner',KEY,s.toJSON(),navigator.userAgent);})
+  .then(function(){return run('pushTest',KEY);}).then(function(m){alert(m+'\n\nCet appareil est inscrit (réf. …'+PUSHFIN+'). Si la notification n\'arrive pas d\'ici 30 secondes, ferme l\'application et regarde l\'écran verrouillé.');majCloche();})
   .catch(function(e){alert(e.message);});
 }
 function majCloche(){var b=$('cloche');if(!b)return;if(!KEY){b.classList.add('hide');return;}
@@ -2151,7 +2153,7 @@ function majCloche(){var b=$('cloche');if(!b)return;if(!KEY){b.classList.add('hi
   else if(!EN_APP&&APP_URL){b.classList.remove('hide');b.textContent='📱';b.title='Installer l\'application';}
   else if(EN_APP){b.classList.remove('hide');b.textContent='🔕';b.title='Activer les notifications';}
   else b.classList.add('hide');}
-function clocheClic(){if(!EN_APP&&APP_URL){window.open(APP_URL+'?k='+encodeURIComponent(KEY),'_blank');return;}if(!pushPossible()){pushActiver();return;}if(Notification.permission==='granted')run('pushTest',KEY).then(function(m){alert(m);});else pushActiver();}
+function clocheClic(){if(!EN_APP&&APP_URL){window.open(APP_URL+'?k='+encodeURIComponent(KEY),'_blank');return;}if(!pushPossible()){pushActiver();return;}pushActiver();}
 
 /* ---------------- RPE (tireur) ---------------- */
 var RPE_L=['0 · Repos','1 · Très très facile','2 · Facile','3 · Modéré','4 · Un peu dur','5 · Dur','6 · Dur +','7 · Très dur','8 · Très dur +','9 · Presque maximal','10 · Maximal'];
