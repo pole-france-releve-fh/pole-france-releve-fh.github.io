@@ -384,6 +384,25 @@ div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box
 @media (max-width:900px){.pg{grid-template-columns:1fr}#lmode{flex-wrap:nowrap;overflow-x:auto;max-width:100%}#lmode .chip{font-size:12px;white-space:nowrap;padding:5px 10px}#lmode+.btn,#lmode~.btn{font-size:12px;padding:4px 9px}}
 .slot.sl{color:var(--ink)}
 .ipc h3{font-size:16px}.ipi{font-size:22px;opacity:.5}
+.hsc{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.wtab{border-collapse:separate;border-spacing:3px;font-size:12px;width:auto}
+.wtab th{font-weight:700;color:var(--mut,#6b7280);white-space:nowrap;padding:2px 4px;text-align:center}
+.wtab td{min-width:34px;height:28px;text-align:center;border-radius:7px;padding:0 4px;position:relative;white-space:nowrap}
+.wtab .stk{position:sticky;left:0;background:var(--card,#fff);z-index:1;text-align:left;padding-right:8px}
+.wtab .stk a{color:inherit;text-decoration:none;font-weight:700}
+.wj td{min-width:48px}
+.wcm{position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
+.jcr[data-jcr]{cursor:pointer}.jcr[data-jcr]:hover{text-decoration:underline}
+.flash{animation:fl 1.2s ease 2}@keyframes fl{50%{box-shadow:0 0 0 3px #0a5bc4}}
+.apg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+.apr{border:1px solid var(--line,#e5e7eb);border-radius:12px;padding:8px 10px;background:var(--card,#fff)}
+.apr.off{background:#f6f6f8;opacity:.85}
+.apr.off b{color:var(--mut,#6b7280);text-decoration:line-through}
+.tg{width:46px;height:28px;border-radius:14px;border:0;background:#d1d5db;position:relative;flex:none;cursor:pointer;padding:0}
+.tg i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+.tg.on{background:#34c759}.tg.on i{left:21px}
+.wdot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#e5e7eb;margin-right:3px}
+.wdot.ok{background:#34c759}.wdot.td{outline:2px solid #0a5bc4;outline-offset:1px}
 </style>
 </head>
 <body>
@@ -453,7 +472,7 @@ function boot(d){
     if(d.erreur){if(KEYMEM){try{localStorage.removeItem('pfr_k');}catch(e){}KEY='';KEYMEM=false;showLogin('Ta session a expiré, reconnecte-toi.');return;}$('app').innerHTML='<div class="card">'+esc(d.erreur)+'</div>';return;}
     $('compte').classList.remove('hide');if(KEYMEM)$('logout').classList.remove('hide');
     var tabs;
-    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['gcal','Calendrier'],['gind','Individuel'],['seances','Séances'],['gtir','Tireurs'],['resultats','Résultats'],['imprimables','Imprimables'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']].concat(d.user.admin?[['connexions','Connexions']]:[]);$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
+    if(d.user.role==='Staff'){tabs=[['jour','Aujourd\'hui'],['gcal','Calendrier'],['gind','Individuel'],['seances','Séances'],['gtir','Tireurs'],['resultats','Résultats'],['imprimables','Imprimables'],['budget','Budget'],['materiel','Matériel'],['saisie','Saisie']].concat(d.user.admin?[['connexions','Suivi appli']]:[]);$('maj').textContent='Données du '+d.maj;$('refresh').classList.remove('hide');}
     else if(d.user.role==='Tireur'){tabs=[['moi','Ma fiche'],['semaine','Planning'],['rpe','RPE séance'],['dispos','Mes dispos']].concat(WELLNESS_T?[['wellnessT','Wellness']]:[]).concat([['resultats','Résultats']]);VIEW=location.hash==='#wellness'&&WELLNESS_T?'wellnessT':location.hash==='#dispos'?'dispos':location.hash==='#rpe'?'rpe':location.hash==='#semaine'?'semaine':'moi';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Coach'){tabs=[['semaine','Planning'],['suivi','Suivi leçons'],['dispos','Mes dispos'],['resultats','Résultats']];VIEW=location.hash==='#dispos'?'dispos':location.hash==='#suivi'?'suivi':'semaine';$('sub').textContent=d.user.nom;}
     else if(d.user.role==='Sélectionneur'){tabs=[['resultats','Résultats']];VIEW='resultats';if(d.user.selCats.length){RES.cat=d.user.selCats[0];RES.vue='Sélection';}$('sub').textContent='Résultats & sélection · '+d.user.nom;}
@@ -466,7 +485,7 @@ function boot(d){
     render();
 }
 $('refresh').onclick=function(){$('app').innerHTML=loading('Actualisation…');run('rafraichir',KEY).then(function(d){D=d;cacheD(d);SEM.data=null;CAL.data=null;$('maj').textContent='Données du '+d.maj;render();});};
-var GRP={gcal:[['semaine','Semaine'],['calendrier','Année'],['saison','Bilan saison']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['muscu','Muscu']]},SUBV={};
+var GRP={gcal:[['semaine','Semaine'],['calendrier','Année'],['saison','Bilan saison']],gind:[['lecons','Leçons et créneaux'],['dispos','Dispos'],['suivi','Suivi des leçons']],gtir:[['tireurs','Tireurs'],['wellness','Wellness'],['charge','Charge'],['muscu','Muscu']]},SUBV={};
 function grpDe(v){for(var g in GRP){if(GRP[g].some(function(x){return x[0]===v;})&&document.querySelector('#nav [data-v="'+g+'"]'))return g;}return null;}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-sv]');if(b){VIEW=b.dataset.sv;render();}});
 function render(){
@@ -474,7 +493,7 @@ function render(){
   var g=grpDe(VIEW);if(g)SUBV[g]=VIEW;
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW||b.dataset.v===g);});
   $('stabs').innerHTML=g?'<div class="chips stabs">'+GRP[g].map(function(x){return '<button class="chip'+(x[0]===VIEW?' on':'')+'" data-sv="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>':'';
-  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
+  ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalendrier,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
   window.scrollTo(0,0);
 }
 
@@ -1126,7 +1145,7 @@ function alertes(){
 }
 
 /* ---------------- SÉANCES ---------------- */
-var STATUTS=['Présent','Retard','Écourté','Adapté blessure','Absent justifié','Absent non justifié'];
+var STATUTS=['Présent','Retard','Écourté','Adapté blessure','Absent','Absent justifié','Absent non justifié'];
 function vSeances(){
   if(!SEM.data||SEM.data.off!==SEM.off){$('app').innerHTML=loading();run('getSemaine',KEY,SEM.off).then(function(r){r.off=SEM.off;SEM.data=r;vSeances();}).catch(function(e){$('app').textContent=e.message;});return;}
   var r=SEM.data,s=r.semaine;
@@ -1168,7 +1187,7 @@ function lessonSlot(c,j){
 function vPresences(){
   $('app').innerHTML=loading('Calcul des présences…');
   run('getPresences',KEY).then(function(l){
-    var cols=['Présent','Retard','Écourté','Adapté blessure','Absent justifié','Absent non justifié'];
+    var cols=['Présent','Retard','Écourté','Adapté blessure','Absent','Absent justifié','Absent non justifié'].filter(function(c){return c.indexOf('Absent ')<0||l.some(function(o){return o[c];});});
     l.sort(function(a,b){return String(a.tireur).localeCompare(String(b.tireur));});
     var h='<button class="back" id="back">← Séances</button><div class="card"><h3>Suivi des présences · séances collectives</h3>'+(l.length?'<div style="overflow:auto"><table><tr><th>Tireur</th><th class="num">Séances</th>'+cols.map(function(c){return '<th class="num">'+c+'</th>';}).join('')+'<th class="num">Retard cumulé</th><th class="num">Assiduité</th></tr>'+l.map(function(o){var pres=(o['Présent']||0)+(o['Retard']||0)+(o['Écourté']||0)+(o['Adapté blessure']||0),pct=o.total?Math.round(pres*100/o.total):0;return '<tr><td><b>'+esc(o.tireur)+'</b></td><td class="num">'+o.total+'</td>'+cols.map(function(c){return '<td class="num">'+(o[c]||'')+'</td>';}).join('')+'<td class="num">'+(o.retardMin?o.retardMin+' min':'')+'</td><td class="num"><span class="pill '+(pct>=90?'p-ok':pct>=75?'p-warn':'p-bad')+'">'+pct+' %</span></td></tr>';}).join('')+'</table></div>':'<div class="empty">Aucun appel enregistré pour l\'instant. Les présences apparaîtront ici dès les premiers appels faits depuis l\'onglet Séances.</div>')+'<div class="mut sm" style="margin-top:8px">Assiduité = présent, en retard, écourté ou adapté, rapporté au nombre de séances pointées.</div></div>';
     $('app').innerHTML=h;$('back').onclick=function(){vSeances();};
@@ -1189,8 +1208,9 @@ function openSeance(f,p){
   var tousEx=(f&&f.exercices)||[];
   CUR={vol:(f&&f.appel&&f.appel.length)?'bilan':'appel',modEx:tousEx.filter(function(e){return /-T\d+G\d+$/.test(e.idE||'');}),id:f?f.id:'',date:(f&&f.date)||p.date,h:(f&&f.h)||p.h,type:(f&&f.type)||p.type,lieu:(f&&f.lieu)||p.lieu,duree:(f&&f.duree)||'',coach:(f&&f.coach)||D.user.nom,consignes:(f&&f.consignes)||'',intensite:(f&&f.intensite)||'',repos:(f&&f.repos)||'',photo:(f&&f.photo)||'',notes:(f&&f.notes)||'',appel:{},exercices:tousEx.filter(function(e){return !/-T\d+G\d+$/.test(e.idE||'');}),matchs:(f&&f.matchs)||[]};
   var neuf=!(f&&f.appel&&f.appel.length);
-  (f?f.appel:[]).forEach(function(a){CUR.appel[a.tireur]=a;});
-  D.tireurs.filter(function(t){return t.pole||/^Partenaire/i.test(t.statut);}).forEach(function(t){var n=t.nom+' '+t.prenom;if(!CUR.appel[n])CUR.appel[n]={tireur:n,statut:neuf&&t.pole?'Présent':''};});
+  (f?f.appel:[]).forEach(function(a){CUR.appel[a.tireur]=Object.assign({touche:true},a);});
+  CUR.quoi=p&&p.quoi||'';
+  if(neuf)appliquerPublic(CUR,publicDefaut(CUR));else CUR.pub='';
   drawSeance();
 }
 function drawSeance(){
@@ -1199,7 +1219,7 @@ function drawSeance(){
   m+='<div class="vtabs"><button data-vol="appel" class="'+(v==='appel'?'on':'')+'">Appel · '+np+'</button><button data-vol="contenu" class="'+(v==='contenu'?'on':'')+'">Contenu</button><button data-vol="bilan" class="'+(v==='bilan'?'on':'')+'">Bilan</button></div>';
   if(estAssaut(c.type)||/FONDA|ASSAUT|DOUBLETTE/.test(norm(c.type)))m+='<button class="bigbtn" id="goEsc" style="margin-bottom:10px">⚔ Module Assauts : poules, tableaux, scores</button>';
   if(v==='appel'){
-    m+='<div class="row wrap" style="margin-bottom:6px;gap:6px"><button class="btn sm" id="allP">Tous présents</button><select id="addT" style="width:auto"><option value="">+ Ajouter un tireur</option>'+opts(noms().filter(function(n){return !c.appel[n];}),null)+'</select><input id="addI" placeholder="Invité (nom libre)" style="width:150px"><button class="btn sm" id="addIb">+ Invité</button></div><div class="mut sm" style="margin-bottom:4px">Tout le pôle est présent par défaut : ne change que les exceptions.</div><div id="ap"></div>';
+    m+='<div id="ap"></div>';
   }else if(v==='contenu'){
     var aContenu=c.exercices.length||c.modEx.length||(c.matchs||[]).length;
     if(aContenu&&!c.edit){m+=ensembleHtml()+'<button class="btn" id="edC" style="margin-top:10px">✎ Modifier le contenu</button><div style="display:none">';}
@@ -1220,12 +1240,8 @@ function drawSeance(){
   [].forEach.call(document.querySelectorAll('[data-vol]'),function(b){b.onclick=function(){keepFields();c.vol=b.dataset.vol;drawSeance();};});
   if($('goEsc'))$('goEsc').onclick=function(){keepFields();var pres=Object.keys(c.appel).filter(function(n){return /^Présent|Retard|Écourté|Adapté/.test(c.appel[n].statut);}).sort();var titre=frDate(c.date)+' · '+c.h+' · '+c.type;
     $('sM').className='msg';$('sM').textContent='Enregistrement de l\'appel…';
-    run('saveSeance',KEY,seanceObj()).then(function(id){c.id=id;return run('saveAppel',KEY,id,c.date,Object.keys(c.appel).map(function(n){return c.appel[n];})).then(function(){escCharger(id,c.date,titre,pres);});}).catch(function(e){$('sM').className='msg err';$('sM').textContent=e.message;});};
-  if(v==='appel'){drawAppel();
-    $('allP').onclick=function(){Object.keys(c.appel).forEach(function(n){if(!c.appel[n].statut)c.appel[n].statut='Présent';});drawSeance();};
-    $('addT').onchange=function(){if(this.value){c.appel[this.value]={tireur:this.value,statut:'Présent'};drawSeance();}};
-    $('addIb').onclick=function(){var n=$('addI').value.trim();if(!n)return;n=n+' (invité)';c.appel[n]={tireur:n,statut:'Présent'};drawSeance();};
-  }
+    run('saveSeance',KEY,seanceObj()).then(function(id){c.id=id;return run('saveAppel',KEY,id,c.date,appelPourEnvoi()).then(function(){escCharger(id,c.date,titre,pres);});}).catch(function(e){$('sM').className='msg err';$('sM').textContent=e.message;});};
+  if(v==='appel'){drawAppel();}
   if($('edC'))$('edC').onclick=function(){c.edit=true;drawSeance();};
   if($('vuC'))$('vuC').onclick=function(){keepFields();c.edit=false;drawSeance();};
   if(v==='contenu'){drawExos();
@@ -1259,8 +1275,8 @@ function ensembleHtml(){
 function ensMatch(m){var w=Number(m.sa)>Number(m.sb),ok=m.sa!==''&&m.sb!==''&&m.sa!=null;return '<div class="sm lmr" style="display:flex;gap:6px;align-items:center;padding:3px 0"><span style="flex:1;text-align:right;'+(ok&&w?'font-weight:800;color:var(--ok)':'')+'">'+esc(nomCourt(m.a))+'</span><b class="scb">'+(ok?esc(m.sa)+' – '+esc(m.sb):'–')+'</b><span style="flex:1;'+(ok&&!w?'font-weight:800;color:var(--ok)':'')+'">'+esc(nomCourt(m.b))+'</span></div>';}
 function bilanHtml(){
   var c=CUR,par={};Object.keys(c.appel).forEach(function(n){var s=c.appel[n].statut;if(s)(par[s]=par[s]||[]).push(c.appel[n]);});
-  var SC={'Présent':'p-ok','Retard':'p-warn','Écourté':'p-warn','Adapté blessure':'p-acc','Absent justifié':'p-ink','Absent non justifié':'p-bad'};
-  var np=['Présent','Retard','Écourté','Adapté blessure'].reduce(function(s,k){return s+(par[k]||[]).length;},0),na=(par['Absent justifié']||[]).length+(par['Absent non justifié']||[]).length,ms0=c.matchs||[],tt=ms0.reduce(function(s,m){return s+(Number(m.sa)||0)+(Number(m.sb)||0);},0);
+  var SC={'Présent':'p-ok','Retard':'p-warn','Écourté':'p-warn','Adapté blessure':'p-acc','Absent':'p-ink','Absent justifié':'p-ink','Absent non justifié':'p-bad'};
+  var np=['Présent','Retard','Écourté','Adapté blessure'].reduce(function(s,k){return s+(par[k]||[]).length;},0),na=(par['Absent']||[]).length+(par['Absent justifié']||[]).length+(par['Absent non justifié']||[]).length,ms0=c.matchs||[],tt=ms0.reduce(function(s,m){return s+(Number(m.sa)||0)+(Number(m.sb)||0);},0);
   var h='<div class="jk bk"><div style="--k:var(--ok)"><b>'+np+'</b><span>présents</span></div><div style="--k:var(--bad)"><b>'+na+'</b><span>absents</span></div><div style="--k:var(--acc)"><b>'+ms0.length+'</b><span>matchs</span></div><div style="--k:#c46a00"><b>'+tt+'</b><span>touches</span></div></div>';
   h+='<div class="sec" style="margin-top:4px">Présences</div><div class="card" style="padding:10px">'+(Object.keys(par).length?STATUTS.filter(function(s){return par[s];}).map(function(s){var l=par[s];return '<div class="sm" style="margin:5px 0"><span class="pill '+(SC[s]||'p-ink')+'">'+esc(s)+' · '+l.length+'</span> '+l.map(function(a){return esc(nomCourt(a.tireur))+(a.retard?' ('+esc(a.retard)+' min)':'')+(a.duree?' ('+esc(a.duree)+')':'')+(a.motif?' – '+esc(a.motif):'');}).join(', ')+'</div>';}).join(''):'<span class="mut sm">Appel pas encore fait.</span>')+'</div>';
   var ex=c.modEx.concat(c.exercices.filter(function(e){return e.idE;}));
@@ -1285,7 +1301,7 @@ function repartirPoules(i,k){var c=CUR,e=c.exercices[i],p=presents();k=Math.max(
   c.exercices=avant.concat(news,c.exercices.slice(i+1).filter(function(x){return !(isPoule(x.format)&&/^Poule \d+\/\d+/.test(x.consignes||'')&&!x.idE);}));drawExos();}
 function isMatchs(f){return /Matchs|Équipe|doublette|thème/i.test(f);}
 function keepFields(){var c=CUR;function g(id,v){var e=$(id);return e?e.value:v;}c.date=g('sD',c.date);c.h=g('sH',c.h);c.type=g('sT',c.type);c.duree=g('sDu',c.duree);c.intensite=g('sI',c.intensite);c.coach=g('sC',c.coach);c.consignes=g('sCo',c.consignes);c.notes=g('sN',c.notes);c.repos=g('sR',c.repos);}
-function drawAppel(){
+function ancien_drawAppel(){
   var c=CUR,grp={};(D.tireurs||[]).forEach(function(t){grp[t.nom+' '+t.prenom]=t.pole?0:/occasion/i.test(t.statut)?2:/^Partenaire/i.test(t.statut)?1:3;});
   var GT=['Pôle','Partenaires','Partenaires occasionnels','Autres et invités'],noms_=Object.keys(c.appel).sort(function(a,b){var ga=grp[a]==null?3:grp[a],gb=grp[b]==null?3:grp[b];return ga-gb||a.localeCompare(b);});
   function ligne(n){var a=c.appel[n],bad=/Absent/.test(a.statut),x=/Retard|Écourté|Adapté|Absent/.test(a.statut);
@@ -1376,7 +1392,7 @@ function seanceObj(){var c=CUR;return {id:c.id,date:c.date,h:c.h,duree:c.duree,t
 function saveSeanceAll(){
   keepFields();var c=CUR,msg=$('sM');msg.className='msg';msg.textContent='Enregistrement…';
   run('saveSeance',KEY,seanceObj()).then(function(id){c.id=id;
-    var liste=Object.keys(c.appel).map(function(n){return c.appel[n];});
+    var liste=appelPourEnvoi();
     c.exercices.forEach(function(e,i){e.ordre=i+1;});
     return run('saveAppel',KEY,id,c.date,liste).then(function(){return c.exercices.reduce(function(pr,e){return pr.then(function(){return run('saveExercice',KEY,{idS:id,idE:e.idE,ordre:e.ordre,format:e.format,touches:e.touches,nb:e.nb,intensite:e.intensite||c.intensite,repos:e.repos||c.repos,consignes:e.consignes,participants:e.participants||[],n5:e.n5,n15:e.n15}).then(function(idE){e.idE=idE;
       var ms=[];if(isPoule(e.format)&&e.scores){var p=e.participants;for(var j=0;j<p.length;j++)for(var k=j+1;k<p.length;k++){var s1=e.scores[p[j]+'|'+p[k]],s2=e.scores[p[k]+'|'+p[j]];if(s1!==undefined&&s1!==''&&s2!==undefined&&s2!=='')ms.push({a:p[j],b:p[k],sa:s1,sb:s2});}}
@@ -1409,7 +1425,7 @@ function vJour(){
   if(annonces.length)h+='<div class="sec">Annoncé pour ce jour</div><div class="card" style="padding:8px 10px">'+annonces.map(memoLigne).join('')+'</div>';
   /* séances */
   var cr=(j?j.creneaux:[]).filter(function(c){return !/^LECONS?$/.test(norm(c.quoi))&&!estRecup(c.quoi);});
-  var restantes=faites.slice(),items=cr.map(function(c){var i=-1;restantes.forEach(function(f,k){if(i<0&&hnum(f.h)===hnum(c.h))i=k;});return {h:c.h,quoi:c.quoi,lieu:c.lieu,f:i>=0?restantes.splice(i,1)[0]:null};});
+  var restantes=faites.slice(),items=cr.map(function(c){var i=-1;restantes.forEach(function(f,k){if(i<0&&hnum(f.h)===hnum(c.h))i=k;});return {h:c.h,quoi:c.quoi,lieu:c.lieu,slot:c.slot,f:i>=0?restantes.splice(i,1)[0]:null};});
   restantes.forEach(function(f){items.push({h:f.h,quoi:f.type,lieu:f.lieu,f:f});});
   items.sort(function(a,b){return hnum(a.h)-hnum(b.h);});
   var cur=-1;if(estAuj){items.forEach(function(it,i){var st=hnum(it.h);if(cur<0&&nm>=st-30&&nm<=st+150)cur=i;});if(cur<0)items.forEach(function(it,i){if(cur<0&&hnum(it.h)>nm)cur=i;});}
@@ -1419,7 +1435,7 @@ function vJour(){
   items.forEach(function(it,i){
     var f=it.f,p={id:f?f.id:'',date:dj,h:it.h,type:typeDe(it.quoi),lieu:it.lieu,quoi:it.quoi},res='';
     if(f){var pr=f.appel.filter(function(a){return /^Présent|Retard|Écourté|Adapté/.test(a.statut);}).length;res='<span class="pill p-ok">'+pr+' présent'+(pr>1?'s':'')+'</span> '+((f.matchs||[]).length?'<span class="pill p-ink">'+f.matchs.length+' matchs</span>':'');}
-    h+='<div class="slot '+(f?'done':'todo')+(i===cur?' jour-now':'')+'" style="flex-wrap:wrap"><div style="flex:1;min-width:180px">'+(i===cur?'<div class="pill p-acc" style="margin-bottom:4px">'+(nm>=hnum(it.h)-30?'En ce moment':'À suivre')+'</div>':'')+'<div class="b" style="font-size:16px">'+esc(it.h)+' · '+tags(it.quoi)+'</div><div class="mut sm">'+esc(it.lieu||'')+'</div><div style="margin-top:4px">'+res+'</div></div><div class="row" style="gap:6px">'+(estEscrime(it.quoi)?'<button class="btn pr" data-esc="'+esc(JSON.stringify(p))+'">⚔ Assauts</button>':'')+'<button class="btn" data-jopen="'+esc(JSON.stringify(p))+'">'+(f?'Séance':'Appel')+'</button></div></div>';
+    h+='<div class="slot '+(f?'done':'todo')+(i===cur?' jour-now':'')+'" style="flex-wrap:wrap"><div style="flex:1;min-width:180px">'+(i===cur?'<div class="pill p-acc" style="margin-bottom:4px">'+(nm>=hnum(it.h)-30?'En ce moment':'À suivre')+'</div>':'')+'<div class="b jcr" style="font-size:16px"'+(it.slot?' data-jcr="'+esc(dj+'|'+it.slot)+'" title="Modifier ce créneau dans le calendrier"':'')+'>'+esc(it.h)+' · '+tags(it.quoi)+(it.slot?' <span class="mut sm" style="font-weight:600">✎</span>':'')+'</div><div class="mut sm">'+esc(it.lieu||'')+'</div><div style="margin-top:4px">'+res+'</div></div><div class="row" style="gap:6px">'+(estEscrime(it.quoi)?'<button class="btn pr" data-esc="'+esc(JSON.stringify(p))+'">⚔ Assauts</button>':'')+'<button class="btn" data-jopen="'+esc(JSON.stringify(p))+'">'+(f?'Séance':'Appel')+'</button></div></div>';
   });
   /* leçons par coach */
   var lec=j?j.lecons.concat((j.entretiens||[]).map(function(x){return Object.assign({e:true},x);})):[],parC={};
@@ -1430,8 +1446,11 @@ function vJour(){
   /* point de la semaine, à faire, wellness, charge, matériel */
   h+='<div class="grid g2 jgrid">'+jourSemaine(s,r,dj)+jourTodo(aFaire)+'</div>';
   h+=jourWellness(dj);
-  if(estAuj)h+='<div class="grid g2 jgrid">'+jourCharge()+jourMateriel()+'</div>';
+  if(estAuj)h+='<div class="grid g2 jgrid">'+jourCharge()+jourAppli()+'</div><div class="grid g2 jgrid">'+jourMateriel()+'</div>';
   $('app').innerHTML=h;
+  bindFF($('app'));
+  [].forEach.call(document.querySelectorAll('[data-jcr]'),function(el){el.onclick=function(){var x=el.dataset.jcr.split('|');ouvrirCreneau(x[0],x[1]);};});
+  [].forEach.call(document.querySelectorAll('.jsem'),function(el){el.onclick=function(e){if(e.target.closest('button,a,input'))return;SEM.off=off;SEM.data=null;goView('semaine');};});
   $('jPrev').onclick=function(){JOUR.d=cIso(cAdd(cDate(dj),-1));vJour();};
   $('jNext').onclick=function(){JOUR.d=cIso(cAdd(cDate(dj),1));vJour();};
   if($('jAuj'))$('jAuj').onclick=function(){JOUR.d=td;vJour();};
@@ -1451,7 +1470,7 @@ function jourSemaine(s,r,dj){
   s.jours.forEach(function(j){j.creneaux.forEach(function(c){if(/^LECONS?$/.test(norm(c.quoi))||estRecup(c.quoi))return;prev++;if(j.date<=td&&sea.some(function(f){return f.date===j.date&&hnum(f.h)===hnum(c.h);}))faites++;});});
   sea.forEach(function(f){matchs+=(f.matchs||[]).length;(f.appel||[]).forEach(function(a){if(!a.statut)return;poin++;if(/^Présent|Retard|Écourté|Adapté/.test(a.statut))pres++;});});
   var evts=[];s.jours.forEach(function(j){if(j.evt)String(j.evt).split('\n').forEach(function(l){if(l.trim())evts.push(esc(j.jour.split(' ')[0])+' : '+esc(l.trim()));});});
-  var h='<div class="card jcard" style="--jc:#0a5bc4"><h3>Point de la semaine</h3><div class="mut sm" style="margin-top:-6px">'+esc(s.titre)+'</div><div class="jk">'
+  var h='<div class="card jcard jsem" style="--jc:#0a5bc4;cursor:pointer"><h3 class="row sp" style="align-items:center"><span>Point de la semaine</span><span class="btn sm">Semaine ›</span></h3><div class="mut sm" style="margin-top:-6px">'+esc(s.titre)+'</div><div class="jk">'
    +'<div><b>'+faites+'<small>/'+prev+'</small></b><span>séances faites</span></div><div><b>'+matchs+'</b><span>matchs saisis</span></div><div><b>'+(poin?Math.round(pres*100/poin)+'<small>%</small>':'–')+'</b><span>assiduité</span></div></div>';
   var B=bandHtml(s);
   if(B.n){var J7=s.jours.slice(0,7);h+='<div class="ws">'+J7.map(function(j,i){var d=String(j.jour).trim().split(/\s+/);return '<div class="wsd'+(j.date===td?' t':'')+'" style="grid-column:'+(i+1)+';grid-row:1"><span>'+esc(d[0].slice(0,3).toLowerCase())+'</span>'+esc(d[1]||'')+'</div>';}).join('')
@@ -1463,7 +1482,7 @@ function jourSemaine(s,r,dj){
 function jourTodo(l){
   return '<div class="card jcard" style="--jc:#c46a00"><h3>À faire'+(l.length?' <span class="mut sm">· '+l.length+'</span>':'')+'</h3>'+(l.length?l.map(memoLigne).join(''):'<div class="mut sm">Rien en attente.</div>')+'<div class="row" style="gap:6px;margin-top:8px"><input id="tdT" placeholder="Ajouter une tâche…"><button class="btn pr sm" id="tdOk">+</button></div></div>';
 }
-function jourCharge(){
+function ancien_jourCharge(){
   var R=D.rpe||[],td=today(),pole=D.tireurs.filter(function(t){return t.pole;});
   if(!R.length)return '<div class="card jcard" style="--jc:#7d3fc2"><h3>Charge d\'entraînement</h3><div class="mut sm">Pas encore de RPE saisi. La charge (durée × RPE) apparaîtra ici dès les premières réponses des tireurs en fin de séance.</div></div>';
   function jours(n){return cIso(cAdd(new Date(),-n));}
@@ -1511,7 +1530,7 @@ function memoVocalUI(){
       if(rep.memo){$('gR').innerHTML='<div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" id="gE">✎ Corriger le type, le tireur ou la date</button></div>';$('gE').onclick=function(){memoEditer(rep.memo,function(){$('gM').textContent='Mémo corrigé : '+memoLib(rep.memo.type)+(rep.memo.tireurs.length?' · '+rep.memo.tireurs.map(nomCourt).join(', '):'')+(rep.memo.date?' · '+frDate(rep.memo.date):'')+'.';});};}
     }).catch(function(e){$('gM').className='msg err';$('gM').textContent=e.message;});};
 }
-function jourWellness(dj){
+function ancien_jourWellness(dj){
   var pole=D.tireurs.filter(function(t){return t.pole;}),map={};(D.wellness||[]).forEach(function(w){if(w.d===dj)map[norm(w.tireur)]=w;});
   if(dj>today())return '';
   var rep=pole.filter(function(t){return map[t.cle];}),manq=pole.filter(function(t){return !map[t.cle];});
@@ -1524,6 +1543,211 @@ function jourWellness(dj){
   return '<div class="sec">Wellness du jour <span class="mut sm" style="font-weight:600;text-transform:none;letter-spacing:0">'+rep.length+'/'+pole.length+' réponses</span></div><div class="card" style="padding:10px">'+(rep.length?'<div class="ntl">'+rep.map(function(t){var w=map[t.cle];return '<span class="wchip" style="'+col(w.total)+'" title="sommeil '+w.s+', forme '+w.f+', courbatures '+w.c+', humeur '+w.hu+', stress '+w.st+(w.comm?' · '+esc(w.comm):'')+'">'+esc(t.prenom)+' <b>'+w.total+'</b>'+(w.comm?' 💬':'')+'</span>';}).join('')+'</div>':'<div class="mut sm">Aucune réponse pour l\'instant.</div>')+(al.length?'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><b class="sm">Alertes</b>'+al.join('')+'</div>':'')+(manq.length?'<div class="mut sm" style="margin-top:8px">Pas encore répondu : '+manq.map(function(t){return esc(t.prenom);}).join(', ')+'</div>':'')+(rep.some(function(t){return map[t.cle].comm;})?'<div style="margin-top:8px">'+rep.filter(function(t){return map[t.cle].comm;}).map(function(t){return '<div class="sm">💬 <b>'+esc(t.prenom)+'</b> : '+esc(map[t.cle].comm)+'</div>';}).join('')+'</div>':'')+'</div>';
 }
 function dicteeGlobale(){memoVocalUI();}
+/* ================= LIENS ENTRE LES ÉCRANS + DÉTAILS (wellness, charge, appel, suivi appli) ================= */
+function goView(v,apres){VIEW=v;render();if(apres)setTimeout(apres,60);}
+var MCH=[];function mchKill(){MCH.forEach(function(c){try{c.destroy();}catch(e){}});MCH=[];}
+function fermerModal(){mchKill();$('modal').innerHTML='';}
+function isoJ(n){return cIso(cAdd(new Date(),-n));}
+function joursListe(n){var l=[];for(var i=n-1;i>=0;i--)l.push(isoJ(i));return l;}
+function jjmm(iso){var d=cDate(iso);return ['di','lu','ma','me','je','ve','sa'][d.getDay()]+' '+d.getDate();}
+var WIT=[['total','Total','/25'],['s','Sommeil','/5'],['f','Forme','/5'],['c','Courbatures','/5'],['hu','Humeur','/5'],['st','Stress','/5']];
+function wCol(k,v){if(v==null||v==='')return 'background:var(--bg2,#f0f2f5);color:#9aa1ad';v=Number(v);
+  if(k==='total')return v<=13?'background:var(--bad-bg);color:var(--bad)':v<=17?'background:var(--warn-bg);color:var(--warn)':'background:var(--ok-bg);color:var(--ok)';
+  return v<=2?'background:var(--bad-bg);color:var(--bad)':v===3?'background:var(--warn-bg);color:var(--warn)':'background:var(--ok-bg);color:var(--ok)';}
+function tirDe(cle){return D.tireurs.filter(function(t){return t.cle===cle;})[0];}
+function nomT(t){return t?t.prenom+' '+t.nom:'';}
+/* charge : séries journalières, aiguë (7 j), chronique (moyenne hebdo sur 28 j), rapport A/C */
+function chargeSerie(cle,nJ){
+  var R=(D.rpe||[]).filter(function(x){return norm(x.tireur)===cle;}),par={};R.forEach(function(x){par[x.d]=(par[x.d]||0)+Number(x.charge||0);});
+  var tous=joursListe(nJ+28),out=[];
+  var prem=R.length?R.map(function(x){return x.d;}).sort()[0]:'9999';
+  tous.forEach(function(d,i){if(i<28)return;var a=0,c=0;for(var k=0;k<28;k++){var dd=tous[i-k];if(k<7)a+=par[dd]||0;c+=par[dd]||0;}var ch=c/4,assez=prem<=cIso(cAdd(cDate(d),-20));out.push({d:d,j:par[d]||0,a:a,c:ch,r:ch&&assez?a/ch:null});});
+  return {jours:out,R:R};
+}
+function rcls(r){return r==null?'p-ink':r>1.5?'p-bad':r>1.3?'p-warn':r<0.8?'p-acc':'p-ok';}
+function monotonie(serie){var l=serie.slice(-7).map(function(x){return x.j;}),m=l.reduce(function(s,x){return s+x;},0)/7,sd=Math.sqrt(l.reduce(function(s,x){return s+(x-m)*(x-m);},0)/7);return sd?m/sd:null;}
+
+/* ---------- fiche forme d'un tireur : wellness détaillé + charge ---------- */
+function ficheForme(cle,onglet){
+  var t=tirDe(cle);if(!t)return;onglet=onglet||'well';mchKill();
+  var W=(D.wellness||[]).filter(function(w){return norm(w.tireur)===cle;}),wm={};W.forEach(function(w){wm[w.d]=w;});
+  var J=joursListe(28),CS=chargeSerie(cle,42),last=CS.jours[CS.jours.length-1]||{};
+  var h='<div class="modal"><div class="card" style="max-width:980px"><div class="row sp wrap"><div><h3 style="margin:0">'+esc(nomT(t))+'</h3><div class="mut sm">'+esc(t.statut||'')+(t.peInsep?' · PE INSEP':'')+'</div></div><div class="row" style="gap:6px"><button class="btn sm" id="ffFi">Fiche complète</button><button class="btn sm" id="ffX">Fermer</button></div></div>';
+  var w7=W.filter(function(w){return w.d>isoJ(7);}),moy7=w7.length?w7.reduce(function(s,w){return s+Number(w.total);},0)/w7.length:null,auj=wm[today()];
+  h+='<div class="jk" style="margin:10px 0"><div><b>'+(auj?auj.total+'<small>/25</small>':'–')+'</b><span>wellness du jour</span></div><div><b>'+(moy7!=null?moy7.toFixed(1):'–')+'</b><span>moyenne 7 j</span></div><div><b>'+Math.round(last.a||0)+'</b><span>charge aiguë 7 j</span></div><div><b>'+(last.r!=null?last.r.toFixed(2):'–')+'</b><span>rapport A/C</span></div></div>';
+  h+='<div class="vtabs"><button data-ffo="well" class="'+(onglet==='well'?'on':'')+'">Wellness</button><button data-ffo="charge" class="'+(onglet==='charge'?'on':'')+'">Charge et RPE</button></div>';
+  if(onglet==='well'){
+    h+='<div style="height:220px;margin:8px 0"><canvas id="ffW"></canvas></div>';
+    h+='<div class="mut sm" style="margin:6px 0">Détail par question sur 28 jours (5 = très bien : bien dormi, en forme, pas de courbatures, bonne humeur, pas de stress).</div>';
+    var JR=J.slice().reverse();h+='<div class="hsc"><table class="wtab"><tr><th class="stk"></th>'+JR.map(function(d){return '<th>'+jjmm(d)+'</th>';}).join('')+'</tr>'+WIT.map(function(k){return '<tr><th class="stk">'+k[1]+'</th>'+JR.map(function(d){var w=wm[d],v=w?w[k[0]]:null;return '<td style="'+wCol(k[0],v)+'">'+(v==null||v===''?'·':esc(v))+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';
+    var cm=W.filter(function(w){return w.comm;}).slice(-8).reverse();
+    h+='<div class="sec">Commentaires</div>'+(cm.length?cm.map(function(w){return '<div class="sm" style="margin:3px 0"><b>'+frDate(w.d)+'</b> · '+esc(w.comm)+'</div>';}).join(''):'<div class="mut sm">Aucun commentaire.</div>');
+  }else{
+    h+='<div style="height:240px;margin:8px 0"><canvas id="ffC"></canvas></div><div style="height:150px;margin:8px 0"><canvas id="ffR"></canvas></div>';
+    h+='<div class="mut sm">Charge d\'une séance = durée (min) × RPE. Aiguë = total des 7 derniers jours. Chronique = moyenne hebdomadaire des 28 derniers jours. Rapport A/C conseillé entre 0,8 et 1,3.</div>';
+    var R=CS.R.slice().sort(function(a,b){return a.d<b.d?1:-1;}).slice(0,15);
+    h+='<div class="sec">Derniers RPE</div>'+(R.length?'<div class="hsc"><table class="sm"><tr><th style="text-align:left">Date</th><th style="text-align:left">Séance</th><th class="num">Durée</th><th class="num">RPE</th><th class="num">Charge</th></tr>'+R.map(function(x){return '<tr><td>'+frDate(x.d)+'</td><td>'+esc(x.seance)+'</td><td class="num">'+(x.duree||'')+'</td><td class="num"><b>'+x.rpe+'</b></td><td class="num">'+Math.round(x.charge||0)+'</td></tr>';}).join('')+'</table></div>':'<div class="mut sm">Pas encore de RPE.</div>');
+  }
+  h+='</div></div>';$('modal').innerHTML=h;
+  $('ffX').onclick=fermerModal;$('ffFi').onclick=function(){fermerModal();openFiche(t.nom+' '+t.prenom);};
+  [].forEach.call(document.querySelectorAll('[data-ffo]'),function(b){b.onclick=function(){ficheForme(cle,b.dataset.ffo);};});
+  if(onglet==='well'&&$('ffW'))MCH.push(new Chart($('ffW'),{type:'line',data:{labels:J.map(jjmm),datasets:[{label:'Total /25',data:J.map(function(d){return wm[d]?Number(wm[d].total):null;}),borderColor:'#0a5bc4',backgroundColor:'#0a5bc4',spanGaps:true,yAxisID:'y',tension:.25,borderWidth:3}].concat(WIT.slice(1).map(function(k,i){var col=['#7d3fc2','#1f8a4c','#c46a00','#c4122f','#6b7280'][i];return {label:k[1]+' /5',data:J.map(function(d){return wm[d]?Number(wm[d][k[0]]):null;}),borderColor:col,backgroundColor:col,spanGaps:true,yAxisID:'y2',borderWidth:1.5,pointRadius:2,tension:.25,hidden:false};}))},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},scales:{y:{min:5,max:25,title:{display:true,text:'total'}},y2:{position:'right',min:1,max:5,grid:{display:false},title:{display:true,text:'questions'}}}}}));
+  if(onglet==='charge'&&$('ffC')){var S=CS.jours;
+    MCH.push(new Chart($('ffC'),{data:{labels:S.map(function(x){return jjmm(x.d);}),datasets:[{type:'bar',label:'Charge du jour',data:S.map(function(x){return x.j||null;}),backgroundColor:'rgba(125,63,194,.45)',order:3},{type:'line',label:'Aiguë (7 j)',data:S.map(function(x){return Math.round(x.a);}),borderColor:'#c4122f',pointRadius:0,borderWidth:2.5,tension:.3,order:1},{type:'line',label:'Chronique (moy. hebdo 28 j)',data:S.map(function(x){return Math.round(x.c);}),borderColor:'#0a5bc4',pointRadius:0,borderWidth:2.5,tension:.3,order:2}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}}}}));
+    MCH.push(new Chart($('ffR'),{type:'line',data:{labels:S.map(function(x){return jjmm(x.d);}),datasets:[{label:'Rapport A/C',data:S.map(function(x){return x.r!=null?Number(x.r.toFixed(2)):null;}),borderColor:'#111',pointRadius:0,borderWidth:2,spanGaps:true},{label:'1,3',data:S.map(function(){return 1.3;}),borderColor:'#c46a00',borderDash:[5,4],pointRadius:0,borderWidth:1},{label:'0,8',data:S.map(function(){return 0.8;}),borderColor:'#0a5bc4',borderDash:[5,4],pointRadius:0,borderWidth:1}]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},scales:{y:{min:0,suggestedMax:2}}}}));}
+}
+
+/* ---------- Wellness (onglet Tireurs > Wellness) : grille horizontale, choix de la question ---------- */
+var WV={k:'total',n:14};
+function vWellness(){
+  var pole=D.tireurs.filter(function(t){return t.pole;}),J=joursListe(WV.n),map={};
+  (D.wellness||[]).forEach(function(w){map[norm(w.tireur)+'|'+w.d]=w;});
+  var h='<div class="row sp wrap" style="gap:8px"><div class="chips">'+WIT.map(function(k){return '<button class="chip'+(WV.k===k[0]?' on':'')+'" data-wk="'+k[0]+'">'+k[1]+'</button>';}).join('')+'</div><div class="chips">'+[7,14,28].map(function(n){return '<button class="chip'+(WV.n===n?' on':'')+'" data-wn="'+n+'">'+n+' j</button>';}).join('')+'</div></div>';
+  var K=WIT.filter(function(k){return k[0]===WV.k;})[0];
+  h+='<div class="card" style="margin-top:10px"><h3 style="margin-top:0">'+K[1]+' · '+WV.n+' derniers jours <span class="mut sm">('+K[2]+')</span></h3><div class="mut sm" style="margin:-6px 0 8px">Touche un nom pour le détail de toutes les questions et la charge d\'entraînement.</div>';
+  var JT=J.slice().reverse();h+='<div class="hsc"><table class="wtab"><tr><th class="stk"></th><th>moy.</th><th>rép.</th>'+JT.map(function(d){return '<th>'+(d===today()?'auj.':jjmm(d))+'</th>';}).join('')+'</tr>';
+  pole.forEach(function(t){var vals=JT.map(function(d){var w=map[t.cle+'|'+d];return w?Number(w[WV.k]):null;}),ok=vals.filter(function(v){return v!=null;}),m=ok.length?ok.reduce(function(s,v){return s+v;},0)/ok.length:null;
+    h+='<tr><th class="stk"><a href="#" data-ff="'+esc(t.cle)+'">'+esc(t.prenom)+' '+esc(String(t.nom).charAt(0))+'.</a></th><td style="'+wCol(WV.k,m==null?null:Math.round(m))+'"><b>'+(m==null?'–':m.toFixed(1))+'</b></td><td class="mut">'+ok.length+'/'+WV.n+'</td>'+vals.map(function(v,i){var w=map[t.cle+'|'+JT[i]];return '<td style="'+wCol(WV.k,v)+'" title="'+(w?'sommeil '+w.s+', forme '+w.f+', courbatures '+w.c+', humeur '+w.hu+', stress '+w.st+(w.comm?' · '+esc(w.comm):''):'')+'">'+(v==null?'·':v)+(w&&w.comm?'<i class="wcm"></i>':'')+'</td>';}).join('')+'</tr>';});
+  h+='</table></div><div class="mut sm" style="margin-top:8px">'+(WV.k==='total'?'Vert : 18 et plus · orange : 14 à 17 · rouge : 13 et moins.':'Vert : 4-5 · orange : 3 · rouge : 1-2.')+' Un point dans la case = commentaire laissé.</div></div>';
+  h+='<div class="card" style="margin-top:12px"><h3 style="margin-top:0">Moyenne du groupe</h3><div style="height:200px"><canvas id="wvC"></canvas></div></div>';
+  var comm=(D.wellness||[]).filter(function(w){return w.comm;}).slice(-12).reverse();
+  h+='<div class="card" style="margin-top:12px"><h3 style="margin-top:0">Derniers commentaires</h3>'+(comm.length?comm.map(function(w){return '<div class="sm" style="margin:4px 0"><b>'+frDate(w.d)+'</b> · <a href="#" data-ff="'+esc(norm(w.tireur))+'">'+esc(w.tireur)+'</a> · '+esc(w.comm)+'</div>';}).join(''):'<div class="mut sm">Aucun commentaire.</div>')+'</div>';
+  $('app').innerHTML=h;
+  [].forEach.call(document.querySelectorAll('[data-wk]'),function(b){b.onclick=function(){WV.k=b.dataset.wk;vWellness();};});
+  [].forEach.call(document.querySelectorAll('[data-wn]'),function(b){b.onclick=function(){WV.n=Number(b.dataset.wn);vWellness();};});
+  bindFF($('app'));
+  var moyJ=J.map(function(d){var l=pole.map(function(t){var w=map[t.cle+'|'+d];return w?Number(w[WV.k]):null;}).filter(function(v){return v!=null;});return l.length?Number((l.reduce(function(s,v){return s+v;},0)/l.length).toFixed(2)):null;});
+  charts.push(new Chart($('wvC'),{type:'line',data:{labels:J.map(jjmm),datasets:[{label:K[1]+' (moyenne)',data:moyJ,borderColor:'#0a5bc4',spanGaps:true,tension:.3,borderWidth:2.5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:WV.k==='total'?{min:5,max:25}:{min:1,max:5}}}}));
+}
+function bindFF(root){[].forEach.call(root.querySelectorAll('[data-ff]'),function(a){a.onclick=function(e){e.preventDefault();e.stopPropagation();ficheForme(a.dataset.ff);};});}
+
+/* ---------- Charge d'entraînement (onglet Tireurs > Charge) ---------- */
+var CHV={n:42};
+function vCharge(){
+  var pole=D.tireurs.filter(function(t){return t.pole;}),rows=pole.map(function(t){var S=chargeSerie(t.cle,CHV.n),l=S.jours[S.jours.length-1]||{},n7=S.R.filter(function(x){return x.d>isoJ(7);}).length;return {t:t,S:S,l:l,mono:monotonie(S.jours),n7:n7,der:S.R.length?S.R.map(function(x){return x.d;}).sort().pop():''};});
+  rows.sort(function(a,b){return (b.l.r||0)-(a.l.r||0);});
+  var J=rows.length?rows[0].S.jours.map(function(x){return x.d;}):[];
+  var h='<div class="row sp wrap"><div class="mut sm">Charge = durée × RPE de chaque séance. Touche un tireur pour ses courbes.</div><div class="chips">'+[28,42,56].map(function(n){return '<button class="chip'+(CHV.n===n?' on':'')+'" data-cn="'+n+'">'+n+' j</button>';}).join('')+'</div></div>';
+  h+='<div class="card" style="margin-top:10px"><h3 style="margin-top:0">Charge du groupe (pôle)</h3><div style="height:240px"><canvas id="chG"></canvas></div></div>';
+  h+='<div class="card" style="margin-top:12px"><h3 style="margin-top:0">Par tireur</h3><div class="hsc"><table class="sm"><tr><th style="text-align:left">Tireur</th><th class="num">Aiguë 7 j</th><th class="num">Chronique</th><th class="num">A/C</th><th class="num">Monotonie</th><th class="num">RPE 7 j</th><th class="num">Dernier</th><th>Tendance A/C</th></tr>'
+   +rows.map(function(x,i){return '<tr data-ff="'+esc(x.t.cle)+'" style="cursor:pointer"><td><b>'+esc(x.t.prenom)+' '+esc(String(x.t.nom).charAt(0))+'.</b></td><td class="num">'+Math.round(x.l.a||0)+'</td><td class="num">'+Math.round(x.l.c||0)+'</td><td class="num"><span class="pill '+rcls(x.l.r)+'">'+(x.l.r==null?'–':x.l.r.toFixed(2))+'</span></td><td class="num">'+(x.mono==null?'–':x.mono.toFixed(1))+'</td><td class="num">'+x.n7+'</td><td class="num">'+(x.der?frDate(x.der):'–')+'</td><td><canvas id="sp'+i+'" width="120" height="28" style="width:120px;height:28px"></canvas></td></tr>';}).join('')+'</table></div>'
+   +'<div class="mut sm" style="margin-top:6px">A/C calculé dès 3 semaines de RPE (avant : « – »). Vert 0,8-1,3 · orange 1,3-1,5 · rouge au-delà · bleu sous-charge. Monotonie = moyenne ÷ écart-type des charges journalières sur 7 jours (au-delà de 2 : séances trop uniformes).</div></div>';
+  $('app').innerHTML=h;
+  [].forEach.call(document.querySelectorAll('[data-cn]'),function(b){b.onclick=function(){CHV.n=Number(b.dataset.cn);vCharge();};});
+  bindFF($('app'));
+  var tot=J.map(function(d,i){return rows.reduce(function(s,x){return s+(x.S.jours[i]?x.S.jours[i].j:0);},0);}),nb=Math.max(1,rows.filter(function(x){return x.S.R.length;}).length);
+  var ra=J.map(function(d,i){var l=rows.map(function(x){return x.S.jours[i]&&x.S.jours[i].r;}).filter(function(v){return v!=null;});return l.length?Number((l.reduce(function(s,v){return s+v;},0)/l.length).toFixed(2)):null;});
+  charts.push(new Chart($('chG'),{data:{labels:J.map(jjmm),datasets:[{type:'bar',label:'Charge moyenne du jour',data:tot.map(function(v){return v?Math.round(v/nb):null;}),backgroundColor:'rgba(125,63,194,.45)',yAxisID:'y'},{type:'line',label:'A/C moyen',data:ra,borderColor:'#111',pointRadius:0,borderWidth:2,yAxisID:'y2',spanGaps:true}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},scales:{y:{title:{display:true,text:'charge'}},y2:{position:'right',min:0,suggestedMax:2,grid:{display:false},title:{display:true,text:'A/C'}}}}}));
+  rows.forEach(function(x,i){var c=$('sp'+i);if(!c)return;var v=x.S.jours.slice(-21).map(function(y){return y.r;});charts.push(new Chart(c,{type:'line',data:{labels:v.map(function(_,k){return k;}),datasets:[{data:v,borderColor:'#7d3fc2',pointRadius:0,borderWidth:1.5,spanGaps:true}]},options:{responsive:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false,min:0,max:2.2}}}}));});
+}
+
+/* ---------- Accueil : wellness détaillé et charge cliquables ---------- */
+function jourWellness(dj){
+  var pole=D.tireurs.filter(function(t){return t.pole;}),map={};(D.wellness||[]).forEach(function(w){if(w.d===dj)map[norm(w.tireur)]=w;});
+  if(dj>today())return '';
+  var rep=pole.filter(function(t){return map[t.cle];}),manq=pole.filter(function(t){return !map[t.cle];});
+  rep.sort(function(a,b){return map[a.cle].total-map[b.cle].total;});
+  var h='<div class="sec row sp" style="align-items:center"><span>Wellness du jour <span class="mut sm" style="font-weight:600;text-transform:none;letter-spacing:0">'+rep.length+'/'+pole.length+' réponses</span></span><button class="btn sm" data-sv="wellness">Détail et historique ›</button></div><div class="card" style="padding:8px 10px">';
+  if(rep.length){h+='<div class="hsc"><table class="wtab wj"><tr><th class="stk" style="text-align:left">Tireur</th>'+WIT.map(function(k){return '<th>'+k[1]+'</th>';}).join('')+'<th style="text-align:left">Alerte / commentaire</th></tr>'
+    +rep.map(function(t){var w=map[t.cle],hist=(D.wellness||[]).filter(function(x){return norm(x.tireur)===t.cle&&x.d<dj&&x.d>=cIso(cAdd(cDate(dj),-28));}),moy=hist.length?hist.reduce(function(s,x){return s+Number(x.total);},0)/hist.length:null,why=[];
+      if(moy!=null&&hist.length>=3&&moy-w.total>=4)why.push('−'+Math.round(moy-w.total)+' pts sur sa moyenne');
+      return '<tr data-ff="'+esc(t.cle)+'" style="cursor:pointer"><th class="stk" style="text-align:left">'+esc(t.prenom)+' '+esc(String(t.nom).charAt(0))+'.</th>'+WIT.map(function(k){return '<td style="'+wCol(k[0],w[k[0]])+'"><b>'+esc(w[k[0]])+'</b></td>';}).join('')+'<td class="sm" style="text-align:left;min-width:160px">'+(why.length?'<span class="pill p-bad">'+why.join(' · ')+'</span> ':'')+esc(w.comm||'')+'</td></tr>';}).join('')+'</table></div>';}
+  else h+='<div class="mut sm">Aucune réponse pour l\'instant.</div>';
+  if(manq.length)h+='<div class="mut sm" style="margin-top:6px">Pas encore répondu : '+manq.map(function(t){return '<a href="#" data-ff="'+esc(t.cle)+'">'+esc(t.prenom)+'</a>';}).join(', ')+'</div>';
+  return h+'</div>';
+}
+function jourCharge(){
+  var R=D.rpe||[],td=today(),pole=D.tireurs.filter(function(t){return t.pole;});
+  var tete='<h3 class="row sp" style="align-items:center"><span>Charge d\'entraînement</span><button class="btn sm" data-sv="charge">Courbes ›</button></h3>';
+  if(!R.length)return '<div class="card jcard" style="--jc:#7d3fc2">'+tete+'<div class="mut sm">Pas encore de RPE saisi.</div></div>';
+  var rows=pole.map(function(t){var S=chargeSerie(t.cle,1),l=S.jours[S.jours.length-1]||{},last=null;S.R.forEach(function(x){if(!last||x.d>=last.d)last=x;});return {t:t,c7:l.a||0,ra:l.r,last:last,n:S.R.length};}).filter(function(x){return x.n;});
+  rows.sort(function(a,b){return (b.ra||0)-(a.ra||0);});
+  var auj=R.filter(function(x){return x.d===td;}),al=rows.filter(function(x){return x.ra!=null&&(x.ra>1.3||x.ra<0.8);});
+  return '<div class="card jcard" style="--jc:#7d3fc2">'+tete+'<div class="mut sm" style="margin-top:-6px">'+auj.length+' RPE aujourd\'hui'+(auj.length?' (moyenne '+(auj.reduce(function(s,x){return s+Number(x.rpe);},0)/auj.length).toFixed(1)+')':'')+' · charge sur 7 jours et rapport aigu/chronique</div>'
+   +(al.length?'<div style="margin:8px 0">'+al.map(function(x){return '<span class="pill '+rcls(x.ra)+'" data-ff="'+esc(x.t.cle)+'" style="margin:0 4px 4px 0;cursor:pointer">'+(x.ra>1.3?'⚠ ':'↓ ')+esc(x.t.prenom)+' '+x.ra.toFixed(2)+'</span>';}).join('')+'</div>':'<div style="margin:8px 0"><span class="pill p-ok">Charges équilibrées</span></div>')
+   +'<table class="sm"><tr><th style="text-align:left">Tireur</th><th class="num">7 j</th><th class="num">A/C</th><th class="num">Dernier RPE</th></tr>'+rows.map(function(x){return '<tr data-ff="'+esc(x.t.cle)+'" style="cursor:pointer"><td>'+esc(x.t.prenom)+' '+esc(String(x.t.nom).charAt(0))+'.</td><td class="num">'+Math.round(x.c7)+'</td><td class="num"><span class="pill '+rcls(x.ra)+'">'+(x.ra==null?'–':x.ra.toFixed(2))+'</span></td><td class="num">'+(x.last?x.last.rpe+' <span class="mut">'+frDate(x.last.d)+'</span>':'')+'</td></tr>';}).join('')+'</table>'
+   +'<div class="mut sm" style="margin-top:6px">Touche un tireur pour ses courbes (charge du jour, aiguë, chronique, A/C) et ses RPE.</div></div>';
+}
+function jourAppli(){
+  if(!(D.user&&D.user.admin))return '';
+  var pole=D.tireurs.filter(function(t){return t.pole;}),td=today(),w={},r={};
+  (D.wellness||[]).forEach(function(x){if(x.d===td)w[norm(x.tireur)]=1;});(D.rpe||[]).forEach(function(x){if(x.d===td)r[norm(x.tireur)]=1;});
+  var nw=pole.filter(function(t){return w[t.cle];}).length,nr=pole.filter(function(t){return r[t.cle];}).length;
+  return '<div class="card jcard" style="--jc:#1f8a4c;cursor:pointer" data-sv="connexions"><h3 class="row sp" style="align-items:center"><span>Utilisation de l\'appli</span><span class="btn sm">Suivi détaillé ›</span></h3><div class="jk"><div><b>'+nw+'<small>/'+pole.length+'</small></b><span>wellness aujourd\'hui</span></div><div><b>'+nr+'<small>/'+pole.length+'</small></b><span>RPE aujourd\'hui</span></div></div><div class="mut sm">Connexions, appareils avec notifications, wellness et RPE de la semaine, dispos rendues : tout est dans le suivi détaillé.</div></div>';
+}
+
+/* ---------- Appel rapide : public de la séance, interrupteur présent/absent, mention facultative ---------- */
+var PUB=[['insep','PE INSEP'],['pole','Pôle'],['polep','Pôle + partenaires'],['tous','Tout le monde']];
+var MENTP=['Retard','Écourté','Adapté blessure'],MENTA=['Blessé','Malade','Scolaire','Compétition','Stage / sélection','Autre'];
+function grpT(t){return !t?3:t.pole?0:/occasion/i.test(t.statut)?2:/^Partenaire/i.test(t.statut)?1:3;}
+function publicDe(pub){return D.tireurs.filter(function(t){var g=grpT(t);if(/ancien|arr[êe]t/i.test(t.statut))return false;return pub==='insep'?t.pole&&t.peInsep:pub==='pole'?g===0:pub==='polep'?g<=1:g<=2;});}
+function publicDefaut(c){var q=norm((c.lieu||'')+' '+(c.quoi||'')+' '+(c.type||''));return /INSEP/.test(q)&&D.tireurs.some(function(t){return t.peInsep;})?'insep':'pole';}
+function appliquerPublic(c,pub){
+  c.pub=pub;var garde={};
+  Object.keys(c.appel).forEach(function(n){var a=c.appel[n];if(a.touche||a.ajoute)garde[n]=a;});
+  var nv={};publicDe(pub).forEach(function(t){var n=t.nom+' '+t.prenom;nv[n]=garde[n]||c.appel[n]&&c.appel[n].touche&&c.appel[n]||{tireur:n,statut:'Présent'};});
+  Object.keys(garde).forEach(function(n){nv[n]=garde[n];});c.appel=nv;
+}
+function estPres(s){return /^Présent|Retard|Écourté|Adapté/.test(s||'');}
+function drawAppel(){
+  var c=CUR,tmap={};(D.tireurs||[]).forEach(function(t){tmap[t.nom+' '+t.prenom]=t;});
+  var noms_=Object.keys(c.appel).sort(function(a,b){return grpT(tmap[a])-grpT(tmap[b])||a.localeCompare(b);});
+  var GT=['Pôle','Partenaires','Partenaires occasionnels','Autres et invités'];
+  var h='<div class="row wrap" style="gap:6px;align-items:center;margin-bottom:8px"><span class="lab" style="margin:0">Public de la séance</span><div class="chips">'+PUB.map(function(p){return '<button class="chip'+(c.pub===p[0]?' on':'')+'" data-pub="'+p[0]+'">'+p[1]+'</button>';}).join('')+'</div><button class="btn sm" id="peG">Groupe PE INSEP…</button></div>';
+  var np=noms_.filter(function(n){return estPres(c.appel[n].statut);}).length;
+  h+='<div class="mut sm" style="margin-bottom:6px">'+np+' présent'+(np>1?'s':'')+' sur '+noms_.length+'. Touche l\'interrupteur pour marquer une absence ; « + » pour préciser (retard, blessure…).</div>';
+  [0,1,2,3].forEach(function(g){var l=noms_.filter(function(n){return grpT(tmap[n])===g;});if(!l.length)return;
+    h+='<div class="lab" style="margin-top:8px">'+GT[g]+' ('+l.length+')</div><div class="apg">'+l.map(function(n){var a=c.appel[n],p=estPres(a.statut),t=tmap[n],mn=p?(a.statut!=='Présent'?a.statut:''):(a.motif||''),open=c.ouvert===n;
+      return '<div class="apr'+(p?'':' off')+'" data-n="'+esc(n)+'"><div class="row" style="gap:8px;align-items:center"><button class="tg'+(p?' on':'')+'" data-tg="1" aria-label="présent ou absent"><i></i></button><b style="flex:1">'+esc(t?t.prenom+' '+t.nom:n)+(t&&t.peInsep?' <span class="pill p-acc" style="font-size:10px">PE INSEP</span>':'')+'</b>'+(mn?'<span class="pill '+(p?'p-warn':'p-ink')+'">'+esc(mn)+(a.retard?' '+esc(a.retard)+' min':'')+'</span>':'')+'<button class="btn sm" data-mx="1">'+(open?'–':'+')+'</button></div>'
+        +(open?'<div class="chips" style="margin-top:6px">'+(p?MENTP:MENTA).map(function(m){var on=p?a.statut===m:a.motif===m;return '<button class="chip'+(on?' on':'')+'" data-mt="'+esc(m)+'">'+esc(m)+'</button>';}).join('')+'</div><div class="row" style="gap:6px;margin-top:6px">'+(p&&a.statut==='Retard'?'<input placeholder="Retard (min)" inputmode="numeric" data-k="retard" value="'+esc(a.retard||'')+'" style="width:110px">':'')+(p&&/Écourté|Adapté/.test(a.statut)?'<input placeholder="Durée faite (min)" inputmode="numeric" data-k="duree" value="'+esc(a.duree||'')+'" style="width:130px">':'')+'<input placeholder="Précision (facultatif)" data-k="note" value="'+esc(a.note||'')+'"></div>':'')+'</div>';}).join('')+'</div>';});
+  h+='<div class="row wrap" style="margin-top:10px;gap:6px"><select id="addT" style="width:auto"><option value="">+ Ajouter un tireur</option>'+opts(noms().filter(function(n){return !c.appel[n];}),null)+'</select><input id="addI" placeholder="Invité (nom libre)" style="width:150px"><button class="btn sm" id="addIb">+ Invité</button></div>';
+  $('ap').innerHTML=h;
+  function compte(){var b=document.querySelector('[data-vol="appel"]');if(b)b.textContent='Appel · '+Object.keys(c.appel).filter(function(x){return estPres(c.appel[x].statut);}).length;}
+  [].forEach.call($('ap').querySelectorAll('[data-pub]'),function(b){b.onclick=function(){appliquerPublic(c,b.dataset.pub);drawAppel();compte();};});
+  $('peG').onclick=peInsepUI;
+  [].forEach.call($('ap').querySelectorAll('.apr'),function(r){var n=r.dataset.n,a=c.appel[n];
+    r.querySelector('[data-tg]').onclick=function(){a.touche=true;if(estPres(a.statut)){a.statut='Absent';a.retard='';a.duree='';}else{a.statut='Présent';a.motif='';}drawAppel();compte();};
+    r.querySelector('[data-mx]').onclick=function(){c.ouvert=c.ouvert===n?'':n;drawAppel();};
+    [].forEach.call(r.querySelectorAll('[data-mt]'),function(b){b.onclick=function(){a.touche=true;var m=b.dataset.mt;if(estPres(a.statut))a.statut=a.statut===m?'Présent':m;else a.motif=a.motif===m?'':m;drawAppel();compte();};});
+    [].forEach.call(r.querySelectorAll('input[data-k]'),function(i){i.oninput=function(){a.touche=true;if(i.dataset.k==='note'){a.note=i.value;}else a[i.dataset.k]=i.value;};});});
+  $('addT').onchange=function(){if(this.value){c.appel[this.value]={tireur:this.value,statut:'Présent',ajoute:true,touche:true};drawAppel();compte();}};
+  $('addIb').onclick=function(){var n=$('addI').value.trim();if(!n)return;n=n+' (invité)';c.appel[n]={tireur:n,statut:'Présent',ajoute:true,touche:true};drawAppel();compte();};
+}
+/* motif enregistré = mention + précision */
+function appelPourEnvoi(){return Object.keys(CUR.appel).map(function(n){var a=CUR.appel[n],m=[a.motif,a.note].filter(Boolean).join(' · ');return {tireur:a.tireur,statut:a.statut,retard:a.retard||'',duree:a.duree||'',motif:m};});}
+function peInsepUI(){
+  var ov=document.createElement('div');ov.id='peo';document.body.appendChild(ov);
+  function dessiner(){var l=D.tireurs.filter(function(t){return t.pole;});
+    ov.innerHTML='<div class="modal" style="z-index:70"><div class="card" style="max-width:520px"><div class="row sp"><h3 style="margin:0">Groupe PE INSEP</h3><button class="btn sm" id="peX">Fermer</button></div><div class="mut sm" style="margin:6px 0 10px">Polistes partenaires d\'entraînement à l\'INSEP. Le public « PE INSEP » de l\'appel ne liste qu\'eux.</div><div class="chips">'+l.map(function(t){return '<button class="chip'+(t.peInsep?' on':'')+'" data-pe="'+esc(t.nom+' '+t.prenom)+'">'+esc(t.prenom+' '+t.nom)+'</button>';}).join('')+'</div><div class="msg" id="peM"></div></div></div>';
+    $('peX').onclick=function(){ov.parentNode.removeChild(ov);if(CUR&&$('ap'))drawAppel();};
+    [].forEach.call(ov.querySelectorAll('[data-pe]'),function(b){b.onclick=function(){var t=D.tireurs.filter(function(x){return x.nom+' '+x.prenom===b.dataset.pe;})[0];if(!t)return;var v=!t.peInsep;t.peInsep=v;b.classList.toggle('on',v);$('peM').className='msg';$('peM').textContent='Enregistrement…';
+      run('setPeInsep',KEY,b.dataset.pe,v).then(function(){$('peM').className='msg okm';$('peM').textContent='Enregistré.';}).catch(function(e){t.peInsep=!v;b.classList.toggle('on',!v);$('peM').className='msg err';$('peM').textContent=e.message;});};});}
+  dessiner();
+}
+
+/* ---------- Suivi d'utilisation de l'appli (Guy) ---------- */
+function vConnexions(){
+  $('app').innerHTML=loading('Lecture du suivi…');
+  run('getUtilisation',KEY).then(function(L){if(VIEW!=='connexions')return;
+    function quand(s){if(!s)return '<span class="mut">jamais</span>';var d=new Date(s.replace(' ','T')),j=Math.floor((new Date().setHours(0,0,0,0)-new Date(d).setHours(0,0,0,0))/864e5);return (j===0?'aujourd\'hui':j===1?'hier':'il y a '+j+' j')+' <span class="mut sm">'+s.slice(11)+'</span>';}
+    var J=joursListe(7),td=today();
+    var pole=L.filter(function(x){return x.role==='Tireur'&&x.pole;}),autres=L.filter(function(x){return x.role==='Tireur'&&!x.pole;}),staff=L.filter(function(x){return x.role!=='Tireur';});
+    var h='<div class="grid g4">'+kpi('Wellness aujourd\'hui',pole.filter(function(x){return x.wellAuj;}).length+' / '+pole.length,'tireurs du pôle')+kpi('Notifications activées',pole.filter(function(x){return x.notif;}).length+' / '+pole.length,'pôle · au moins un appareil')+kpi('Connectés cette semaine',pole.filter(function(x){return x.der&&x.der.slice(0,10)>=J[0];}).length+' / '+pole.length)+kpi('Dispos S+1 rendues',pole.filter(function(x){return x.dispos;}).length+' / '+pole.length)+'</div>';
+    function table(l,titre,tireurs){l.sort(function(a,b){return (b.der||'').localeCompare(a.der||'')||a.nom.localeCompare(b.nom);});
+      return '<div class="sec">'+titre+'</div><div class="card" style="padding:6px 10px"><div class="hsc"><table class="sm"><tr><th style="text-align:left">Nom</th><th style="text-align:left">Dernière connexion</th><th class="num">Fois</th><th style="text-align:left">Notifications</th>'+(tireurs?'<th>Wellness 7 j</th><th class="num">RPE 7 j</th><th class="ctr">Dispos S+1</th>':'')+'<th class="num" title="notifications envoyées / ouvertes sur 7 jours">Notifs 7 j</th></tr>'
+        +l.map(function(x){return '<tr'+(x.der?'':' style="opacity:.6"')+'><td><b>'+esc(x.nom)+'</b></td><td>'+quand(x.der)+'</td><td class="num">'+(x.nb||'')+'</td><td>'+(x.app&&x.app.length?x.app.map(function(a){return '<span class="pill p-ok" style="font-size:11px">'+esc(a)+'</span>';}).join(' '):'<span class="pill p-bad" style="font-size:11px">aucune</span>')+'</td>'
+          +(tireurs?'<td style="white-space:nowrap">'+J.map(function(d){var ok=x.well.indexOf(d)>=0;return '<span class="wdot'+(ok?' ok':'')+(d===td?' td':'')+'" title="'+frDate(d)+'"></span>';}).join('')+'</td><td class="num">'+(x.rpe||'')+(x.rpeDer?' <span class="mut">'+frDate(x.rpeDer)+'</span>':'')+'</td><td class="ctr">'+(x.dispos?'✓':'<span class="mut">–</span>')+'</td>':'')
+          +'<td class="num">'+(x.notifs.env?x.notifs.lues+' / '+x.notifs.env:'')+'</td></tr>';}).join('')+'</table></div></div>';}
+    h+=table(pole,'Tireurs du pôle',true);if(autres.length)h+=table(autres,'Partenaires',true);h+=table(staff,'Staff, cadres et sélectionneurs',false);
+    h+='<div class="foot">Notifications : appareils sur lesquels la cloche 🔔 est activée. Wellness 7 j : un point vert par jour répondu (le dernier = aujourd\'hui). Notifs 7 j : reçues et ouvertes par l\'appli / envoyées. Une ouverture de l\'appli compte pour une connexion (au plus une toutes les 15 minutes). Visible par toi seul.</div>';
+    $('app').innerHTML=h;
+  }).catch(function(e){$('app').innerHTML='<div class="card err">'+esc(e.message)+'</div>';});
+}
+
+function ouvrirCreneau(date,slot){
+  var off=Math.round((cLun(cDate(date))-cLun(new Date()))/6048e5);SEM.off=off;if(off!==0)SEM.data=null;
+  goView('semaine');var n=0;(function att(){var el=document.querySelector('[data-crj="'+date+'"][data-crs="'+slot+'"]');if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(function(){el.click();},350);}else if(n++<40)setTimeout(att,150);})();
+}
 
 /* ================= MODULE ASSAUTS ================= */
 var ESC=null;
@@ -1961,7 +2185,7 @@ function vSaison(forcer){
     charts.push(new Chart($('saC2'),{type:'bar',data:{labels:lab,datasets:[{label:'Assauts',data:S.map(function(s){return s.assauts||0;}),backgroundColor:'#c4122f'},{label:'Fonda',data:S.map(function(s){return s.fonda||0;}),backgroundColor:'#2563eb'},{label:'Prépa physique',data:S.map(function(s){return s.pp||0;}),backgroundColor:'#1f8a4c'}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}}));
   }
 }
-function vConnexions(){
+function ancien_vConnexions(){
   $('app').innerHTML=loading('Lecture des connexions…');
   run('getConnexions',KEY).then(function(L){
     function quand(s){if(!s)return '<span class="mut">jamais</span>';var d=new Date(s.replace(' ','T')),j=Math.floor((new Date().setHours(0,0,0,0)-new Date(d).setHours(0,0,0,0))/864e5);return (j===0?'aujourd\'hui':j===1?'hier':'il y a '+j+' j')+' <span class="mut sm">'+s.slice(8,10)+'/'+s.slice(5,7)+' '+s.slice(11)+'</span>';}
@@ -2265,6 +2489,10 @@ function showTip(td,e){
   function fit(){var hh=t.offsetHeight;if(e.clientY+4+hh>innerHeight-8)t.style.top=Math.max(8,innerHeight-8-hh)+'px';}
   t.dataset.cur=nom+dt;
   function draw(list){if(t.dataset.cur!==nom+dt)return;var c=list.filter(function(p){return p.date===dt;});
+    if(!c.length){var mots=head.split(' ').filter(function(w){return w.length>=4&&!/^(SELECTIVE|NON|SENIOR|INDIVIDUEL|PTS|SELECTIFS)$/.test(w);}),
+      dn=function(x){var m=String(x||'').match(/(\d{2})\/(\d{2})\/(\d{4})/);return m?new Date(m[3]+'-'+m[2]+'-'+m[1]).getTime():0;};
+      c=list.filter(function(p){var E=norm(p.ep);if(!mots.some(function(w){return E.indexOf(w)>=0||(w==='CAIRE'&&E.indexOf('CAIRO')>=0);}))return false;return !dt||Math.abs(dn(p.date)-dn(dt))<=6*864e5;});
+      if(!dt&&c.length>1)c.sort(function(a,b){return dn(b.date)-dn(a.date);});}
     if(c.length>1){var f=c.filter(function(p){var k=(String(p.ep).match(/M17|M20|M23|SENIOR/i)||[''])[0].toUpperCase();return k&&head.indexOf(k)>=0;});if(f.length)c=f;}
     tipSet(t,'<div class="b" style="margin-bottom:4px;padding-right:26px">'+esc(nom)+'</div>'+(c.length?parcoursHtml([c[0]],true):'<div class="mut">Pas de parcours détaillé importé pour cette épreuve.</div>'));t.scrollTop=0;fit();}
   if(PARC[nom])draw(PARC[nom]);
@@ -2382,12 +2610,12 @@ function vImprimables(){
 function routeHash(){if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=null;
   if(r==='Tireur')v=h==='#wellness'&&WELLNESS_T?'wellnessT':h==='#dispos'?'dispos':h==='#rpe'?'rpe':h==='#semaine'?'semaine':h==='#resultats'?'resultats':null;
   else if(r==='Coach')v=h==='#dispos'?'dispos':h==='#suivi'?'suivi':h==='#semaine'?'semaine':null;
-  else v=h==='#jour'?'jour':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
+  else v=h==='#jour'?'jour':h==='#charge'?'charge':h==='#suivi-appli'?'connexions':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
   if(v&&v!==VIEW){VIEW=v;[].forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('on',b.dataset.v===v);});render();scrollTo(0,0);}}
 window.addEventListener('hashchange',routeHash);
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var m=e.data||{};if(m.type==='ouvrir'&&m.lien){if(location.hash===m.lien)routeHash();else location.hash=m.lien;}});
 /* ---------------- WELLNESS, BUDGET, MATÉRIEL ---------------- */
-function vWellness(){
+function ancien_vWellness(){
   var pole=D.tireurs.filter(function(t){return t.pole;}),jours=[];
   for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5);jours.push(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2));}
   var map={};D.wellness.forEach(function(w){map[norm(w.tireur)+'|'+w.d]=w;});
