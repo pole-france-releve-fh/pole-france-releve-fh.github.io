@@ -2804,7 +2804,7 @@ function vWellnessT(){$('app').innerHTML='<div class="card" style="max-width:520
 
 load();
 </script>
-<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');</script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');function rasPastille(){try{if(navigator.clearAppBadge)navigator.clearAppBadge().catch(function(){});if(window.caches)caches.open('pfr').then(function(c){return c.put('pastille',new Response('0'));});}catch(e){}}rasPastille();document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')rasPastille();});</script>
 <style>@supports(padding:max(0px)){header{padding-top:max(14px,env(safe-area-inset-top))}}</style>
 </body>
 </html>
