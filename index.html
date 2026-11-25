@@ -1645,6 +1645,25 @@ function vWellness(){
 }
 function bindFF(root){[].forEach.call(root.querySelectorAll('[data-ff]'),function(a){a.onclick=function(e){e.preventDefault();e.stopPropagation();ficheForme(a.dataset.ff);};});}
 
+
+/* lecture simple de la charge : une jauge par tireur, groupés par zone */
+var CHZ=[['rouge','Trop chargé','#c4122f','semaine bien au-dessus de son habitude : alléger'],['orange','À surveiller','#c46a00','semaine plus chargée que d\'habitude'],['vert','Dans sa zone','#1f8a4c','charge proche de son habitude'],['bleu','Sous-chargé','#0a5bc4','semaine plus légère que d\'habitude'],['gris','Pas assez de RPE','#9aa1ab','moins de 3 semaines de RPE : pas encore de calcul']];
+function chZone(r){return r==null?'gris':r>1.5?'rouge':r>1.3?'orange':r<0.8?'bleu':'vert';}
+function chJauge(r){var p=r==null?null:Math.max(0,Math.min(100,r/2*100));
+  return '<div style="position:relative;height:12px;border-radius:6px;overflow:hidden;display:flex;margin:6px 0 2px"><div style="width:40%;background:#cfe0f7"></div><div style="width:25%;background:#cdebd8"></div><div style="width:10%;background:#f6e0c3"></div><div style="width:25%;background:#f5ccd2"></div>'
+   +(p==null?'':'<div style="position:absolute;left:calc('+p+'% - 7px);top:-1px;width:14px;height:14px;border-radius:50%;background:#111;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.5)"></div>')+'</div>'
+   +'<div class="mut" style="display:flex;justify-content:space-between;font-size:10px"><span>léger</span><span>habituel</span><span>trop</span></div>';}
+function chEnClair(rows){
+  var g={};rows.forEach(function(x){var z=chZone(x.l.r);(g[z]=g[z]||[]).push(x);});
+  var h='<div class="card" style="margin-top:10px"><h3 style="margin-top:0">En un coup d\'œil</h3><div class="mut sm" style="margin:-6px 0 8px">On compare la charge des 7 derniers jours à la semaine habituelle du tireur (moyenne des 4 dernières semaines).</div>'
+   +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+CHZ.map(function(z){var n=(g[z[0]]||[]).length;return '<div style="flex:1;min-width:64px;text-align:center;border-radius:10px;padding:6px 4px;background:'+z[2]+(n?'':'55')+';color:#fff"><div style="font-size:22px;font-weight:800;line-height:1">'+n+'</div><div style="font-size:11px">'+z[1]+'</div></div>';}).join('')+'</div>';
+  CHZ.forEach(function(z){var L=g[z[0]];if(!L||!L.length)return;
+    h+='<div class="sec" style="color:'+z[2]+'">'+z[1]+' <span class="mut sm" style="font-weight:400">· '+z[3]+'</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">';
+    L.forEach(function(x){var r=x.l.r,pc=r==null?null:Math.round((r-1)*100);
+      var txt=r==null?(x.n7?x.n7+' RPE cette semaine':'aucun RPE cette semaine'):(pc===0?'comme d\'habitude':(pc>0?'+'+pc:pc)+' % vs habitude');
+      h+='<div data-ff="'+esc(x.t.cle)+'" style="cursor:pointer;border:1px solid #e3e6ea;border-left:5px solid '+z[2]+';border-radius:10px;padding:8px"><b>'+esc(x.t.prenom)+' '+esc(String(x.t.nom).charAt(0))+'.</b><div class="sm" style="color:'+z[2]+';font-weight:700">'+txt+'</div>'+(r==null?'':chJauge(r)+'<div class="mut" style="font-size:11px;margin-top:3px">'+x.n7+' RPE en 7 j')+(r==null?'<div class="mut" style="font-size:11px">':'')+(x.mono!=null&&x.mono>2?' · <span style="color:#c46a00">séances trop uniformes</span>':'')+(x.der&&x.der<=isoJ(4)?' · <span style="color:#c4122f">pas de RPE depuis '+frDate(x.der)+'</span>':'')+'</div></div>';});
+    h+='</div>';});
+  return h+'<div class="mut sm" style="margin-top:8px">Touche un tireur pour ses courbes. Le point noir = où il en est cette semaine par rapport à son habitude.</div></div>';}
 /* ---------- Charge d'entraînement (onglet Tireurs > Charge) ---------- */
 var CHV={n:42};
 function vCharge(){
@@ -1652,10 +1671,11 @@ function vCharge(){
   rows.sort(function(a,b){return (b.l.r||0)-(a.l.r||0);});
   var J=rows.length?rows[0].S.jours.map(function(x){return x.d;}):[];
   var h='<div class="row sp wrap"><div class="mut sm">Charge = durée × RPE de chaque séance. Touche un tireur pour ses courbes.</div><div class="chips">'+[28,42,56].map(function(n){return '<button class="chip'+(CHV.n===n?' on':'')+'" data-cn="'+n+'">'+n+' j</button>';}).join('')+'</div></div>';
+  h+=chEnClair(rows);
   h+='<div class="card" style="margin-top:10px"><h3 style="margin-top:0">Charge du groupe (pôle)</h3><div style="height:240px"><canvas id="chG"></canvas></div></div>';
-  h+='<div class="card" style="margin-top:12px"><h3 style="margin-top:0">Par tireur</h3><div class="hsc"><table class="sm"><tr><th style="text-align:left">Tireur</th><th class="num">Aiguë 7 j</th><th class="num">Chronique</th><th class="num">A/C</th><th class="num">Monotonie</th><th class="num">RPE 7 j</th><th class="num">Dernier</th><th>Tendance A/C</th></tr>'
+  h+='<details class="card" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">Tableau détaillé (chiffres)</summary><div style="margin-top:8px"><div class="hsc"><table class="sm"><tr><th style="text-align:left">Tireur</th><th class="num">Aiguë 7 j</th><th class="num">Chronique</th><th class="num">A/C</th><th class="num">Monotonie</th><th class="num">RPE 7 j</th><th class="num">Dernier</th><th>Tendance A/C</th></tr>'
    +rows.map(function(x,i){return '<tr data-ff="'+esc(x.t.cle)+'" style="cursor:pointer"><td><b>'+esc(x.t.prenom)+' '+esc(String(x.t.nom).charAt(0))+'.</b></td><td class="num">'+Math.round(x.l.a||0)+'</td><td class="num">'+Math.round(x.l.c||0)+'</td><td class="num"><span class="pill '+rcls(x.l.r)+'">'+(x.l.r==null?'–':x.l.r.toFixed(2))+'</span></td><td class="num">'+(x.mono==null?'–':x.mono.toFixed(1))+'</td><td class="num">'+x.n7+'</td><td class="num">'+(x.der?frDate(x.der):'–')+'</td><td><canvas id="sp'+i+'" width="120" height="28" style="width:120px;height:28px"></canvas></td></tr>';}).join('')+'</table></div>'
-   +'<div class="mut sm" style="margin-top:6px">A/C calculé dès 3 semaines de RPE (avant : « – »). Vert 0,8-1,3 · orange 1,3-1,5 · rouge au-delà · bleu sous-charge. Monotonie = moyenne ÷ écart-type des charges journalières sur 7 jours (au-delà de 2 : séances trop uniformes).</div></div>';
+   +'<div class="mut sm" style="margin-top:6px">A/C calculé dès 3 semaines de RPE (avant : « – »). Vert 0,8-1,3 · orange 1,3-1,5 · rouge au-delà · bleu sous-charge. Monotonie = moyenne ÷ écart-type des charges journalières sur 7 jours (au-delà de 2 : séances trop uniformes).</div></div></details>';
   $('app').innerHTML=h;
   [].forEach.call(document.querySelectorAll('[data-cn]'),function(b){b.onclick=function(){CHV.n=Number(b.dataset.cn);vCharge();};});
   bindFF($('app'));
