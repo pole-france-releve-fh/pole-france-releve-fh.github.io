@@ -1903,7 +1903,8 @@ function escDepuisCreneau(f,p){
 function escCharger(idS,date,titre,presents){
   $('modal').innerHTML='<div class="modal"><div class="card">'+loading('Ouverture du module Assauts…')+'</div></div>';
   run('getModule',KEY,idS).then(function(st){
-    ESC={idS:idS,date:date,titre:titre,presents:presents||[],st:st||{v:1,tours:[]},sel:0};
+    st=st||{v:1,tours:[]};var ap=st._appel;delete st._appel;
+    ESC={idS:idS,date:date,titre:titre,presents:(ap&&ap.length?ap.slice().sort():presents||[]),appelOk:!!(ap&&ap.length),st:st,sel:0};
     ESC.sel=ESC.st.tours.length?ESC.st.tours.length-1:-1;
     escDraw();
   }).catch(function(e){$('modal').innerHTML='';alert(e.message);});
@@ -2001,7 +2002,8 @@ var ESC_TYPES=[['poules','Poules'],['controle','Assauts contrôlés (rang proche
 function escNouveauTour(){
   var e=ESC,st=e.st,prev=st.tours[st.tours.length-1],src=prev?escIndivClasse(prev).filter(function(n){return !(prev.ab||{})[n];}):e.presents.slice();
   var NT=e.nt=e.nt||{type:'poules',touches:prev&&prev.type!=='equipes'?prev.touches:15,nb:'',mode:prev?'niveau':'serpentin',rp:'3e',taille:3,form:'poule',inc:5,compo:'serpentin',obj:'aucun',ov:'',hc:'',sel:{}};
-  src.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
+  if(e.appelOk){e.presents.forEach(function(n){if(src.indexOf(n)<0)src.push(n);});src.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=e.presents.indexOf(n)>=0;});}
+  else src.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
   if(NT.type==='controle'){escNouveauControle();return;}
   function rang(a,b){var ia=src.indexOf(a),ib=src.indexOf(b);return (ia<0?999:ia)-(ib<0?999:ib);}
   var tousN=Object.keys(NT.sel).sort(rang),liste=tousN.filter(function(n){return NT.sel[n];}),T=NT.type;
@@ -2017,7 +2019,7 @@ function escNouveauTour(){
     if(T==='poules'||T==='libre')h+='<div><span class="lab">Handicap (touches d\'avance au moins bien classé)</span><input id="ntHc" inputmode="numeric" value="'+esc(NT.hc)+'" placeholder="0"></div>';
   }
   h+='</div><div class="mut sm" id="ntInfo" style="margin:6px 0"></div>';
-  h+='<div class="sec">Tireurs ('+liste.length+') · '+(prev?'dans l\'ordre du classement du '+esc(prev.nom):'présents de la séance')+'</div><div class="ntl">'+tousN.map(function(n){return '<label class="ntc"><input type="checkbox" data-nt="'+esc(n)+'"'+(NT.sel[n]?' checked':'')+'> '+esc(nomCourt(n))+'</label>';}).join('')+'</div><div class="row wrap" style="margin-top:8px"><select id="ntAdd" style="width:auto">'+opts(noms().filter(function(n){return NT.sel[n]==null;}),'+ ajouter un tireur (retard, partenaire…)')+'</select></div>';
+  h+='<div class="sec">Tireurs ('+liste.length+') · '+(prev?'dans l\'ordre du classement du '+esc(prev.nom):'présents de la séance')+'</div><div class="ntl">'+tousN.map(function(n){return '<label class="ntc"><input type="checkbox" data-nt="'+esc(n)+'"'+(NT.sel[n]?' checked':'')+'> '+esc(nomCourt(n))+(rangsCourt(n)?' <small class="mut">'+esc(rangsCourt(n))+'</small>':'')+'</label>';}).join('')+'</div><div class="row wrap" style="margin-top:8px"><select id="ntAdd" style="width:auto">'+opts(noms().filter(function(n){return NT.sel[n]==null;}),'+ ajouter un tireur (retard, partenaire…)')+'</select></div>';
   h+='<button class="go" id="ntGo">Créer le tour</button>';
   $('escB').innerHTML=h;
   function info(){var n=liste.length,k=Number(NT.nb),x='';
@@ -2263,13 +2265,15 @@ function smEnregistrer(ms){
  * qu'il n'a pas encore rencontré (appariement optimal : somme des écarts de rang au carré la plus petite).
  * Nombre impair : un tireur au repos par rotation, jamais deux fois le même tant que tous n'y sont pas passés. */
 function ctlTireur(n){return (D.tireurs||[]).filter(function(x){return x.nom+' '+x.prenom===n;})[0]||null;}
-function ctlRang(n,src){var t=ctlTireur(n);if(!t)return null;var r=resDe(t);var c=r&&r[src];var v=c?Number(String(c.clt).replace(/[^\d]/g,'')):NaN;return v>0?v:null;}
-var CTL_SRC=[['M20','Classement M20 (sélectif)'],['M17','Classement M17 (sélectif)'],['Senior','Classement Senior'],['tour','Classement du tour précédent'],['presents','Ordre actuel (à la main)']];
+function ctlRang(n,src){var t=ctlTireur(n);if(!t)return null;var r=resDe(t),sel=/^sel/.test(src),k=sel?src.slice(3):src,c=r&&r[k];var v=c?Number(String(sel?c.sel:c.clt).replace(/[^\d]/g,'')):NaN;return v>0?v:null;}
+/* rangs d'un tireur dans les classements (CN M17, M20, Senior et sélectifs) */
+function rangsCourt(n){var t=ctlTireur(n);if(!t)return '';var r=resDe(t);if(!r)return '';var o=[];['M17','M20','Senior'].forEach(function(k){var x=r[k];if(!x)return;if(x.clt)o.push((k==='Senior'?'Sr':k)+' '+x.clt);if(x.sel)o.push('Sél.'+k+' '+x.sel);});return o.join(' · ');}
+var CTL_SRC=[['selM20','Classement sélectif M20'],['M20','Classement national M20'],['selM17','Classement sélectif M17'],['M17','Classement national M17'],['Senior','Classement national Senior'],['tour','Classement du tour précédent'],['presents','Ordre actuel (à la main)']];
 function ctlTrier(liste,src,prev){
   if(src==='tour'&&prev){var c=escIndivClasse(prev);return liste.slice().sort(function(a,b){var ia=c.indexOf(a),ib=c.indexOf(b);return (ia<0?999:ia)-(ib<0?999:ib);});}
   if(src==='presents')return liste.slice();
   /* pas de rang dans ce classement : on regarde les autres classements (Senior > M20 > M17 pour situer), sinon en fin de liste */
-  var autres=['Senior','M20','M17'].filter(function(x){return x!==src;});
+  var autres=['Senior','M20','M17'].filter(function(x){return x!==src&&'sel'+x!==src;});
   return liste.slice().sort(function(a,b){var ra=ctlRang(a,src),rb=ctlRang(b,src);
     if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;
     for(var i=0;i<autres.length;i++){var xa=ctlRang(a,autres[i]),xb=ctlRang(b,autres[i]);if(xa!=null&&xb!=null)return xa-xb;if(xa!=null)return -1;if(xb!=null)return 1;}
@@ -2291,39 +2295,58 @@ function ctlApparier(idx,cost){
     if((tot<1e8&&tot<Infinity)||W>=k){var p=[],i2=0,m2=0;while(i2<k){var key=i2*S+m2,d=ch[key];if(m2&1){m2>>=1;i2++;continue;}p.push([idx[i2],idx[i2+d]]);m2=(m2|(1<<d))>>1;i2++;}return {c:tot,p:p};}
   }
 }
-function ctlPlan(L,nbM,seq){
-  var n=L.length,R=ctlNbRot(n,nbM),joue={},repos=L.map(function(){return 0;}),rot=[],tous=L.map(function(_,i){return i;});
-  var cost=function(i,j){return (joue[i+'|'+j]?1e8:0)+(j-i)*(j-i);};
-  for(var r=0;r<R;r++){
-    var res,rp=[];
-    if(n%2===0)res=ctlApparier(tous,cost);
-    else{ /* au repos : parmi ceux qui y sont le moins allés, celui qui donne les meilleurs appariements */
-      var mn=Math.min.apply(null,repos),best=null,bi=-1;
-      tous.forEach(function(c){if(repos[c]!==mn)return;var x=ctlApparier(tous.filter(function(y){return y!==c;}),cost);if(!best||x.c<best.c){best=x;bi=c;}});
-      res=best;repos[bi]++;rp.push(L[bi]);
-    }
-    var ms=res.p.map(function(p){joue[p[0]+'|'+p[1]]=1;return [L[p[0]],L[p[1]]];});
-    rot.push({f:seq[r%seq.length],m:ms,repos:rp});
+/* appariement avec repos : exactement K matchs (K = pistes), les autres au repos (coût de repos fourni) */
+function ctlApparierK(n,cost,repos,K){
+  for(var W=Math.min(n,8);;W=Math.min(n,W+4)){
+    var S=1<<W,KK=K+1,memo=new Float64Array((n+1)*S*KK).fill(-1),ch=new Int8Array((n+1)*S*KK);
+    var f=function(i,mask,p){if(i>=n)return p===0?0:Infinity;var key=(i*S+mask)*KK+p;if(memo[key]>=0)return memo[key];var best=Infinity,bd=-2;
+      if(mask&1){best=f(i+1,mask>>1,p);bd=-1;}
+      else{var v0=repos(i)+f(i+1,mask>>1,p);if(v0<best){best=v0;bd=0;}
+        if(p>0)for(var d=1;d<W&&i+d<n;d++){if(mask>>d&1)continue;var v=cost(i,i+d)+f(i+1,(mask|(1<<d))>>1,p-1);if(v<best){best=v;bd=d;}}}
+      memo[key]=best;ch[key]=bd;return best;};
+    var tot=f(0,0,K);
+    if(tot<1e6||W>=n){if(tot===Infinity)return {c:tot,p:[],r:[]};var pr=[],rp=[],i2=0,m2=0,p2=K;while(i2<n){var key=(i2*S+m2)*KK+p2,d=ch[key];if(m2&1){m2>>=1;i2++;continue;}if(d===0){rp.push(i2);m2>>=1;i2++;continue;}pr.push([i2,i2+d]);m2=(m2|(1<<d))>>1;i2++;p2--;}return {c:tot,p:pr,r:rp};}
+  }
+}
+/* rotations : chaque tireur fait nbM matchs, contre le plus proche de son rang pas encore rencontré ;
+   pistes = nombre de matchs simultanés (les autres au repos, à tour de rôle) */
+function ctlPlan(L,nbM,seq,pistes){
+  var n=L.length,P=Math.max(1,Math.min(Number(pistes)||Math.floor(n/2),Math.floor(n/2))),joue={},nb=L.map(function(){return 0;}),rep=L.map(function(){return 0;}),rot=[];
+  for(var g=0;g<80;g++){
+    var reste=nb.map(function(x){return Math.max(0,nbM-x);}),elig=reste.filter(function(x){return x>0;}).length;
+    if(!elig)break;
+    var K=elig===1?1:Math.min(P,Math.floor(elig/2));
+    var cf=function(i,j){return (joue[i+'|'+j]?1e8:0)+(reste[i]?0:1e6)+(reste[j]?0:1e6)+(j-i)*(j-i);},rf=function(i){return reste[i]*1e4+rep[i]*50;};
+    var res=ctlApparierK(n,cf,rf,K);
+    /* sinon, moins de matchs plutôt que de faire tirer en plus quelqu'un qui a fini */
+    for(var k2=K-1;k2>=1&&res.c>=1e6;k2--){var x=ctlApparierK(n,cf,rf,k2);if(x.c<1e6)res=x;}
+    if(!res||!res.p.length||res.c>=1e8)break;
+    var ms=res.p.map(function(p){joue[p[0]+'|'+p[1]]=1;nb[p[0]]++;nb[p[1]]++;return [L[p[0]],L[p[1]]];});
+    res.r.forEach(function(i){rep[i]++;});
+    rot.push({f:seq[rot.length%seq.length],m:ms,repos:res.r.map(function(i){return L[i];})});
   }
   return rot;
 }
 function escNouveauControle(){
   var e=ESC,st=e.st,prev=st.tours[st.tours.length-1],NT=e.nt;
-  NT.src=NT.src||(prev?'tour':'M20');NT.nbm=NT.nbm||6;NT.seq=NT.seq||'5';
+  NT.src=NT.src||(prev?'tour':'selM20');NT.nbm=NT.nbm||6;NT.seq=NT.seq||'5';
   var base=(prev?escIndivClasse(prev).filter(function(n){return !(prev.ab||{})[n];}):e.presents.slice());
-  base.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
+  if(e.appelOk){e.presents.forEach(function(n){if(base.indexOf(n)<0)base.push(n);});base.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=e.presents.indexOf(n)>=0;});}
+  else base.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
   var choisis=Object.keys(NT.sel).filter(function(n){return NT.sel[n];});
   /* ordre : trié une fois selon la source, puis modifiable à la main */
   if(!NT.ordre||NT.ordreSrc!==NT.src){NT.ordre=ctlTrier(Object.keys(NT.sel),NT.src,prev);NT.ordreSrc=NT.src;}
   Object.keys(NT.sel).forEach(function(n){if(NT.ordre.indexOf(n)<0)NT.ordre.push(n);});
-  var L=NT.ordre.filter(function(n){return NT.sel[n];}),n=L.length,seq=ctlSeq(NT.seq),R=ctlNbRot(n,Number(NT.nbm)||1);
+  var L=NT.ordre.filter(function(n){return NT.sel[n];}),n=L.length,seq=ctlSeq(NT.seq),maxP=Math.max(1,Math.floor(n/2));if(!NT.pistes||NT.pistes>maxP)NT.pistesAuto=true;if(NT.pistesAuto)NT.pistes=maxP;var PL=n>=2?ctlPlan(L,Number(NT.nbm)||1,seq,NT.pistes):[],R=PL.length;
   var h='<div class="sec" style="margin-top:6px">Nouveau tour '+(st.tours.length+1)+' · assauts contrôlés</div><div class="grid g3"><div><span class="lab">Formule</span><select id="ntT">'+optv(ESC_TYPES,'controle')+'</select></div>';
   h+='<div><span class="lab">Classer selon</span><select id="ctSrc">'+optv(CTL_SRC.filter(function(x){return x[0]!=='tour'||prev;}),NT.src)+'</select></div>';
   h+='<div><span class="lab">Matchs par tireur</span><input id="ctNb" inputmode="numeric" value="'+esc(NT.nbm)+'"></div>';
+  h+='<div><span class="lab">Pistes disponibles</span><input id="ctP" inputmode="numeric" value="'+esc(NT.pistes)+'"></div>';
   h+='<div style="grid-column:1/-1"><span class="lab">Touches, dans l\'ordre des rotations (la suite se répète)</span><div class="row wrap" style="gap:6px"><input id="ctSeq" value="'+esc(NT.seq)+'" style="max-width:160px" placeholder="ex. 5 15">'+[['5','Tout en 5'],['15','Tout en 15'],['5 15','5 / 15 alternés'],['5 5 15','5 · 5 · 15']].map(function(p){return '<button class="btn sm'+(NT.seq===p[0]?' pr':'')+'" data-seq="'+p[0]+'">'+p[1]+'</button>';}).join('')+'</div></div></div>';
-  var info=n<2?'Il faut au moins 2 tireurs.':n+' tireurs · '+R+' rotation'+(R>1?'s':'')+' · '+(n%2?'1 au repos à chaque rotation (jamais le même deux fois), ':'')+''+(function(){var mn=R-(n%2?Math.ceil(R/n):0),mx=R-(n%2?Math.floor(R/n):0);return mn===mx?mn:mn+' ou '+mx;})()+' matchs par tireur · '+R*Math.floor(n/2)+' matchs en tout'+(Number(NT.nbm)>=n-(n%2?0:1)&&n>1?' · plafonné : tout le monde se rencontre une fois':'')+' · touches : '+seq.slice(0,Math.min(R,8)).join(', ')+(R>8?'…':'');
+  var cpt={};L.forEach(function(x){cpt[x]=0;});PL.forEach(function(r){r.m.forEach(function(p){cpt[p[0]]++;cpt[p[1]]++;});});var vv=L.map(function(x){return cpt[x];}),mn=Math.min.apply(null,vv.length?vv:[0]),mx=Math.max.apply(null,vv.length?vv:[0]),nrep=PL.length?PL[0].repos.length:0,tot=PL.reduce(function(s,r){return s+r.m.length;},0);
+  var info=n<2?'Il faut au moins 2 tireurs.':n+' tireurs · '+NT.pistes+' piste'+(NT.pistes>1?'s':'')+' · '+R+' rotation'+(R>1?'s':'')+' · '+(nrep?nrep+' au repos par rotation (à tour de rôle) · ':'personne au repos · ')+(mn===mx?mn:mn+' à '+mx)+' matchs par tireur · '+tot+' matchs en tout · touches : '+seq.slice(0,Math.min(R,8)).join(', ')+(R>8?'…':'');
   h+='<div class="mut sm" style="margin:6px 0">'+esc(info)+'</div>';
-  h+='<div class="sec">Classement de départ · touche ▲▼ ou le numéro pour changer une place</div><div class="card" style="padding:6px 10px">'+NT.ordre.map(function(x){var on=NT.sel[x],k=on?L.indexOf(x)+1:'';var t=ctlTireur(x),r=t?resDe(t):null,info2=['M20','M17','Senior'].map(function(c){var v=r&&r[c]&&r[c].clt;return v?c+' '+v:'';}).filter(String).join(' · ');
+  h+='<div class="sec">Classement de départ · touche ▲▼ ou le numéro pour changer une place</div><div class="card" style="padding:6px 10px">'+NT.ordre.map(function(x){var on=NT.sel[x],k=on?L.indexOf(x)+1:'';var info2=rangsCourt(x);
     return '<div class="row" style="gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line);'+(on?'':'opacity:.45')+'"><button class="btn sm" data-rg="'+esc(x)+'" style="min-width:42px;font-weight:800">'+(on?k:'–')+'</button><label style="flex:1;min-width:0;display:flex;gap:6px;align-items:center"><input type="checkbox" data-nt="'+esc(x)+'"'+(on?' checked':'')+' style="width:auto"> <b>'+esc(nomCourt(x))+'</b> <span class="mut sm">'+esc(info2)+'</span></label><button class="btn sm" data-up="'+esc(x)+'" aria-label="Monter">▲</button><button class="btn sm" data-dn="'+esc(x)+'" aria-label="Descendre">▼</button></div>';}).join('')+'</div>';
   h+='<div class="row wrap" style="margin-top:8px"><select id="ntAdd" style="width:auto">'+opts(noms().filter(function(x){return NT.sel[x]==null;}),'+ ajouter un tireur (retard, partenaire…)')+'</select></div>';
   h+='<button class="go" id="ntGo">Proposer les rotations</button>';
@@ -2331,6 +2354,7 @@ function escNouveauControle(){
   $('ntT').onchange=function(){NT.type=this.value;escNouveauTour();};
   $('ctSrc').onchange=function(){NT.src=this.value;NT.ordre=null;escNouveauControle();};
   $('ctNb').onchange=function(){NT.nbm=Math.max(1,Number(this.value)||1);escNouveauControle();};
+  $('ctP').onchange=function(){var v=Math.max(1,Math.floor(Number(this.value)||1));NT.pistesAuto=v>=maxP;NT.pistes=Math.min(v,maxP);escNouveauControle();};
   $('ctSeq').onchange=function(){NT.seq=this.value.trim()||'5';escNouveauControle();};
   [].forEach.call(document.querySelectorAll('[data-seq]'),function(b){b.onclick=function(){NT.seq=b.dataset.seq;escNouveauControle();};});
   function bouge(x,d){var i=NT.ordre.indexOf(x),j=i+d;while(j>=0&&j<NT.ordre.length&&!NT.sel[NT.ordre[j]])j+=d;if(j<0||j>=NT.ordre.length)return;NT.ordre.splice(i,1);NT.ordre.splice(j,0,x);escNouveauControle();}
@@ -2341,8 +2365,8 @@ function escNouveauControle(){
   $('ntAdd').onchange=function(){if(this.value){NT.sel[this.value]=true;(NT.retard=NT.retard||{})[this.value]=true;NT.ordre.push(this.value);escNouveauControle();}};
   $('ntGo').onclick=function(){
     if(L.length<2){alert('Il faut au moins 2 tireurs.');return;}
-    var rot=ctlPlan(L,Number(NT.nbm)||1,seq);
-    var t={id:'T'+(st.tours.length+1),nom:'Tour '+(st.tours.length+1)+' · contrôlés',type:'controle',touches:Math.max.apply(null,seq),seq:seq,src:NT.src,tireurs:L.slice(),ordre:L.slice(),rot:rot,sc:{},ab:{},retard:{},cree:new Date().toISOString()};
+    var rot=PL;
+    var t={id:'T'+(st.tours.length+1),nom:'Tour '+(st.tours.length+1)+' · contrôlés',type:'controle',touches:Math.max.apply(null,seq),seq:seq,src:NT.src,pistes:NT.pistes,tireurs:L.slice(),ordre:L.slice(),rot:rot,sc:{},ab:{},retard:{},cree:new Date().toISOString()};
     Object.keys(NT.retard||{}).forEach(function(x){if(NT.sel[x]&&st.tours.length)t.retard[x]=true;});
     st.tours.push(t);ESC.sel=st.tours.length-1;ESC.nt=null;escDraw();escSave();
   };
@@ -2350,7 +2374,7 @@ function escNouveauControle(){
 function ctlCourante(t){for(var r=0;r<t.rot.length;r++){if(t.rot[r].m.some(function(p){return !escGet(t,p[0],p[1])&&!(t.ab||{})[p[0]]&&!(t.ab||{})[p[1]];}))return r;}return -1;}
 function escControleHtml(t){
   var cur=ctlCourante(t),rg=function(x){var i=t.ordre.indexOf(x);return i<0?'':'<span class="mut sm">'+(i+1)+'</span>';};
-  var h='<div class="mut sm" style="margin-bottom:6px">'+t.tireurs.length+' tireurs · '+t.rot.length+' rotations · classement de départ : '+esc((CTL_SRC.filter(function(x){return x[0]===t.src;})[0]||['',''])[1]||'')+' · touche un match pour son score (2 touches : vainqueur, puis touches du perdant).</div>';
+  var h='<div class="mut sm" style="margin-bottom:6px">'+t.tireurs.length+' tireurs · '+(t.pistes?t.pistes+' pistes · ':'')+t.rot.length+' rotations · classement de départ : '+esc((CTL_SRC.filter(function(x){return x[0]===t.src;})[0]||['',''])[1]||'')+' · touche un match pour son score (2 touches : vainqueur, puis touches du perdant).</div>';
   t.rot.forEach(function(r,ri){
     var fait=r.m.filter(function(p){return escGet(t,p[0],p[1]);}).length,on=ri===cur;
     h+='<div class="card'+(on?' ctl-on':'')+'" id="ctR'+ri+'" style="padding:8px 10px;margin-bottom:8px;'+(on?'border:2px solid var(--acc,#1d4ed8)':fait===r.m.length?'opacity:.75':'')+'"><div class="row sp"><b>Rotation '+(ri+1)+' · en '+r.f+'</b><span class="mut sm">'+fait+'/'+r.m.length+(on?' · en cours':'')+'</span></div>';
