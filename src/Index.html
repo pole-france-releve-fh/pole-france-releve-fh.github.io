@@ -2675,14 +2675,14 @@ function ficheCompte(f){
 /* ---------------- RÉSULTATS ---------------- */
 function vResultats(){
   var cats=D.cats||['M17 FH','M20 FH','M23 FH','Senior FH'];
-  var h='<div class="row sp wrap" style="margin-bottom:10px"><div class="chips" id="rc">'+cats.map(function(c){return '<button class="chip'+(RES.cat===c?' on':'')+'" data-c="'+c+'">'+c+'</button>';}).join('')+'</div><div class="row">'+(isStaff()?'<button class="btn sm" id="rUp">↻ Recalculer depuis V6</button>':'')+'<button class="btn sm pr" id="rPr">🖨 Imprimer</button><button class="btn sm" id="rPr2">🖨 Toutes catégories</button><button class="btn sm" id="rPr3" title="Imprimer le tableau affiché">🖨 Tableau affiché</button></div></div><div id="rv"></div>';
+  var h='<div class="row sp wrap" style="margin-bottom:10px"><div id="rc">'+[[' FH','Fleuret hommes'],[' FD','Fleuret dames']].map(function(sx){var l=cats.filter(function(c){return c.slice(-3)===sx[0];});return l.length?'<div class="chips" style="margin-bottom:4px"><span class="mut sm" style="align-self:center;min-width:104px">'+sx[1]+'</span>'+l.map(function(c){return '<button class="chip'+(RES.cat===c?' on':'')+'" data-c="'+c+'">'+c.slice(0,-3)+'</button>';}).join('')+'</div>':'';}).join('')+'</div><div class="row">'+(isStaff()?'<button class="btn sm" id="rUp">↻ Recalculer depuis V6</button>':'')+'<button class="btn sm pr" id="rPr">🖨 Imprimer</button><button class="btn sm" id="rPr2">🖨 Toutes catégories</button><button class="btn sm" id="rPr3" title="Imprimer le tableau affiché">🖨 Tableau affiché</button></div></div><div id="rv"></div>';
   $('app').innerHTML=h;
   $('rc').onclick=function(e){if(e.target.dataset.c){RES.cat=e.target.dataset.c;RES.vue=null;RES.sort=null;vResultats();}};
-  if($('rUp'))$('rUp').onclick=function(){this.disabled=true;this.textContent='Calcul… (1 min)';run('actualiserResultats',KEY).then(function(){RES.data={};vResultats();});};
+  if($('rUp'))$('rUp').onclick=function(){this.disabled=true;this.textContent='Calcul… (1 min)';run('actualiserResultats',KEY,RES.cat).then(function(){delete RES.data[RES.cat];vResultats();});};
   $('rPr').onclick=function(){printResPages(false);};$('rPr2').onclick=function(){printResPages(true);};$('rPr3').onclick=printResultats;
   var d=RES.data[RES.cat];
   if(!d){$('rv').innerHTML=loading('Chargement des résultats '+RES.cat+'…');run('getResultats',KEY,RES.cat).then(function(r){RES.data[RES.cat]=r;vResultats();}).catch(function(e){$('rv').textContent=e.message;});return;}
-  var vues=resVues(d);if(/^(M17|M20|Senior) FH$/.test(RES.cat))vues[IMPV]=[];if(isStaff()||(isSel()&&D.user.selCats.indexOf(RES.cat)>=0))vues[SELV]=[];if(!RES.vue||!vues[RES.vue])RES.vue=Object.keys(vues)[0];
+  var vues=resVues(d);if(/^(M17|M20|Senior) FH$/.test(RES.cat))vues[IMPV]=[];if(/ FH$/.test(RES.cat)&&(isStaff()||(isSel()&&D.user.selCats.indexOf(RES.cat)>=0)))vues[SELV]=[];if(!RES.vue||!vues[RES.vue])RES.vue=Object.keys(vues)[0];
   var x='<div class="chips" id="rvv" style="margin-bottom:10px">'+Object.keys(vues).map(function(v){return '<button class="chip'+(RES.vue===v?' on':'')+'" data-v="'+esc(v)+'">'+esc(v)+'</button>';}).join('')+'</div>';
   x+='<div class="row wrap" style="margin-bottom:10px"><input id="rq" placeholder="Rechercher un nom, un club…" value="'+esc(RES.q)+'" style="max-width:280px"><label class="row sm" style="margin:0"><input type="checkbox" id="rp" style="width:auto"'+(RES.pole?' checked':'')+'> Pôle seulement</label><span class="mut sm">Mis à jour le '+esc(d.maj)+' · clic sur un en-tête pour trier</span></div><div class="rt" id="rt"></div>';
   $('rv').innerHTML=x;
@@ -2904,7 +2904,7 @@ function rpSelectif(cat,d,dS){
     note='Barème du classement sélectif M20 (1er 32 · 2e 26 · 3e 20 · 5-8 12 · 9-16 8 · 17-32 4 · 33-64 1) × coefficient : CdM et GP 5 · France Élite 2 · Antony et CN 1 · Hénin 0,5. Tous les résultats comptent.';
   }
   if(!cols.length)return '';
-  return '<div class="rpp">'+printHead('Pôle France Relève · fleuret hommes','Classement sélectif '+cat+' · 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP)+'<div class="pfoot">'+esc(note)+' En gras : tireurs du pôle et partenaires.</div></div>';
+  return '<div class="rpp">'+printHead('Pôle France Relève · '+RP_ARME,'Classement sélectif '+cat+' · 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP)+'<div class="pfoot">'+esc(note)+' En gras : tireurs du pôle et partenaires.</div></div>';
 }
 function rpBlocs(cat,d){
   var isP=rpPole(d),C=cat==='Senior'?['Senior']:cat==='M20'?['M20','Senior']:['M17','M20','Senior'],cols=[],blocs=[],MAXC=22;
@@ -2919,15 +2919,16 @@ function rpBlocs(cat,d){
   add('RESULTATS_NAT|'+C[0]+'|2025/2026','National '+sh(C[0])+' 25/26',true);
   var k0=sansER(C[0]);
   var rows=d.lignes.filter(function(r){return rpNum(r[k0]);}).sort(function(a,b){return rpNum(a[k0])-rpNum(b[k0]);}).map(function(r){return {r:r,rang:r[k0],cells:cols.map(function(k){return esc(r[k.c]||'');})};});
-  return '<div class="rpp">'+printHead('Pôle France Relève · fleuret hommes','Résultats '+(cat==='Senior'?'Seniors':cat)+' · saison 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP,blocs)+'<div class="pfoot">Lignes rangées selon le classement national '+(cat==='Senior'?'Senior':cat)+' sans ER. Épreuves dans l\'ordre chronologique ; en gris italique, la saison 2025-2026. Couleurs : or 1er, argent 2e, bronze 3e, vert jusqu\'à 8e, vert clair 16e, bleu clair 32e. En gras : tireurs du pôle et partenaires.</div></div>';
+  return '<div class="rpp">'+printHead('Pôle France Relève · '+RP_ARME,'Résultats '+(cat==='Senior'?'Seniors':cat)+' · saison 2026-2027','Mis à jour le '+esc(d.maj))+rpTable(cols,rows,isP,blocs)+'<div class="pfoot">Lignes rangées selon le classement national '+(cat==='Senior'?'Senior':cat)+' sans ER. Épreuves dans l\'ordre chronologique ; en gris italique, la saison 2025-2026. Couleurs : or 1er, argent 2e, bronze 3e, vert jusqu\'à 8e, vert clair 16e, bleu clair 32e. En gras : tireurs du pôle et partenaires.</div></div>';
 }
+var RP_ARME='fleuret hommes';
 function rpCharge(cats){return Promise.all(cats.map(function(c){return RES.data[c]?Promise.resolve(RES.data[c]):run('getResultats',KEY,c).then(function(r){RES.data[c]=r;return r;});}));}
 function printResPages(tout){
-  var cur=RES.cat.replace(' FH',''),L=tout?['M17','M20','M23','Senior']:[cur],need=['Senior FH'].concat(L.map(function(c){return c+' FH';}));
+  var SX=RES.cat.slice(-3),cur=RES.cat.slice(0,-3),L=tout?['M17','M20','M23','Senior']:[cur],need=['Senior'+SX].concat(L.map(function(c){return c+SX;}));RP_ARME=SX===' FD'?'fleuret dames':'fleuret hommes';
   var b=$('rPr2')||$('rPr');if(b){b.disabled=true;}
   rpCharge(need.filter(function(x,i,a){return a.indexOf(x)===i;})).then(function(){
     var h='<style>@page{size:A4 landscape;margin:7mm}</style>',pages=[];
-    L.forEach(function(c){var d=RES.data[c+' FH'];pages.push(rpSelectif(c,d,RES.data['Senior FH']));if(c!=='M23')pages.push(rpBlocs(c,d));});
+    L.forEach(function(c){var d=RES.data[c+SX];pages.push(rpSelectif(c,d,RES.data['Senior'+SX]));if(c!=='M23')pages.push(rpBlocs(c,d));});
     if(b)b.disabled=false;doPrint(h+pages.filter(Boolean).join(''));
   }).catch(function(e){if(b)b.disabled=false;alert(e.message);});
 }
@@ -2935,7 +2936,7 @@ function printResultats(){
   var d=RES.data[RES.cat];if(!d)return;
   if(RES.vue===IMPV&&IMP[RES.cat]){var t=IMP[RES.cat];doPrint(printHead('Pôle France Relève · fleuret hommes',RES.cat.replace(' FH','')+' · classement sélectif et résultats nationaux',String(t.titre||'').replace(/^.*\(/,'(').replace(/\)$/,')'))+imprHtml(t,true));return;}
   var tab=$('rt').cloneNode(true),more=tab.querySelector('#rMore');if(more)more.remove();
-  doPrint(printHead('Pôle France Relève · fleuret hommes',RES.cat+' · '+RES.vue+(RES.pole?' · pôle':''),'Mis à jour le '+d.maj)+'<div class="rt">'+tab.innerHTML+'</div>');
+  doPrint(printHead('Pôle France Relève · '+(/ FD$/.test(RES.cat)?'fleuret dames':'fleuret hommes'),RES.cat+' · '+RES.vue+(RES.pole?' · pôle':''),'Mis à jour le '+d.maj)+'<div class="rt">'+tab.innerHTML+'</div>');
 }
 
 /* ---------------- IMPRIMABLES : tous les documents, toujours régénérés avec les données du moment ---------------- */
