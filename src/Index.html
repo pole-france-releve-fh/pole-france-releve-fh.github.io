@@ -127,7 +127,7 @@ details.ppd>summary{cursor:pointer;list-style:none}details.ppd>summary::-webkit-
 .ab-tag{color:#b42318;font-size:11px;font-weight:700}
 .br{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}.br .rd{min-width:170px}.br .m{border:1px solid var(--line);border-radius:10px;margin:6px 0;padding:6px 8px;cursor:pointer;background:#fff;font-size:13px}.br .m.off{cursor:default;opacity:.7}.br .m .w{font-weight:800;color:var(--ok)}
 .ntl{display:flex;flex-wrap:wrap;gap:6px}.ntc{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}.ntc input{width:auto}
-.kpc{max-width:420px;width:100%}.kpr{display:grid;grid-template-columns:1fr 110px;gap:10px;align-items:center;margin:6px 0;font-weight:700;font-size:17px}.kpr input{font-size:28px;text-align:center;padding:8px}
+.kpc{max-width:420px;width:100%}.kgr{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.kgr button{padding:11px 0;font-size:17px;font-weight:800;min-width:0}.kpr{display:grid;grid-template-columns:1fr 110px;gap:10px;align-items:center;margin:6px 0;font-weight:700;font-size:17px}.kpr input{font-size:28px;text-align:center;padding:8px}
 .kb{display:block;width:100%;margin:6px 0;text-align:left}
 .lmr{padding:4px 0;border-bottom:1px solid var(--line);cursor:pointer}.lmr .b{font-weight:800}
 a.nm{color:var(--ink);text-decoration:underline}
@@ -1383,12 +1383,15 @@ function dicter(btn,e){
     ms.forEach(function(m){if(isPoule(e.format)){e.scores[m.a+'|'+m.b]=m.sa;e.scores[m.b+'|'+m.a]=m.sb;if(e.participants.indexOf(m.a)<0)e.participants.push(m.a);if(e.participants.indexOf(m.b)<0)e.participants.push(m.b);}else e.liste.push(m);});
     fermer();drawExos();};
 }
-function parseDictee(t){
-  var all=noms(),out=[];
-  String(t).toLowerCase().split(/\b(?:puis|ensuite|et puis|match suivant)\b|[.;]/).forEach(function(seg){
-    var w=norm(seg).split(' ').filter(Boolean),found=[],nums=[];
-    String(seg).split(/[\s\-–—:\/,]+/).forEach(function(x){var lx=x.toLowerCase().replace(/[^0-9a-zé]/g,'');if(/^\d+$/.test(lx))nums.push(Number(lx));else if(NB[lx]!=null)nums.push(NB[lx]);});
-    all.forEach(function(n){var nom=norm(n).split(' ')[0],pos=norm(seg).indexOf(nom);if(nom.length>2&&pos>=0)found.push({n:n,p:pos});});
+function parseDictee(t,cand){
+  var all=cand||noms(),out=[];
+  var cles=all.map(function(n){var tt=(D.tireurs||[]).filter(function(x){return x.nom+' '+x.prenom===n;})[0],k=[norm(n).split(' ')[0]];if(tt){k.push(norm(tt.prenom));k.push(norm(tt.nom));}return {n:n,k:k.filter(function(x,i,a){return x.length>2&&a.indexOf(x)===i;})};});
+  var cpt={};cles.forEach(function(c){c.k.forEach(function(x){cpt[x]=(cpt[x]||0)+1;});});
+  String(t).replace(/[’']/g,' ').toLowerCase().split(/\b(?:puis|ensuite|et puis|match suivant)\b|[.;\n]/).forEach(function(seg){
+    var found=[],nums=[],S=' '+norm(seg)+' ';
+    String(seg).split(/[\s\-–—:\/,]+/).forEach(function(x){var lx=x.toLowerCase().replace(/[^0-9a-zé]/g,'');if(/^\d+$/.test(lx))nums.push(Number(lx));else if(NB[lx]!=null&&!((lx==='un'||lx==='une')&&!nums.length))nums.push(NB[lx]);});
+    if(nums.length===1){var z=String(nums[0]);if(nums[0]>15&&z.length===2)nums=[+z[0],+z[1]];else if(z.length===3)nums=Number(z.slice(0,2))<=15?[+z.slice(0,2),+z[2]]:[+z[0],+z.slice(1)];else if(z.length===4)nums=[+z.slice(0,2),+z.slice(2)];}
+    cles.forEach(function(c){var best=-1;c.k.forEach(function(x){if(cpt[x]>1&&c.k.length>1&&x!==c.k[0])return;var p=S.indexOf(' '+x+' ');if(p>=0&&(best<0||p<best))best=p;});if(best>=0)found.push({n:c.n,p:best});});
     found.sort(function(a,b){return a.p-b.p;});
     if(found.length>=2&&nums.length>=2)out.push({a:found[0].n,b:found[1].n,sa:nums[0],sb:nums[1]});
   });
@@ -1993,11 +1996,12 @@ function escDraw(){
   [].forEach.call(document.querySelectorAll('[data-tour]'),function(b){b.onclick=function(){e.sel=Number(b.dataset.tour);escDraw();};});
   if(e.sel<0)escNouveauTour();else escTour(t);
 }
-var ESC_TYPES=[['poules','Poules'],['tableau','Tableau à élimination directe'],['equipes','Équipes (relais)'],['roi','Roi de la piste'],['libre','Matchs libres']];
+var ESC_TYPES=[['poules','Poules'],['controle','Assauts contrôlés (rang proche)'],['tableau','Tableau à élimination directe'],['equipes','Équipes (relais)'],['roi','Roi de la piste'],['libre','Matchs libres']];
 function escNouveauTour(){
   var e=ESC,st=e.st,prev=st.tours[st.tours.length-1],src=prev?escIndivClasse(prev).filter(function(n){return !(prev.ab||{})[n];}):e.presents.slice();
   var NT=e.nt=e.nt||{type:'poules',touches:prev&&prev.type!=='equipes'?prev.touches:15,nb:'',mode:prev?'niveau':'serpentin',rp:'3e',taille:3,form:'poule',inc:5,compo:'serpentin',obj:'aucun',ov:'',hc:'',sel:{}};
   src.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
+  if(NT.type==='controle'){escNouveauControle();return;}
   function rang(a,b){var ia=src.indexOf(a),ib=src.indexOf(b);return (ia<0?999:ia)-(ib<0?999:ib);}
   var tousN=Object.keys(NT.sel).sort(rang),liste=tousN.filter(function(n){return NT.sel[n];}),T=NT.type;
   var h='<div class="sec" style="margin-top:6px">Nouveau tour '+(st.tours.length+1)+'</div><div class="grid g3"><div><span class="lab">Formule</span><select id="ntT">'+optv(ESC_TYPES,T)+'</select></div>';
@@ -2054,6 +2058,7 @@ function escTour(t){
   else if(t.type==='tableau')h+=escTableauHtml(t);
   else if(t.type==='equipes')h+=escEquipesHtml(t);
   else if(t.type==='roi')h+=escRoiHtml(t);
+  else if(t.type==='controle')h+=escControleHtml(t);
   else h+=escLibreHtml(t);
   h+='<div id="escCls"></div>';
   $('escB').innerHTML=h;
@@ -2066,6 +2071,7 @@ function escTour(t){
   [].forEach.call(document.querySelectorAll('#escB [data-addp]'),function(s){s.onchange=function(){if(!s.value)return;var gi=s.dataset.addp;if(t.type==='poules')t.groupes[Number(gi)].push(s.value);else if(t.type==='equipes'){t.tireurs.push(s.value);t.equipes[Number(gi)].m.push(s.value);}else t.tireurs.push(s.value);t.retard[s.value]=true;escTour(t);escSave();};});
   if($('lmGo'))$('lmGo').onclick=function(){var a=$('lmA').value,bb=$('lmB').value;if(!a||!bb||a===bb){alert('Choisis deux tireurs différents.');return;}escKeypad(t,a,bb,'m'+Date.now());};
   if($('roiGo'))$('roiGo').onclick=function(){var R=escRoi(t);escKeypad(t,R.ch,R.cl,'m'+Date.now());};
+  if(t.type==='controle')ctlBind(t);
 }
 function escCell(t,a,b){var r=escGet(t,a,b),ab=t.ab||{},x=ab[a]==='annuler'||ab[b]==='annuler',tot=t.touches;if(!r)return '<td class="sc'+(x?' xx':'')+'" data-m="'+esc(a+'|'+b)+'"></td>';return '<td class="sc '+(r.sa>r.sb?'v':'d')+(x?' xx':'')+'" data-m="'+esc(a+'|'+b)+'">'+(r.sa>r.sb?'V'+(r.sa!==tot?r.sa:''):r.sa)+'</td>';}
 function escPouleHtml(t,g,gi,titre){
@@ -2120,14 +2126,17 @@ function escClassementHtml(t){
   return h+'<div class="mut sm" style="margin-top:6px">'+(t.type==='tableau'||t.formule==='tableau'?'Ordre : place au tableau, puis classement d\'entrée.':t.type==='roi'?'Ordre : victoires, puis meilleure série, puis indice.':'Ordre : victoires/matchs, puis indice, puis touches données. Les matchs d\'un abandon « annulé » ne comptent pas.')+' Le tour suivant part de ce classement.</div></div>';
 }
 function escHcTxt(t,a,b){if(!t.hcap||!t.ordre)return '';var ia=t.ordre.indexOf(a),ib=t.ordre.indexOf(b);if(ia<0||ib<0)return '';var faible=ia>ib?a:b;return '<div class="mut sm" style="margin-top:4px">Départ : '+esc(nomCourt(faible))+' mène '+t.hcap+'-0</div>';}
-function escKeypad(t,a,b,k){
+function escKeypad(t,a,b,k,f){
+  f=Number(f||(t.sc&&t.sc[k||escKey(a,b)]||{}).f||t.touches)||15;var rapide=f<=15;
   var r=escGet(t,a,b,k)||{sa:'',sb:''},ov=document.createElement('div');ov.id='kp';document.body.appendChild(ov);function fermer(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
-  ov.innerHTML='<div class="modal" style="z-index:60;align-items:center"><div class="card kpc"><div class="kpr"><span>'+esc(nomCourt(a))+'</span><input id="kA" inputmode="numeric" pattern="[0-9]*" value="'+esc(r.sa)+'"></div><div class="kpr"><span>'+esc(nomCourt(b))+'</span><input id="kB" inputmode="numeric" pattern="[0-9]*" value="'+esc(r.sb)+'"></div>'+escHcTxt(t,a,b)+'<div class="row" style="gap:6px;margin-top:10px"><button class="btn" id="kV1">V '+esc(nomCourt(a))+'</button><button class="btn" id="kV2">V '+esc(nomCourt(b))+'</button></div><div class="row" style="gap:6px;margin-top:10px"><button class="btn" id="kX">Annuler</button><button class="btn" id="kE">Effacer</button><button class="go" style="margin:0;flex:1" id="kOk">OK</button></div></div></div>';
-  setTimeout(function(){$('kA').focus();$('kA').select();},60);
-  $('kA').oninput=function(){if(String(this.value).length>=2||Number(this.value)>=2&&t.touches<10)$('kB').focus();};
-  $('kV1').onclick=function(){$('kA').value=t.touches;$('kB').focus();};$('kV2').onclick=function(){$('kB').value=t.touches;$('kA').focus();};
+  ov.innerHTML='<div class="modal" style="z-index:60;align-items:center"><div class="card kpc">'+(rapide?'<div class="lab" style="margin-top:0">Rapide · 1. le vainqueur</div><div class="row" style="gap:6px"><button class="btn kw" data-kw="a" style="flex:1;font-size:16px;padding:12px 6px">'+esc(nomCourt(a))+'</button><button class="btn kw" data-kw="b" style="flex:1;font-size:16px;padding:12px 6px">'+esc(nomCourt(b))+'</button></div><div class="lab" style="margin-top:8px">2. les touches du perdant (match en '+f+')</div><div class="kgr">'+Array.apply(null,{length:f}).map(function(_,i){return '<button class="btn" data-kl="'+i+'">'+i+'</button>';}).join('')+'</div><div class="lab" style="margin-top:8px">ou le score exact</div>':'')+'<div class="kpr"><span>'+esc(nomCourt(a))+'</span><input id="kA" inputmode="numeric" pattern="[0-9]*" value="'+esc(r.sa)+'"></div><div class="kpr"><span>'+esc(nomCourt(b))+'</span><input id="kB" inputmode="numeric" pattern="[0-9]*" value="'+esc(r.sb)+'"></div>'+escHcTxt(t,a,b)+''+'<div class="row" style="gap:6px;margin-top:10px"><button class="btn" id="kV1">V '+esc(nomCourt(a))+'</button><button class="btn" id="kV2">V '+esc(nomCourt(b))+'</button></div><div class="row" style="gap:6px;margin-top:10px"><button class="btn" id="kX">Annuler</button><button class="btn" id="kE">Effacer</button><button class="go" style="margin:0;flex:1" id="kOk">OK</button></div></div></div>';
+  if(!rapide)setTimeout(function(){$('kA').focus();$('kA').select();},60);
+  $('kA').oninput=function(){if(String(this.value).length>=2||Number(this.value)>=2&&f<10)$('kB').focus();};
+  $('kV1').onclick=function(){$('kA').value=f;$('kB').focus();};$('kV2').onclick=function(){$('kB').value=f;$('kA').focus();};
+  var W='';[].forEach.call(ov.querySelectorAll('[data-kw]'),function(x){x.onclick=function(){W=x.dataset.kw;[].forEach.call(ov.querySelectorAll('[data-kw]'),function(y){y.classList.toggle('pr',y===x);});};});
+  [].forEach.call(ov.querySelectorAll('[data-kl]'),function(x){x.onclick=function(){if(!W){[].forEach.call(ov.querySelectorAll('[data-kw]'),function(y){y.style.outline='2px solid #c8102e';});return;}var l=Number(x.dataset.kl);$('kA').value=W==='a'?f:l;$('kB').value=W==='a'?l:f;$('kOk').click();};});
   $('kX').onclick=fermer;$('kE').onclick=function(){escSet(t,a,b,'','',k);fermer();escTour(t);escSave();};
-  $('kOk').onclick=function(){var x=$('kA').value,y=$('kB').value;if(x===''||y===''){alert('Entre les deux scores.');return;}if(Number(x)===Number(y)&&t.type!=='libre'){alert('Il faut un vainqueur.');return;}escSet(t,a,b,x,y,k);fermer();escTour(t);escSave();};
+  $('kOk').onclick=function(){var x=$('kA').value,y=$('kB').value;if(x===''||y===''){alert('Entre les deux scores.');return;}if(Number(x)===Number(y)&&t.type!=='libre'){alert('Il faut un vainqueur.');return;}escSet(t,a,b,x,y,k);if(t.type==='controle')t.sc[k||escKey(a,b)].f=f;fermer();escTour(t);escSave();};
   ov.addEventListener('keydown',function(ev){if(ev.key==='Enter')$('kOk').click();});
 }
 /* Saisie d'une rencontre par équipes : score final, ou relais par relais (score cumulé) */
@@ -2162,10 +2171,131 @@ function escMenu(t,n){
 function escDictee(t){
   var ov=document.createElement('div');ov.id='dic';document.body.appendChild(ov);function fermer(){if(ov.parentNode)ov.parentNode.removeChild(ov);}
   ov.innerHTML='<div class="modal" style="z-index:60"><div class="card" style="max-width:520px"><div class="row sp"><h3 style="margin:0">🎤 Dicter · '+esc(t.nom)+'</h3><button class="btn sm" id="xD">Fermer</button></div><div class="mut sm" style="margin:8px 0">Micro du clavier : « Watson Anane 15 12 puis Boumaza Robinet 15 14 ». Le premier nom va avec le premier score.</div><textarea id="dT" rows="3" style="width:100%"></textarea><div id="dR" class="mut sm" style="margin:6px 0"></div><button class="go" id="dOk">Ajouter</button></div></div>';
-  var tous=escTous(t);function parse(){return parseDictee($('dT').value).filter(function(m){return tous.indexOf(m.a)>=0&&tous.indexOf(m.b)>=0;});}
+  var tous=escTous(t);function parse(){return parseDictee($('dT').value,tous).filter(function(m){return tous.indexOf(m.a)>=0&&tous.indexOf(m.b)>=0;});}
   setTimeout(function(){$('dT').focus();},50);$('xD').onclick=fermer;
   $('dT').oninput=function(){var ms=parse();$('dR').textContent=ms.length?'Compris : '+ms.map(function(m){return nomCourt(m.a)+' '+m.sa+' – '+m.sb+' '+nomCourt(m.b);}).join(' · '):'';};
-  $('dOk').onclick=function(){var ms=parse();if(!ms.length){alert('Pas compris : il faut deux tireurs du tour et deux scores.');return;}var seq=t.type==='libre'||t.type==='roi';ms.forEach(function(m,i){escSet(t,m.a,m.b,m.sa,m.sb,seq?'m'+(Date.now()+i):null);});fermer();escTour(t);escSave();};
+  $('dOk').onclick=function(){var ms=parse();if(!ms.length){alert('Pas compris : il faut deux tireurs du tour et deux scores.');return;}var seq=t.type==='libre'||t.type==='roi';ms.forEach(function(m,i){escSet(t,m.a,m.b,m.sa,m.sb,seq?'m'+(Date.now()+i):null);if(t.type==='controle')(t.rot||[]).forEach(function(r){r.m.forEach(function(p){if(escKey(p[0],p[1])===escKey(m.a,m.b))t.sc[escKey(m.a,m.b)].f=r.f;});});});fermer();escTour(t);escSave();};
+}
+/* ================= ASSAUTS CONTRÔLÉS =================
+ * Les tireurs sont classés de 1 à n ; à chaque rotation, chacun tire contre le plus proche de son rang
+ * qu'il n'a pas encore rencontré (appariement optimal : somme des écarts de rang au carré la plus petite).
+ * Nombre impair : un tireur au repos par rotation, jamais deux fois le même tant que tous n'y sont pas passés. */
+function ctlTireur(n){return (D.tireurs||[]).filter(function(x){return x.nom+' '+x.prenom===n;})[0]||null;}
+function ctlRang(n,src){var t=ctlTireur(n);if(!t)return null;var r=resDe(t);var c=r&&r[src];var v=c?Number(String(c.clt).replace(/[^\d]/g,'')):NaN;return v>0?v:null;}
+var CTL_SRC=[['M20','Classement M20 (sélectif)'],['M17','Classement M17 (sélectif)'],['Senior','Classement Senior'],['tour','Classement du tour précédent'],['presents','Ordre actuel (à la main)']];
+function ctlTrier(liste,src,prev){
+  if(src==='tour'&&prev){var c=escIndivClasse(prev);return liste.slice().sort(function(a,b){var ia=c.indexOf(a),ib=c.indexOf(b);return (ia<0?999:ia)-(ib<0?999:ib);});}
+  if(src==='presents')return liste.slice();
+  /* pas de rang dans ce classement : on regarde les autres classements (Senior > M20 > M17 pour situer), sinon en fin de liste */
+  var autres=['Senior','M20','M17'].filter(function(x){return x!==src;});
+  return liste.slice().sort(function(a,b){var ra=ctlRang(a,src),rb=ctlRang(b,src);
+    if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;
+    for(var i=0;i<autres.length;i++){var xa=ctlRang(a,autres[i]),xb=ctlRang(b,autres[i]);if(xa!=null&&xb!=null)return xa-xb;if(xa!=null)return -1;if(xb!=null)return 1;}
+    return a<b?-1:1;});
+}
+function ctlSeq(txt){var l=String(txt||'').split(/[^\d]+/).map(Number).filter(function(x){return x>0&&x<=45;});return l.length?l:[5];}
+function ctlNbRot(n,nbM){if(n<2)return 0;if(n%2===0)return Math.min(nbM,n-1);var R=nbM;while(R-Math.ceil(R/n)<nbM&&R<n)R++;return Math.min(R,n);}
+/* appariement de coût minimal entre tireurs classés : programmation dynamique « en fenêtre »
+   (chacun est apparié à un tireur à moins de W places ; W s'élargit si besoin pour éviter un doublon) */
+function ctlApparier(idx,cost){
+  var k=idx.length;if(!k)return {c:0,p:[]};
+  for(var W=Math.min(k,8);;W=Math.min(k,W+4)){
+    var S=1<<W,memo=new Float64Array((k+1)*S).fill(-1),ch=new Int8Array((k+1)*S);
+    var f=function(i,mask){if(i>=k)return 0;var key=i*S+mask;if(memo[key]>=0)return memo[key];var best=Infinity,bd=0;
+      if(mask&1){best=f(i+1,mask>>1);bd=0;}
+      else for(var d=1;d<W&&i+d<k;d++){if(mask>>d&1)continue;var v=cost(idx[i],idx[i+d])+f(i+1,(mask|(1<<d))>>1);if(v<best){best=v;bd=d;}}
+      memo[key]=best;ch[key]=bd;return best;};
+    var tot=f(0,0);
+    if((tot<1e8&&tot<Infinity)||W>=k){var p=[],i2=0,m2=0;while(i2<k){var key=i2*S+m2,d=ch[key];if(m2&1){m2>>=1;i2++;continue;}p.push([idx[i2],idx[i2+d]]);m2=(m2|(1<<d))>>1;i2++;}return {c:tot,p:p};}
+  }
+}
+function ctlPlan(L,nbM,seq){
+  var n=L.length,R=ctlNbRot(n,nbM),joue={},repos=L.map(function(){return 0;}),rot=[],tous=L.map(function(_,i){return i;});
+  var cost=function(i,j){return (joue[i+'|'+j]?1e8:0)+(j-i)*(j-i);};
+  for(var r=0;r<R;r++){
+    var res,rp=[];
+    if(n%2===0)res=ctlApparier(tous,cost);
+    else{ /* au repos : parmi ceux qui y sont le moins allés, celui qui donne les meilleurs appariements */
+      var mn=Math.min.apply(null,repos),best=null,bi=-1;
+      tous.forEach(function(c){if(repos[c]!==mn)return;var x=ctlApparier(tous.filter(function(y){return y!==c;}),cost);if(!best||x.c<best.c){best=x;bi=c;}});
+      res=best;repos[bi]++;rp.push(L[bi]);
+    }
+    var ms=res.p.map(function(p){joue[p[0]+'|'+p[1]]=1;return [L[p[0]],L[p[1]]];});
+    rot.push({f:seq[r%seq.length],m:ms,repos:rp});
+  }
+  return rot;
+}
+function escNouveauControle(){
+  var e=ESC,st=e.st,prev=st.tours[st.tours.length-1],NT=e.nt;
+  NT.src=NT.src||(prev?'tour':'M20');NT.nbm=NT.nbm||6;NT.seq=NT.seq||'5';
+  var base=(prev?escIndivClasse(prev).filter(function(n){return !(prev.ab||{})[n];}):e.presents.slice());
+  base.forEach(function(n){if(NT.sel[n]==null)NT.sel[n]=true;});
+  var choisis=Object.keys(NT.sel).filter(function(n){return NT.sel[n];});
+  /* ordre : trié une fois selon la source, puis modifiable à la main */
+  if(!NT.ordre||NT.ordreSrc!==NT.src){NT.ordre=ctlTrier(Object.keys(NT.sel),NT.src,prev);NT.ordreSrc=NT.src;}
+  Object.keys(NT.sel).forEach(function(n){if(NT.ordre.indexOf(n)<0)NT.ordre.push(n);});
+  var L=NT.ordre.filter(function(n){return NT.sel[n];}),n=L.length,seq=ctlSeq(NT.seq),R=ctlNbRot(n,Number(NT.nbm)||1);
+  var h='<div class="sec" style="margin-top:6px">Nouveau tour '+(st.tours.length+1)+' · assauts contrôlés</div><div class="grid g3"><div><span class="lab">Formule</span><select id="ntT">'+optv(ESC_TYPES,'controle')+'</select></div>';
+  h+='<div><span class="lab">Classer selon</span><select id="ctSrc">'+optv(CTL_SRC.filter(function(x){return x[0]!=='tour'||prev;}),NT.src)+'</select></div>';
+  h+='<div><span class="lab">Matchs par tireur</span><input id="ctNb" inputmode="numeric" value="'+esc(NT.nbm)+'"></div>';
+  h+='<div style="grid-column:1/-1"><span class="lab">Touches, dans l\'ordre des rotations (la suite se répète)</span><div class="row wrap" style="gap:6px"><input id="ctSeq" value="'+esc(NT.seq)+'" style="max-width:160px" placeholder="ex. 5 15">'+[['5','Tout en 5'],['15','Tout en 15'],['5 15','5 / 15 alternés'],['5 5 15','5 · 5 · 15']].map(function(p){return '<button class="btn sm'+(NT.seq===p[0]?' pr':'')+'" data-seq="'+p[0]+'">'+p[1]+'</button>';}).join('')+'</div></div></div>';
+  var info=n<2?'Il faut au moins 2 tireurs.':n+' tireurs · '+R+' rotation'+(R>1?'s':'')+' · '+(n%2?'1 au repos à chaque rotation (jamais le même deux fois), ':'')+''+(function(){var mn=R-(n%2?Math.ceil(R/n):0),mx=R-(n%2?Math.floor(R/n):0);return mn===mx?mn:mn+' ou '+mx;})()+' matchs par tireur · '+R*Math.floor(n/2)+' matchs en tout'+(Number(NT.nbm)>=n-(n%2?0:1)&&n>1?' · plafonné : tout le monde se rencontre une fois':'')+' · touches : '+seq.slice(0,Math.min(R,8)).join(', ')+(R>8?'…':'');
+  h+='<div class="mut sm" style="margin:6px 0">'+esc(info)+'</div>';
+  h+='<div class="sec">Classement de départ · touche ▲▼ ou le numéro pour changer une place</div><div class="card" style="padding:6px 10px">'+NT.ordre.map(function(x){var on=NT.sel[x],k=on?L.indexOf(x)+1:'';var t=ctlTireur(x),r=t?resDe(t):null,info2=['M20','M17','Senior'].map(function(c){var v=r&&r[c]&&r[c].clt;return v?c+' '+v:'';}).filter(String).join(' · ');
+    return '<div class="row" style="gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line);'+(on?'':'opacity:.45')+'"><button class="btn sm" data-rg="'+esc(x)+'" style="min-width:42px;font-weight:800">'+(on?k:'–')+'</button><label style="flex:1;min-width:0;display:flex;gap:6px;align-items:center"><input type="checkbox" data-nt="'+esc(x)+'"'+(on?' checked':'')+' style="width:auto"> <b>'+esc(nomCourt(x))+'</b> <span class="mut sm">'+esc(info2)+'</span></label><button class="btn sm" data-up="'+esc(x)+'" aria-label="Monter">▲</button><button class="btn sm" data-dn="'+esc(x)+'" aria-label="Descendre">▼</button></div>';}).join('')+'</div>';
+  h+='<div class="row wrap" style="margin-top:8px"><select id="ntAdd" style="width:auto">'+opts(noms().filter(function(x){return NT.sel[x]==null;}),'+ ajouter un tireur (retard, partenaire…)')+'</select></div>';
+  h+='<button class="go" id="ntGo">Proposer les rotations</button>';
+  $('escB').innerHTML=h;
+  $('ntT').onchange=function(){NT.type=this.value;escNouveauTour();};
+  $('ctSrc').onchange=function(){NT.src=this.value;NT.ordre=null;escNouveauControle();};
+  $('ctNb').onchange=function(){NT.nbm=Math.max(1,Number(this.value)||1);escNouveauControle();};
+  $('ctSeq').onchange=function(){NT.seq=this.value.trim()||'5';escNouveauControle();};
+  [].forEach.call(document.querySelectorAll('[data-seq]'),function(b){b.onclick=function(){NT.seq=b.dataset.seq;escNouveauControle();};});
+  function bouge(x,d){var i=NT.ordre.indexOf(x),j=i+d;while(j>=0&&j<NT.ordre.length&&!NT.sel[NT.ordre[j]])j+=d;if(j<0||j>=NT.ordre.length)return;NT.ordre.splice(i,1);NT.ordre.splice(j,0,x);escNouveauControle();}
+  [].forEach.call(document.querySelectorAll('[data-up]'),function(b){b.onclick=function(){bouge(b.dataset.up,-1);};});
+  [].forEach.call(document.querySelectorAll('[data-dn]'),function(b){b.onclick=function(){bouge(b.dataset.dn,1);};});
+  [].forEach.call(document.querySelectorAll('[data-rg]'),function(b){b.onclick=function(){var x=b.dataset.rg;if(!NT.sel[x])return;var v=Number(prompt('Nouvelle place de '+nomCourt(x)+' (1 à '+L.length+') :',L.indexOf(x)+1));if(!(v>=1))return;v=Math.min(v,L.length);var Lx=L.filter(function(y){return y!==x;});Lx.splice(v-1,0,x);var reste=NT.ordre.filter(function(y){return !NT.sel[y];});NT.ordre=Lx.concat(reste);escNouveauControle();};});
+  [].forEach.call(document.querySelectorAll('[data-nt]'),function(c){c.onchange=function(){NT.sel[c.dataset.nt]=c.checked;escNouveauControle();};});
+  $('ntAdd').onchange=function(){if(this.value){NT.sel[this.value]=true;(NT.retard=NT.retard||{})[this.value]=true;NT.ordre.push(this.value);escNouveauControle();}};
+  $('ntGo').onclick=function(){
+    if(L.length<2){alert('Il faut au moins 2 tireurs.');return;}
+    var rot=ctlPlan(L,Number(NT.nbm)||1,seq);
+    var t={id:'T'+(st.tours.length+1),nom:'Tour '+(st.tours.length+1)+' · contrôlés',type:'controle',touches:Math.max.apply(null,seq),seq:seq,src:NT.src,tireurs:L.slice(),ordre:L.slice(),rot:rot,sc:{},ab:{},retard:{},cree:new Date().toISOString()};
+    Object.keys(NT.retard||{}).forEach(function(x){if(NT.sel[x]&&st.tours.length)t.retard[x]=true;});
+    st.tours.push(t);ESC.sel=st.tours.length-1;ESC.nt=null;escDraw();escSave();
+  };
+}
+function ctlCourante(t){for(var r=0;r<t.rot.length;r++){if(t.rot[r].m.some(function(p){return !escGet(t,p[0],p[1])&&!(t.ab||{})[p[0]]&&!(t.ab||{})[p[1]];}))return r;}return -1;}
+function escControleHtml(t){
+  var cur=ctlCourante(t),rg=function(x){var i=t.ordre.indexOf(x);return i<0?'':'<span class="mut sm">'+(i+1)+'</span>';};
+  var h='<div class="mut sm" style="margin-bottom:6px">'+t.tireurs.length+' tireurs · '+t.rot.length+' rotations · classement de départ : '+esc((CTL_SRC.filter(function(x){return x[0]===t.src;})[0]||['',''])[1]||'')+' · touche un match pour son score (2 touches : vainqueur, puis touches du perdant).</div>';
+  t.rot.forEach(function(r,ri){
+    var fait=r.m.filter(function(p){return escGet(t,p[0],p[1]);}).length,on=ri===cur;
+    h+='<div class="card'+(on?' ctl-on':'')+'" id="ctR'+ri+'" style="padding:8px 10px;margin-bottom:8px;'+(on?'border:2px solid var(--acc,#1d4ed8)':fait===r.m.length?'opacity:.75':'')+'"><div class="row sp"><b>Rotation '+(ri+1)+' · en '+r.f+'</b><span class="mut sm">'+fait+'/'+r.m.length+(on?' · en cours':'')+'</span></div>';
+    r.m.forEach(function(p,pi){var s=escGet(t,p[0],p[1]),ab=(t.ab||{})[p[0]]||(t.ab||{})[p[1]];
+      h+='<div class="row" data-cm="'+ri+'|'+pi+'" style="gap:6px;align-items:center;padding:7px 2px;border-top:1px solid var(--line);cursor:pointer;'+(ab?'opacity:.4':'')+'"><span style="flex:1;text-align:right" class="'+(s&&s.sa>s.sb?'b':'')+'">'+esc(nomCourt(p[0]))+' '+rg(p[0])+'</span><span style="min-width:74px;text-align:center;font-weight:800;font-size:17px;border-radius:8px;padding:3px 6px;background:'+(s?'transparent':'rgba(0,0,0,.05)')+'">'+(s?s.sa+' – '+s.sb:'·')+'</span><span style="flex:1" class="'+(s&&s.sb>s.sa?'b':'')+'">'+rg(p[1])+' '+esc(nomCourt(p[1]))+'</span></div>';});
+    if(r.repos.length)h+='<div class="mut sm" style="margin-top:4px">Au repos : '+r.repos.map(function(x){return esc(nomCourt(x));}).join(', ')+'</div>';
+    if(on||fait<r.m.length)h+='<div class="row" style="gap:6px;margin-top:6px"><input data-serie="'+ri+'" placeholder="Tous les scores d\'un coup, dans l\'ordre : 5-3 2-5 5-4…" style="flex:1"><button class="btn sm" data-serieok="'+ri+'">OK</button></div>';
+    h+='</div>';
+  });
+  h+='<div class="mut sm">Tireurs : '+t.tireurs.map(function(x){return '<a href="#" class="nm" data-who="'+esc(x)+'">'+esc(nomCourt(x))+'</a>';}).join(' · ')+'</div>';
+  return h;
+}
+/* scores en série : « 5-3 2-5 5 4 15/12 » → dans l'ordre des matchs de la rotation (score du tireur de gauche d'abord) */
+function ctlSerie(txt){var out=[],m,rx=/(\d{1,2})\s*(?:-|–|—|\/|:|à|a|\s)\s*(\d{1,2})/gi;txt=String(txt||'');
+  /* chiffres collés « 53 21 » en 5 touches */
+  if(!/[-–—\/:à]/.test(txt)&&/^\s*\d{2}(\s+\d{2})*\s*$/.test(txt))return txt.trim().split(/\s+/).map(function(x){return [Number(x[0]),Number(x[1])];});
+  while((m=rx.exec(txt)))out.push([Number(m[1]),Number(m[2])]);return out;}
+function ctlBind(t){
+  [].forEach.call(document.querySelectorAll('#escB [data-cm]'),function(c){c.onclick=function(){var x=c.dataset.cm.split('|'),r=t.rot[Number(x[0])],p=r.m[Number(x[1])];escKeypad(t,p[0],p[1],null,r.f);};});
+  [].forEach.call(document.querySelectorAll('#escB [data-serieok]'),function(b){b.onclick=function(){var ri=Number(b.dataset.serieok),r=t.rot[ri],inp=document.querySelector('[data-serie="'+ri+'"]'),l=ctlSerie(inp.value);
+    if(!l.length){alert('Écris les scores dans l\'ordre des matchs, par exemple : 5-3 2-5 5-4');return;}
+    var libres=r.m.filter(function(p){return !escGet(t,p[0],p[1]);});var cible=l.length===r.m.length?r.m:libres;
+    if(l.length>cible.length){alert(l.length+' scores pour '+cible.length+' match'+(cible.length>1?'s':'')+' à saisir.');return;}
+    var bad=l.filter(function(s){return s[0]===s[1];});if(bad.length){alert('Il faut un vainqueur dans chaque match ('+bad[0].join('-')+').');return;}
+    l.forEach(function(s,i){var p=cible[i];escSet(t,p[0],p[1],s[0],s[1]);t.sc[escKey(p[0],p[1])].f=r.f;});
+    escTour(t);escSave();var nx=document.getElementById('ctR'+ctlCourante(t));if(nx)nx.scrollIntoView({behavior:'smooth',block:'start'});};});
+  var c=document.getElementById('ctR'+ctlCourante(t));if(c&&!ESC.vu){ESC.vu=1;setTimeout(function(){c.scrollIntoView({block:'start'});},50);}
 }
 /* ---------------- APPLICATION (PWA) ET NOTIFICATIONS ---------------- */
 var VAPID='',PUSHFIN='';
