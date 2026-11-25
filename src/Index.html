@@ -415,7 +415,7 @@ div.cmp,div.cmp.int,div.cmp.nat,div.cmp.reg{background:#fff;color:var(--ink);box
 <body>
 <header><div><div class="k">Pôle France Relève · Châtenay-Malabry</div><h1 id="titre">France Fleuret Hommes</h1><small id="sub"></small></div><div class="hb"><small id="maj"></small><button id="refresh" class="hide" title="Recharger les données">↻<span class="lbl"> Actualiser</span></button><button id="compte" class="hide" title="Choisir mon e-mail et mon mot de passe">🔑</button><button id="cloche" class="hide" title="Notifications">🔔</button><button id="logout" class="hide" title="Déconnexion">⏻<span class="lbl"> Déconnexion</span></button><img class="ffe" src="https://www.ffescrime.fr/wp-content/uploads/2026/10/logo-escrime-ffe.png" alt="Fédération Française d'Escrime"></div></header>
 <nav id="nav" class="hide"></nav>
-<main><div id="stabs"></div><div id="load"><span class="spin"></span>Chargement…</div><div id="app"></div></main>
+<main><div id="stabs"></div><div id="load"><span class="spin"></span>Chargement…</div><div id="nlues"></div><div id="app"></div></main>
 <div id="print"></div>
 <div id="modal"></div>
 <script>
@@ -501,6 +501,7 @@ function render(){
   [].forEach.call($('nav').children,function(b){b.classList.toggle('on',b.dataset.v===VIEW||b.dataset.v===g);});
   $('stabs').innerHTML=g?'<div class="chips stabs">'+GRP[g].map(function(x){return '<button class="chip'+(x[0]===VIEW?' on':'')+'" data-sv="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>':'';
   ({saison:vSaison,suivi:vSuivi,connexions:vConnexions,charge:vCharge,compets:vMesCompets,muscu:vMuscu,rpe:vRPE,jour:vJour,semaine:vSemaine,calendrier:vCalMois,priorites:vPriorites,annuel:vAnnuel,seances:vSeances,tireurs:vTireurs,resultats:vResultats,wellness:vWellness,budget:vBudget,materiel:vMateriel,saisie:vSaisie,moi:vMoi,wellnessT:vWellnessT,dispos:vDispos,lecons:vLecons,imprimables:vImprimables})[VIEW]();
+  majNonLues();
   window.scrollTo(0,0);
 }
 
@@ -1847,6 +1848,33 @@ function calModes(){return VIEW==='priorites'?[]:VIEW==='annuel'?[['planning','P
 function vPriorites(){CAL.mode='liste';vCalendrier();}
 function vAnnuel(){if(!/^(planning|annee)$/.test(CAL.mode))CAL.mode='planning';vCalendrier();}
 function vCalMois(){if(!/^(mois|semaine|jour)$/.test(CAL.mode))CAL.mode='mois';vCalendrier();}
+/* ===== Récap des notifications non lues (écran d'accueil) ===== */
+var NL={l:null,t:0},LU0=null;try{LU0=new URLSearchParams(location.search).get('lu');}catch(e){}
+function homeView(){var r=D&&D.user&&D.user.role;return r==='Staff'?'jour':r==='Tireur'?'moi':r==='Coach'?'semaine':'';}
+function quandNL(t){var d=new Date(t),hm=('0'+d.getHours()).slice(-2)+'h'+('0'+d.getMinutes()).slice(-2),a=new Date();a.setHours(0,0,0,0);if(t>=a.getTime())return hm;if(t>=a.getTime()-864e5)return 'hier '+hm;return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);}
+function majNonLues(force){
+  if(!$('nlues'))return;
+  if(!D||!D.user||!homeView()||VIEW!==homeView()){$('nlues').innerHTML='';return;}
+  if(LU0){var x=LU0;LU0=null;var f=function(){majNonLues(true);};run('marquerLues',KEY,[x]).then(f,f);return;}
+  drawNL();
+  if(!force&&NL.l&&Date.now()-NL.t<30000)return;
+  run('mesNonLues',KEY).then(function(l){NL.l=l||[];NL.t=Date.now();drawNL();}).catch(function(){});
+}
+function drawNL(){
+  var el=$('nlues');if(!el)return;var l=NL.l||[];
+  if(VIEW!==homeView()||!l.length){el.innerHTML='';return;}
+  el.innerHTML='<div class="card" style="border-left:4px solid var(--acc,#c8102e);padding:10px 12px;margin-bottom:12px"><div class="row sp" style="gap:8px;margin-bottom:4px"><b>🔔 '+l.length+' notification'+(l.length>1?'s':'')+' non lue'+(l.length>1?'s':'')+'</b><button class="btn sm" id="nlTout">Tout marquer lu</button></div>'+
+    l.map(function(n){return '<div class="row" data-nl="'+esc(n.id)+'" style="gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid rgba(0,0,0,.07);cursor:'+(n.lien?'pointer':'default')+'"><div style="flex:1;min-width:0"><div class="b">'+esc(n.titre)+'</div><div class="sm" style="white-space:pre-line">'+esc(n.corps)+'</div></div><span class="mut sm" style="white-space:nowrap">'+quandNL(n.t)+'</span><button class="btn sm nlx" title="Marquer comme lu" aria-label="Marquer comme lu">✓</button></div>';}).join('')+'</div>';
+  $('nlTout').onclick=function(){luNL((NL.l||[]).map(function(n){return n.id;}));};
+  [].forEach.call(el.querySelectorAll('[data-nl]'),function(r){r.onclick=function(e){var id=r.dataset.nl,n=(NL.l||[]).filter(function(x){return x.id===id;})[0];luNL([id]);if(!e.target.closest('.nlx')&&n&&n.lien){if(location.hash===n.lien)routeHash();else location.hash=n.lien;}};});
+}
+function luNL(ids){
+  if(!ids.length)return;
+  NL.l=(NL.l||[]).filter(function(n){return ids.indexOf(n.id)<0;});drawNL();
+  if(!NL.l.length){try{if(navigator.clearAppBadge)navigator.clearAppBadge().catch(function(){});}catch(e){}}
+  run('marquerLues',KEY,ids).catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')majNonLues(true);});
 function ouvrirCreneau(date,slot){
   var off=Math.round((cLun(cDate(date))-cLun(new Date()))/6048e5);SEM.off=off;if(off!==0)SEM.data=null;
   goView('semaine');var n=0;(function att(){var el=document.querySelector('[data-crj="'+date+'"][data-crs="'+slot+'"]');if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(function(){el.click();},350);}else if(n++<40)setTimeout(att,150);})();
@@ -2717,7 +2745,7 @@ function routeHash(){if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=n
   else v=h==='#jour'?'jour':h==='#charge'?'charge':h==='#suivi-appli'?'connexions':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
   if(v&&v!==VIEW){VIEW=v;[].forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('on',b.dataset.v===v);});render();scrollTo(0,0);}}
 window.addEventListener('hashchange',routeHash);
-if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var m=e.data||{};if(m.type==='ouvrir'&&m.lien){if(location.hash===m.lien)routeHash();else location.hash=m.lien;}});
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var m=e.data||{};if(m.type==='ouvrir'){if(m.id)luNL([String(m.id)]);if(m.lien){if(location.hash===m.lien)routeHash();else location.hash=m.lien;}}});
 /* ---------------- WELLNESS, BUDGET, MATÉRIEL ---------------- */
 function ancien_vWellness(){
   var pole=D.tireurs.filter(function(t){return t.pole;}),jours=[];

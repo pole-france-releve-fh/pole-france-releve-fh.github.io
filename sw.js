@@ -1,5 +1,5 @@
 /* Pôle France Relève · service worker : notifications et mise en cache de la page */
-var API='https://script.google.com/macros/s/AKfycbxm3C8aW7kjv6PQCQ151w3swN17ugD58ADi8hiAgwNe16uHQDzLRbR15HKcy8GILsOJ/exec',V='pfr-v32';
+var API='https://script.google.com/macros/s/AKfycbxm3C8aW7kjv6PQCQ151w3swN17ugD58ADi8hiAgwNe16uHQDzLRbR15HKcy8GILsOJ/exec',V='pfr-v33';
 self.addEventListener('install',function(e){self.skipWaiting();e.waitUntil(caches.open(V).then(function(c){return c.addAll(['./','index.html','manifest.json','icon-192.png','badge.png']);}).catch(function(){}));});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(l){return Promise.all(l.filter(function(k){return k!==V&&k!=='pfr';}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
 self.addEventListener('fetch',function(e){var u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin)return;
@@ -22,9 +22,9 @@ self.addEventListener('push',function(e){
         /* pastille rouge sur l'icône : nombre de messages non vus depuis la dernière ouverture */
         var nb=neufs.filter(function(n){return vus.slice(0,-neufs.length).indexOf(n.id)<0;}).length;
         var pastille=c.match('pastille').then(function(r){return r?r.text():'0';}).then(function(t){var v=(Number(t)||0)+nb;return c.put('pastille',new Response(String(v))).then(function(){if(self.navigator&&self.navigator.setAppBadge)return self.navigator.setAppBadge(v).catch(function(){});});});
-        return Promise.all(neufs.map(function(n,i){return montrer(n.titre,{body:n.corps,tag:i===0?ATT:n.id,data:{lien:n.lien||''}});}).concat([pastille]));});});});
+        return Promise.all(neufs.map(function(n,i){return montrer(n.titre,{body:n.corps,tag:i===0?ATT:n.id,data:{lien:n.lien||'',id:n.id}});}).concat([pastille]));});});});
   }).catch(function(){}));
 });
 self.addEventListener('notificationclick',function(e){e.notification.close();var url=self.registration.scope+(e.notification.data&&e.notification.data.lien||'');
-  var lien=e.notification.data&&e.notification.data.lien||'';
-  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){if(l.length){var c=l[0];c.postMessage({type:'ouvrir',lien:lien});return c.focus?c.focus():c;}return self.clients.openWindow(url);}));});
+  var lien=e.notification.data&&e.notification.data.lien||'',nid=e.notification.data&&e.notification.data.id||'';if(nid)url=self.registration.scope+'?lu='+encodeURIComponent(nid)+lien;
+  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){if(l.length){var c=l[0];c.postMessage({type:'ouvrir',lien:lien,id:nid});return c.focus?c.focus():c;}return self.clients.openWindow(url);}));});
