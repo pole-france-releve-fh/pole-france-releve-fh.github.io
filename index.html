@@ -1875,10 +1875,16 @@ function majNonLues(force){
 function drawNL(){
   var el=$('nlues');if(!el)return;var l=NL.l||[];
   if(VIEW!==homeView()||!l.length){el.innerHTML='';return;}
-  el.innerHTML='<div class="card" style="border-left:4px solid var(--acc,#c8102e);padding:10px 12px;margin-bottom:12px"><div class="row sp" style="gap:8px;margin-bottom:4px"><b>🔔 '+l.length+' notification'+(l.length>1?'s':'')+' non lue'+(l.length>1?'s':'')+'</b><button class="btn sm" id="nlTout">Tout marquer lu</button></div>'+
-    l.map(function(n){return '<div class="row" data-nl="'+esc(n.id)+'" style="gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid rgba(0,0,0,.07);cursor:'+(n.lien?'pointer':'default')+'"><div style="flex:1;min-width:0"><div class="b">'+esc(n.titre)+'</div><div class="sm" style="white-space:pre-line">'+esc(n.corps)+'</div></div><span class="mut sm" style="white-space:nowrap">'+quandNL(n.t)+'</span><button class="btn sm nlx" title="Marquer comme lu" aria-label="Marquer comme lu">✓</button></div>';}).join('')+'</div>';
+  /* doublons (envoi en double) regroupés */
+  var g=[],vu={};l.forEach(function(n){var k=n.titre+'|'+n.corps;if(vu[k]&&Math.abs(vu[k].t-n.t)<6e5){vu[k].ids.push(n.id);return;}var x={ids:[n.id],titre:n.titre,corps:n.corps,lien:n.lien,t:n.t};vu[k]=x;g.push(x);});
+  var max=NL.tout?g.length:4,vis=g.slice(0,max);
+  el.innerHTML='<div class="card" style="border-left:4px solid var(--acc,#c8102e);padding:8px 12px;margin-bottom:12px"><div class="row sp" style="gap:8px;margin-bottom:2px"><b>🔔 '+g.length+' non lue'+(g.length>1?'s':'')+'</b><button class="btn sm" id="nlTout">Tout marquer lu</button></div>'+
+    vis.map(function(n,i){return '<div class="row" data-nl="'+i+'" style="gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(0,0,0,.07);cursor:'+(n.lien?'pointer':'default')+'"><div style="flex:1;min-width:0"><div class="b" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(n.titre)+'</div><div class="sm mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(n.corps)+'</div></div><span class="mut sm" style="white-space:nowrap">'+quandNL(n.t)+'</span><button class="btn sm nlx" title="Marquer comme lu" aria-label="Marquer comme lu">✓</button></div>';}).join('')+
+    (g.length>max?'<button class="btn sm" id="nlPlus" style="margin-top:6px;width:100%">Voir les '+(g.length-max)+' autres</button>':(NL.tout&&g.length>4?'<button class="btn sm" id="nlMoins" style="margin-top:6px;width:100%">Réduire</button>':''))+'</div>';
   $('nlTout').onclick=function(){luNL((NL.l||[]).map(function(n){return n.id;}));};
-  [].forEach.call(el.querySelectorAll('[data-nl]'),function(r){r.onclick=function(e){var id=r.dataset.nl,n=(NL.l||[]).filter(function(x){return x.id===id;})[0];luNL([id]);if(!e.target.closest('.nlx')&&n&&n.lien){if(location.hash===n.lien)routeHash();else location.hash=n.lien;}};});
+  if($('nlPlus'))$('nlPlus').onclick=function(){NL.tout=true;drawNL();};
+  if($('nlMoins'))$('nlMoins').onclick=function(){NL.tout=false;drawNL();};
+  [].forEach.call(el.querySelectorAll('[data-nl]'),function(r){r.onclick=function(e){var n=vis[+r.dataset.nl];if(!n)return;luNL(n.ids);if(!e.target.closest('.nlx')&&n.lien){if(location.hash===n.lien)routeHash();else location.hash=n.lien;}};});
 }
 function luNL(ids){
   if(!ids.length)return;
