@@ -3024,12 +3024,13 @@ function vImprimables(){
 
 
 /* Ouverture directe de l'écran visé par une notification (#wellness, #rpe, #dispos…), que l'appli soit déjà ouverte ou non. */
-function routeHash(){if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=null;
+function routeHash(){var h0=location.hash;if(/^#go:/.test(h0)){history.replaceState(null,'',location.pathname+location.search);location.href=h0.slice(4);return;}
+  if(!D||!D.user)return;var h=location.hash,r=D.user.role,v=null;
   if(r==='Tireur')v=h==='#competitions'?'compets':h==='#wellness'&&WELLNESS_T?'wellnessT':h==='#dispos'?'dispos':h==='#rpe'?'rpe':h==='#semaine'?'semaine':h==='#resultats'?'resultats':null;
   else if(r==='Coach')v=h==='#dispos'?'dispos':h==='#suivi'?'suivi':h==='#semaine'?'semaine':null;
   else v=h==='#jour'?'jour':h==='#charge'?'charge':h==='#suivi-appli'?'connexions':h==='#wellness'?'saisie':h==='#semaine'?'semaine':h==='#dispos'?'dispos':h==='#seances'||h==='#appel'?'seances':null;
   if(v&&v!==VIEW){VIEW=v;[].forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('on',b.dataset.v===v);});render();scrollTo(0,0);}}
-window.addEventListener('hashchange',routeHash);
+window.addEventListener('hashchange',routeHash);if(/^#go:/.test(location.hash))setTimeout(routeHash,300);
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var m=e.data||{};if(m.type==='ouvrir'){if(m.id)luNL([String(m.id)]);if(m.lien){if(location.hash===m.lien)routeHash();else location.hash=m.lien;}}});
 /* ---------------- WELLNESS, BUDGET, MATÉRIEL ---------------- */
 function ancien_vWellness(){
